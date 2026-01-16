@@ -26,7 +26,8 @@ DEX is **extensible**, allowing integration of new datasets, models, and AI tech
 ## 💡 Key Features
 
 ### **Data Engineering & Analysis**
-- Python-based ETL pipelines for ingestion and transformation  
+- Python-based ETL pipelines for ingestion and transformation on **Databricks**  
+- Databricks notebooks for collaborative data engineering and analysis  
 - Feature engineering and preprocessing  
 - Exploratory Data Analysis (EDA) with **Matplotlib, Seaborn, Plotly**  
 - Dataset versioning and management
@@ -66,9 +67,9 @@ DEX is **extensible**, allowing integration of new datasets, models, and AI tech
 
 | Area                        | Tools / Technologies                           |
 |-------------------------------|-----------------------------------------------|
-| Data Processing               | Python, Apache PySpark, Pandas, NumPy         |
-| ETL / Pipelines               | Python scripts, Airflow, Prefect             |
-| Storage                       | SQLite, PostgreSQL, Parquet                  |
+| Data Processing               | Python, Apache PySpark, Pandas, NumPy, Databricks         |
+| ETL / Pipelines               | Python scripts, Airflow, Prefect, Databricks Workflows             |
+| Storage                       | SQLite, PostgreSQL, Parquet, Databricks Delta Lake                  |
 | Machine Learning              | scikit-learn, XGBoost, LightGBM             |
 | Deep Learning / AI            | PyTorch, TensorFlow, HuggingFace, LangChain |
 | Visualization                 | Matplotlib, Seaborn, Plotly                  |

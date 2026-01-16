@@ -1,7 +1,0 @@
-httpx
-mypy
-ruff
-black
-pytest
-types-requests
-pyodbc

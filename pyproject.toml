@@ -8,8 +8,6 @@ authors = [
 ]
 readme = "Readme.md"
 requires-python = ">=3.9"
-dependencies = [
-]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -23,11 +21,11 @@ authors = ["Jay"]
 license = "MIT"
 package-mode = false
 
-[tool-black]
+[tool.black]
 line-length = 88
 target-version = ["py311"]
 
-[tool-ruff]
+[tool.ruff]
 select = ["E", "F", "I", "B", "UP", "SIM", "C90"]
 line-length = 88
 target-version = "py311"
@@ -51,23 +49,21 @@ no_implicit_optional = true
 [tool.poetry.dependencies]
 python = "^3.11"
 requests = "^2.26.0"
-httpx = "^0.23.0"
+pyspark = "^4.1.0"
+databricks-cli = "*"
+fastapi = "^0.110.0"
+uvicorn = { extras = ["standard"], version = "^0.27.0" }
 mypy = "^0.931"
 ruff = "^0.0.276"
 black = "^21.12b0"
 pytest = "^6.2.5"
 types-requests = "^2.26.9"
-pyodbc = "^5.0.0"
-dotenv = "^0.9.9"
-fastapi = "^0.110.0"
-uvicorn = { extras= ["standard"], version = "^0.27.0" }
+python-dotenv = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^6.2.5"
 pytest-cov = "^3.0.0"
-flake8 = "^4.0.1"
-isort = "^5.10.1"
-coverage = "^7.4.0"
+ipykernel = "^7.1.0"
 
 [tool.poetry.scripts]
 # CLI entry using short form `dex` pointing to FastAPI app for convenience
