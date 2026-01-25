@@ -50,7 +50,7 @@ app.add_middleware(
 
 
 @app.get("/stock/{symbol}")
-async def get_stock_data(symbol: str):    
+async def get_stock_data(symbol: str):
     url = f"https://stooq.com/q/d/l/?s={symbol.lower()}.us&i=d"
     async with httpx.AsyncClient() as client:
         try:
@@ -62,6 +62,7 @@ async def get_stock_data(symbol: str):
             return JSONResponse(content={"data": json.loads(json_response)})
         except httpx.HTTPError as e:
             raise HTTPException(status_code=500, detail=str(e))
-        
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

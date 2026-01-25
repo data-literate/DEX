@@ -26,14 +26,16 @@ logger.info("API key loaded from secrets")
 
 # COMMAND ----------
 
+
 def fetch_weather(city: str, api_key: str, units: str = "metric") -> dict:
     """Fetch weather data for a city."""
     endpoint = "https://api.openweathermap.org/data/2.5/weather"
     params = {"q": city, "units": units, "appid": api_key}
-    
+
     response = requests.get(endpoint, params=params, timeout=10)
     response.raise_for_status()
     return response.json()
+
 
 def transform_record(api_response: dict) -> dict:
     """Transform API response to standard format."""
@@ -54,6 +56,7 @@ def transform_record(api_response: dict) -> dict:
         "timestamp": datetime.utcnow().isoformat(),
     }
 
+
 # COMMAND ----------
 
 # Extract data for all cities
@@ -73,12 +76,14 @@ for city in cities_list:
 
 # COMMAND ----------
 
-# Create DataFrame and save to Delta table  
+# Create DataFrame and save to Delta table
 spark = SparkSession.builder.appName("WeatherExtract").getOrCreate()
 df = spark.createDataFrame(weather_records)
 
 # Write to a temporary Delta table that persists for this job
 df.write.mode("overwrite").option("mergeSchema", "true").saveAsTable("weather_raw_temp")
 
-logger.info(f"Extracted {len(weather_records)} weather records to weather_raw_temp table")
+logger.info(
+    f"Extracted {len(weather_records)} weather records to weather_raw_temp table"
+)
 display(df)

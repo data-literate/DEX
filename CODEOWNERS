@@ -1,0 +1,5 @@
+# Code owners: adjust to your organization/team
+/.github/ @data-literate/infra-team
+/infra/ @data-literate/infra-team
+/src/ @data-literate/backend-team
+/pipelines/ @data-literate/data-team

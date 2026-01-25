@@ -50,18 +50,10 @@ df = df.withColumn(
     unix_timestamp(col("timestamp"), "yyyy-MM-dd'T'HH:mm:ss"),
 )
 
-df = df.withColumn(
-    "hour", hour(from_unixtime(col("timestamp_unix")))
-)
-df = df.withColumn(
-    "day_of_week", dayofweek(from_unixtime(col("timestamp_unix")))
-)
-df = df.withColumn(
-    "day_of_year", dayofyear(from_unixtime(col("timestamp_unix")))
-)
-df = df.withColumn(
-    "month", month(from_unixtime(col("timestamp_unix")))
-)
+df = df.withColumn("hour", hour(from_unixtime(col("timestamp_unix"))))
+df = df.withColumn("day_of_week", dayofweek(from_unixtime(col("timestamp_unix"))))
+df = df.withColumn("day_of_year", dayofyear(from_unixtime(col("timestamp_unix"))))
+df = df.withColumn("month", month(from_unixtime(col("timestamp_unix"))))
 
 logger.info("Time features created")
 
@@ -94,9 +86,11 @@ logger.info("Lag features created")
 logger.info("Creating rolling window features...")
 
 for window_size in [3, 6, 12]:
-    window_spec = Window.partitionBy("city").orderBy(
-        "timestamp_unix"
-    ).rangeBetween(-(window_size - 1), 0)
+    window_spec = (
+        Window.partitionBy("city")
+        .orderBy("timestamp_unix")
+        .rangeBetween(-(window_size - 1), 0)
+    )
 
     # Temperature rolling stats
     df = df.withColumn(
@@ -157,10 +151,7 @@ logger.info(f"Rows after dropping nulls: {df.count()}")
 feature_table = "weather_features"
 logger.info(f"Saving features to {feature_table}...")
 
-df.write \
-    .mode("overwrite") \
-    .option("mergeSchema", "true") \
-    .saveAsTable(feature_table)
+df.write.mode("overwrite").option("mergeSchema", "true").saveAsTable(feature_table)
 
 logger.info(f"✓ {df.count()} feature records saved to {feature_table}")
 
@@ -168,7 +159,9 @@ logger.info(f"✓ {df.count()} feature records saved to {feature_table}")
 
 # Show feature statistics
 logger.info("Feature Summary:")
-df.select("temperature", "humidity", "pressure", "wind_speed", "cloudiness").describe().display()
+df.select(
+    "temperature", "humidity", "pressure", "wind_speed", "cloudiness"
+).describe().display()
 
 # COMMAND ----------
 

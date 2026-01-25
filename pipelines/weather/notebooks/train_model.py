@@ -196,10 +196,7 @@ predictions.select(
     "hour",
     "day_of_week",
     "month",
-).write \
-    .mode("overwrite") \
-    .option("mergeSchema", "true") \
-    .saveAsTable(predictions_table)
+).write.mode("overwrite").option("mergeSchema", "true").saveAsTable(predictions_table)
 
 logger.info(f"✓ Predictions saved to {predictions_table}")
 

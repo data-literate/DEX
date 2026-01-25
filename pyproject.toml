@@ -4,10 +4,10 @@ name = "DataEngineX"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Jay", email = "jay@email.com"}
+    {name = "Jay", email = "jayapal.myaka99@gmail.com"}
 ]
 readme = "Readme.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -19,7 +19,7 @@ version = "0.1.0"
 description = ""
 authors = ["Jay"]
 license = "MIT"
-package-mode = false
+package-mode = true
 
 [tool.black]
 line-length = 88
@@ -49,40 +49,53 @@ no_implicit_optional = true
 [tool.poetry.dependencies]
 python = "^3.11"
 requests = "^2.26.0"
-pyspark = "^4.1.0"
+pyspark = ">=4.1.1"
 databricks-cli = "*"
 fastapi = "^0.110.0"
 uvicorn = { extras = ["standard"], version = "^0.27.0" }
-mypy = "^0.931"
-ruff = "^0.0.276"
-black = "^21.12b0"
-pytest = "^6.2.5"
-types-requests = "^2.26.9"
 python-dotenv = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^6.2.5"
 pytest-cov = "^3.0.0"
 ipykernel = "^7.1.0"
+poethepoet = "^0.40.0"
+# runtime packages used across the repo that mypy expected
+numpy = "^1.26"
+pandas = "^2.1"
+httpx = "^0.24"
+types-requests = "^2.32.4.20260107"
+ruff = "^0.0.276"
+black = "^26.1.0"
+mypy = "^0.931"
 
 [tool.poetry.scripts]
 # CLI entry using short form `dex` pointing to FastAPI app for convenience
-dex = "app.main:app"
+dex = "dataenginex.main:app"
+
+[[tool.poetry.packages]]
+include = "dataenginex"
+from = "src"
 
 # -----------------------
 # Pytest configuration
 # -----------------------
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=app --cov-report=xml"
+addopts = "--cov=dataenginex --cov-report=xml"
 
 # -----------------------
 # Coverage configuration
 # -----------------------
 [tool.coverage.run]
 branch = true
-source = ["app"]
+source = ["dataenginex"]
 
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
+
+# Poethepoet tasks: define common developer tasks (poe lint)
+[tool.poe.tasks]
+# Run Ruff, Black (check) and MyPy
+lint = "ruff . && black --check . && mypy . --ignore-missing-imports"

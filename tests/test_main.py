@@ -1,7 +1,8 @@
 from fastapi.testclient import TestClient
-from app.main import app
+from dataenginex.main import app
 
 client = TestClient(app)
+
 
 def test_root():
     response = client.get("/")

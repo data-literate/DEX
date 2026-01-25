@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 def get_connection_string() -> str:
     driver = os.getenv("DB_DRIVER")
     server_name = os.getenv("DB_SERVER")
@@ -20,6 +21,7 @@ def get_connection_string() -> str:
         f"PWD={password}"
     )
 
+
 @contextmanager
 def db_connection() -> Iterator[pyodbc.Connection]:
     conn_str = get_connection_string()
@@ -28,6 +30,7 @@ def db_connection() -> Iterator[pyodbc.Connection]:
         yield conn
     finally:
         conn.close()
+
 
 if __name__ == "__main__":
 

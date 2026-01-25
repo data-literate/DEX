@@ -2,11 +2,13 @@
 # A generator function allows us to iterate over a sequence of values without storing them all in memory
 # On demand, the next value is produced when requested using the next() function or a loop
 
+
 def count_numbers(n):
     num = 1
     for _ in range(n):
         yield num
         num += 1
+
 
 if __name__ == "__main__":
     # Using the generator function

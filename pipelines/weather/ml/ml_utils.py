@@ -65,18 +65,14 @@ class WeatherFeatureEngineer:
             unix_timestamp(col("timestamp"), "yyyy-MM-dd'T'HH:mm:ss"),
         )
 
-        df = df.withColumn(
-            "hour", hour(from_unixtime(col("timestamp_unix")))
-        )
+        df = df.withColumn("hour", hour(from_unixtime(col("timestamp_unix"))))
         df = df.withColumn(
             "day_of_week", dayofweek(from_unixtime(col("timestamp_unix")))
         )
         df = df.withColumn(
             "day_of_year", dayofyear(from_unixtime(col("timestamp_unix")))
         )
-        df = df.withColumn(
-            "month", month(from_unixtime(col("timestamp_unix")))
-        )
+        df = df.withColumn("month", month(from_unixtime(col("timestamp_unix"))))
 
         return df
 
@@ -112,10 +108,10 @@ class WeatherFeatureEngineer:
 
         # Window specification for rolling calculations
         for window_size in window_sizes:
-            window_spec = Window.partitionBy("city").orderBy(
-                "timestamp_unix"
-            ).rangeBetween(
-                -(window_size - 1), 0
+            window_spec = (
+                Window.partitionBy("city")
+                .orderBy("timestamp_unix")
+                .rangeBetween(-(window_size - 1), 0)
             )
 
             for metric in metrics:
@@ -208,7 +204,8 @@ class WeatherModelTrainer:
         """Train temperature prediction model."""
         # Feature columns (exclude IDs, timestamps, and target)
         feature_cols = [
-            col for col in df.columns
+            col
+            for col in df.columns
             if col
             not in [
                 "city",
@@ -223,9 +220,7 @@ class WeatherModelTrainer:
         ]
 
         # Create assembler
-        assembler = VectorAssembler(
-            inputCols=feature_cols, outputCol="features"
-        )
+        assembler = VectorAssembler(inputCols=feature_cols, outputCol="features")
 
         # Create regressor
         if model_type == "random_forest":
@@ -322,9 +317,7 @@ class WeatherPredictor:
 
         return predictions
 
-    def get_city_forecast(
-        self, df: DataFrame, city: str
-    ) -> Dict[str, Any]:
+    def get_city_forecast(self, df: DataFrame, city: str) -> Dict[str, Any]:
         """Get forecast for specific city."""
         city_df = df.filter(col("city") == city)
         predictions = self.predict(city_df)

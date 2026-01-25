@@ -7,12 +7,12 @@ This module contains Jupyter notebooks for the weather ML pipeline:
    - Create ML features from raw weather data
    - Output: weather_features table
    - Duration: 2-3 minutes
-   
+
 2. train_model.ipynb
    - Train Random Forest temperature prediction model
    - Output: Trained model + weather_predictions table
    - Duration: 3-5 minutes
-   
+
 3. analyze_predictions.ipynb
    - Analyze model predictions and performance
    - Output: Multiple analysis tables
@@ -23,7 +23,7 @@ Quick Start:
     1. feature_engineering.ipynb (creates features)
     2. train_model.ipynb (trains model)
     3. analyze_predictions.ipynb (analyzes results)
-    
+
     Total time: 6-10 minutes
 
 Documentation:
@@ -35,8 +35,4 @@ Documentation:
 __version__ = "1.0"
 __author__ = "Weather ML Pipeline"
 
-__all__ = [
-    "feature_engineering",
-    "train_model", 
-    "analyze_predictions"
-]
+__all__ = ["feature_engineering", "train_model", "analyze_predictions"]

@@ -45,17 +45,12 @@ except Exception as e:
 # COMMAND ----------
 
 # Calculate prediction error
-predictions = predictions.withColumn(
-    "error", col("temperature") - col("prediction")
-)
+predictions = predictions.withColumn("error", col("temperature") - col("prediction"))
+
+predictions = predictions.withColumn("abs_error", abs(col("error")))
 
 predictions = predictions.withColumn(
-    "abs_error", abs(col("error"))
-)
-
-predictions = predictions.withColumn(
-    "error_pct", 
-    round((abs(col("error")) / col("temperature") * 100), 2)
+    "error_pct", round((abs(col("error")) / col("temperature") * 100), 2)
 )
 
 # COMMAND ----------
@@ -63,10 +58,16 @@ predictions = predictions.withColumn(
 # Performance by city
 logger.info("\n=== PERFORMANCE BY CITY ===")
 
-city_performance = predictions.groupBy("city").agg({
-    "abs_error": ["avg", "min", "max"],
-    "temperature": ["count"],
-}).orderBy("avg(abs_error)")
+city_performance = (
+    predictions.groupBy("city")
+    .agg(
+        {
+            "abs_error": ["avg", "min", "max"],
+            "temperature": ["count"],
+        }
+    )
+    .orderBy("avg(abs_error)")
+)
 
 city_performance.display()
 
@@ -75,10 +76,16 @@ city_performance.display()
 # Performance by hour of day
 logger.info("\n=== PERFORMANCE BY HOUR ===")
 
-hour_performance = predictions.groupBy("hour").agg({
-    "abs_error": ["avg", "min", "max"],
-    "prediction": ["count"],
-}).orderBy("hour")
+hour_performance = (
+    predictions.groupBy("hour")
+    .agg(
+        {
+            "abs_error": ["avg", "min", "max"],
+            "prediction": ["count"],
+        }
+    )
+    .orderBy("hour")
+)
 
 hour_performance.display()
 
@@ -87,12 +94,26 @@ hour_performance.display()
 # Performance by day of week
 logger.info("\n=== PERFORMANCE BY DAY OF WEEK ===")
 
-day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+day_names = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+]
 
-day_performance = predictions.groupBy("day_of_week").agg({
-    "abs_error": ["avg", "min", "max"],
-    "prediction": ["count"],
-}).orderBy("day_of_week")
+day_performance = (
+    predictions.groupBy("day_of_week")
+    .agg(
+        {
+            "abs_error": ["avg", "min", "max"],
+            "prediction": ["count"],
+        }
+    )
+    .orderBy("day_of_week")
+)
 
 day_performance.display()
 
@@ -102,14 +123,19 @@ day_performance.display()
 logger.info("\n=== PERFORMANCE BY TEMPERATURE RANGE ===")
 
 predictions_with_range = predictions.withColumn(
-    "temp_range",
-    (col("temperature").cast("int") / 5 * 5).cast("string")
+    "temp_range", (col("temperature").cast("int") / 5 * 5).cast("string")
 )
 
-range_performance = predictions_with_range.groupBy("temp_range").agg({
-    "abs_error": ["avg"],
-    "prediction": ["count"],
-}).orderBy("temp_range")
+range_performance = (
+    predictions_with_range.groupBy("temp_range")
+    .agg(
+        {
+            "abs_error": ["avg"],
+            "prediction": ["count"],
+        }
+    )
+    .orderBy("temp_range")
+)
 
 range_performance.display()
 
@@ -143,10 +169,16 @@ predictions.orderBy(col("abs_error").desc()).select(
 # Forecast accuracy by condition
 logger.info("\n=== PERFORMANCE BY WEATHER CONDITION ===")
 
-condition_performance = predictions.groupBy("condition").agg({
-    "abs_error": ["avg", "min", "max"],
-    "prediction": ["count"],
-}).orderBy("avg(abs_error)")
+condition_performance = (
+    predictions.groupBy("condition")
+    .agg(
+        {
+            "abs_error": ["avg", "min", "max"],
+            "prediction": ["count"],
+        }
+    )
+    .orderBy("avg(abs_error)")
+)
 
 condition_performance.display()
 
@@ -187,10 +219,7 @@ predictions.select(
     "humidity",
     "pressure",
     "condition",
-).write \
-    .mode("overwrite") \
-    .option("mergeSchema", "true") \
-    .saveAsTable(analysis_table)
+).write.mode("overwrite").option("mergeSchema", "true").saveAsTable(analysis_table)
 
 logger.info(f"✓ Analysis saved to {analysis_table}")
 

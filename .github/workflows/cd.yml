@@ -1,0 +1,58 @@
+name: CD
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Log in to registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and push image
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:${{ github.sha }}
+            ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:latest
+
+  deploy-dev:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Deploy to dev (placeholder)
+        run: |
+          echo "Add your deployment steps here (kubectl/helm/cloud CLI)."
+
+  promote-staging:
+    if: github.ref == 'refs/heads/main'
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Deploy to staging (placeholder)
+        run: echo "Run integration tests against staging and smoke tests here."
+
+  deploy-prod:
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    needs: promote-staging
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://example.com
+    steps:
+      - name: Require manual approval (GitHub environment)
+        run: echo "Manual approval required in GitHub UI before proceeding."
+      - name: Deploy to production (placeholder)
+        run: echo "Deploying image to production cluster..."

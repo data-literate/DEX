@@ -57,11 +57,8 @@ df_typed = df.select(
 # Write to Delta Lake
 try:
     row_count = df_typed.count()
-    df_typed.write \
-        .mode(MODE) \
-        .option("mergeSchema", "true") \
-        .saveAsTable(TARGET_TABLE)
-    
+    df_typed.write.mode(MODE).option("mergeSchema", "true").saveAsTable(TARGET_TABLE)
+
     logger.info(f"✓ Loaded {row_count} records to {TARGET_TABLE}")
 except Exception as e:
     logger.error(f"Failed to load data: {str(e)}")

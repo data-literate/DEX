@@ -21,3 +21,11 @@
 ## Miro
 ## Mermaid
 ## Excalidraw
+
+# Explore Open Source Tools and Technologies
+
+## Minio
+## Metabase
+## Apache Doris
+## Apache Hop
+
