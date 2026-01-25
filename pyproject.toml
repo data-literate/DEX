@@ -65,7 +65,7 @@ numpy = "^1.26"
 pandas = "^2.1"
 httpx = "^0.24"
 types-requests = "^2.32.4.20260107"
-ruff = "^0.0.276"
+ruff = "^0.14.14"
 black = "^26.1.0"
 mypy = "^0.931"
 
