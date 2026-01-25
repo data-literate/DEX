@@ -61,7 +61,7 @@ pytest-cov = "^3.0.0"
 ipykernel = "^7.1.0"
 poethepoet = "^0.40.0"
 # runtime packages used across the repo that mypy expected
-numpy = "^1.26"
+numpy = "^2.4"
 pandas = "^2.1"
 httpx = "^0.24"
 types-requests = "^2.32.4.20260107"
