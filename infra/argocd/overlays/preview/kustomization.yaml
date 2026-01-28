@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Namespace set by ApplicationSet template (dex-pr-XX)
+
+bases:
+  - ../../base
+
+replicas:
+  - name: dex
+    count: 2
+
+images:
+  - name: data-literate/dex
+    # Tag set by ApplicationSet template (sha-XXXXX)
+
+patchesStrategicMerge:
+  - deployment.yaml

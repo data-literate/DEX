@@ -11,13 +11,12 @@ dist/
 
 # Virtual environments
 .env
-.env.*
 .venv/
 venv/
 ENV/
 env/
 
-# Installer logs
+# Intsaller logs
 pip-log.txt
 pip-delete-this-directory.txt
 

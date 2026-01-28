@@ -1,12 +1,17 @@
 from fastapi import FastAPI
 import uvicorn
 
-app = FastAPI()
+app = FastAPI(title="DataEngineX", version="0.1.0")
 
 
 @app.get("/")
 def read_root():
-    return {"status": "ok"}
+    return {"message": "DataEngineX API", "version": "0.1.0"}
+
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
 
 
 if __name__ == "__main__":
