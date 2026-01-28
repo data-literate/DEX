@@ -67,8 +67,6 @@ spec:
         repoURL: https://github.com/data-literate/DEX
         targetRevision: main
         path: "infra/argocd/overlays/{{environment}}"
-        kustomize:
-          version: v5.0.0
       destination:
         server: https://kubernetes.default.svc
         namespace: "{{namespace}}"
@@ -119,7 +117,6 @@ spec:
         path: infra/argocd/overlays/preview
         
         kustomize:
-          version: v5.0.0
           images:
             - data-literate/dex:sha-{{head_short_sha}}  # Use PR's image
       
@@ -166,3 +163,8 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: 'dex-pr-*'  # Allow PR preview namespaces
       server: https://kubernetes.default.svc
+  
+  # Allow creating namespaces
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
