@@ -52,22 +52,22 @@ requests = "^2.26.0"
 pyspark = ">=4.1.1"
 databricks-cli = "*"
 fastapi = "^0.110.0"
-uvicorn = { extras = ["standard"], version = "^0.27.0" }
+uvicorn = { extras = ["standard"], version = "^0.40.0" }
 python-dotenv = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^6.2.5"
+pytest = "^9.0.2"
 pytest-cov = "^3.0.0"
 ipykernel = "^7.1.0"
 poethepoet = "^0.40.0"
 # runtime packages used across the repo that mypy expected
-numpy = "^1.26"
+numpy = "^2.4"
 pandas = "^2.1"
 httpx = "^0.24"
 types-requests = "^2.32.4.20260107"
-ruff = "^0.0.276"
+ruff = "^0.14.14"
 black = "^26.1.0"
-mypy = "^0.931"
+mypy = "^1.19.1"
 
 [tool.poetry.scripts]
 # CLI entry using short form `dex` pointing to FastAPI app for convenience
