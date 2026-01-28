@@ -18,37 +18,37 @@ jobs:
   lint-and-test:
     name: Lint and Test
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      
+
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
-      
+
       - name: Install Poetry
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-      
+
       - name: Install dependencies
         run: |
           poetry config virtualenvs.in-project true
           poetry install
-      
+
       - name: Run Ruff linter
         run: poetry run ruff check .
-      
+
       - name: Run mypy type checker
         run: poetry run mypy src/
-        continue-on-error: true  # Don't fail on type errors yet
-      
+        continue-on-error: true
+
       - name: Run pytest
         run: poetry run pytest tests/ -v --cov=src --cov-report=xml
-      
-      - name: Upload coverage to SonarCloud (optional)
+
+      - name: Upload coverage to SonarCloud
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: echo "TODO: Configure SonarCloud integration"
+        run: echo "TODO Configure SonarCloud integration"
