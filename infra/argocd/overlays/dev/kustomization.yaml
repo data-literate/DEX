@@ -13,7 +13,7 @@ replicas:
 images:
   - name: data-literate/dex
     newName: ghcr.io/data-literate/dex
-    newTag: sha-a38c12b2
+    newTag: sha-51c0cc9c
 
 patches:
   - path: deployment.yaml
