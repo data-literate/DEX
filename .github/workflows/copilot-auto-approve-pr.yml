@@ -39,11 +39,19 @@ jobs:
               pull_number: context.issue.number
             });
 
-            const copilotComments = comments.data.filter(c => c.user.login === 'Copilot');
-            const hasCopilotComments = copilotComments.length > 0;
+            // Only count unresolved Copilot comments
+            const copilotComments = comments.data.filter(c => 
+              c.user.login === 'Copilot' && 
+              c.in_reply_to_id === undefined // Top-level comments only (not replies)
+            );
+            
+            // Check if comments are resolved (position is null for resolved/outdated comments)
+            const unresolvedComments = copilotComments.filter(c => c.position !== null);
+            const hasCopilotComments = unresolvedComments.length > 0;
 
             console.log(`Copilot review found: ${copilotReview ? 'yes' : 'no'}`);
-            console.log(`Copilot comments: ${copilotComments.length}`);
+            console.log(`Total Copilot comments: ${copilotComments.length}`);
+            console.log(`Unresolved Copilot comments: ${unresolvedComments.length}`);
 
             // Only auto-approve if from repo owner AND Copilot has no comments
             if (context.payload.pull_request.user.login === context.repo.owner &&
