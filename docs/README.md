@@ -1,135 +1,61 @@
-# DEX — Single Documentation
+# DEX Documentation Guide (Start Here)
 
-This single documentation file consolidates project guidance, quick-run instructions, conceptual notes, and the folder structure. Use this as the canonical developer guide while you explore and extend DEX.
+This page is the entry point for developers. It explains how the repo is organized, how work flows from code to deployment, and where to find deeper documentation.
 
----
+## What This Repo Does
 
-## Project Overview
+DEX (DataEngineX) is a Python platform that ships a FastAPI service and supports ML/data pipelines with a production-grade CI/CD + GitOps deployment flow.
 
-DEX (DataEngineX) is a Python-based Data & AI Engine demonstrating end-to-end workflows in data engineering, analysis, ML, generative AI, MLOps, and DevOps. The repository contains small, focused concept modules under `src/pyconcepts/` designed for learning and integration into runnable examples.
+## How Changes Flow (High Level)
 
-## Quick Start — How to Run Locally
+```mermaid
+graph LR
+    Feature["feature/* branch"] --> DevPR["PR → dev"]
+    DevPR --> DevCI["CI: lint/test/build"]
+    DevCI --> DevCD["CD: update dev overlay (dev branch)"]
+    DevCD --> DevApp["ArgoCD syncs dex-dev"]
+    DevApp --> ReleasePR["Release PR: dev → main"]
+    ReleasePR --> MainCI["CI: lint/test/build"]
+    MainCI --> MainCD["CD: update stage/prod overlays (main)"]
+    MainCD --> StageProd["ArgoCD syncs dex-stage + dex-prod"]
+```
 
-Prerequisites
-- Python 3.10+ (3.12 used in this workspace)
-- Virtual environment tool (venv, poetry, or pipenv)
+## Repository Tour
 
-Install dependencies (using pip):
+```
+root/
+├── src/dataenginex/          # FastAPI app and core code
+├── pipelines/                # Example data/ML pipelines
+├── workflows/                # Workflow definitions
+├── infra/                    # Kubernetes + ArgoCD GitOps manifests
+├── .github/workflows/        # CI/CD workflows
+├── docs/                     # Documentation (this folder)
+└── tests/                    # Unit/integration tests
+```
+
+## Common Tasks
+
+### Run Locally
 
 ```bash
-python -m venv .venv
-source .venv/Scripts/activate    # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+poetry install
+poetry run uvicorn dataenginex.main:app --reload
 ```
 
-Run the FastAPI application (development):
+### Run Quality Checks
 
 ```bash
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+poetry run pytest -v
+poetry run ruff check src/ tests/ && poetry run black --check . && poetry run mypy src/ --ignore-missing-imports
+# Or use the poe lint shortcut:
+poe lint
 ```
 
-Run tests:
+## Where To Go Next
 
-```bash
-pytest -q
-```
-
-Notes
-- If you use Poetry, run `poetry install` and `poetry run uvicorn app.main:app --reload`.
-- Ensure environment variables (API keys, DB URLs) are set via a `.env` file when needed.
-
----
-
-## `src/pyconcepts` — Modules, Goals and Exercises
-
-This section documents each small concept module and suggests concrete exercises to integrate them end-to-end into DEX.
-
-- `async_http_client.py`
-	- Goal: implement a robust async HTTP client with retries, timeouts, and simple in-memory caching.
-	- Exercise: fetch live data from a public API (OpenWeatherMap, Coindesk, etc.), cache results for 60 seconds, expose via an endpoint `/api/external-data`.
-
-- `async_dependency_injection.py`
-	- Goal: show how to wire services (HTTP client, DB connection, config) into FastAPI using dependency injection.
-	- Exercise: create factory functions that return DB or client instances; add tests that replace dependencies with mocks to verify behavior.
-
-- `context_managers.py`
-	- Goal: implement sync/async context managers for resource management (DB connections, temporary files, timers).
-	- Exercise: add a DB connection context manager for SQLite that opens/closes connections and times queries.
-
-- `strict_decorators.py`
-	- Goal: provide decorators for input validation, retry/backoff, and simple rate limiting.
-	- Exercise: add a `@retry` decorator used by the HTTP client; add a `@validate_types` decorator with runtime checks used in a utility function.
-
-- `var_len_args.py`
-	- Goal: demonstrate flexible function signatures and safe argument handling.
-	- Exercise: implement a small ETL helper that accepts variable transform functions and applies them to a DataFrame.
-
-- `yield_keyword.py`
-	- Goal: explain and demonstrate generator patterns and streaming results.
-	- Exercise: implement a streaming CSV reader that yields rows to an async endpoint using `StreamingResponse` from FastAPI.
-
-### Integrations (end-to-end ideas)
-
-- Build a small ETL endpoint `/api/insights`:
-	1. Use the async HTTP client to fetch raw data.
-	2. Use `var_len_args` transforms to clean/aggregate data.
-	3. Store results in SQLite via `context_managers` DB context.
-	4. Expose aggregated results and stream raw rows with `yield_keyword` utilities.
-
-### Testing ideas
-
-- Create unit tests for the DI layer by injecting mock HTTP clients.
-- Test retry behavior by simulating failing endpoints.
-
----
-
-## Folder Structure
-
-Current (trimmed):
-
-```
-/ (project root)
-├─ app/
-│  └─ main.py
-├─ src/pyconcepts/
-│  ├─ async_dependency_injection.py
-│  ├─ async_http_client.py
-│  ├─ context_managers.py
-│  ├─ strict_decorators.py
-│  ├─ var_len_args.py
-│  └─ yield_keyword.py
-├─ tests/
-├─ requirements.txt
-└─ Readme.md
-```
-
-Proposed additions (recommended):
-
-```
-docs/                 # consolidated project documentation (this file)
-examples/             # small runnable examples (weather, ETL)
-notebooks/            # Jupyter notebooks for EDA and experiments
-infra/                # Docker, GitHub Actions, Terraform
-pipelines/            # Prefect/Airflow pipeline definitions
-```
-
-Guidance
-- Keep `docs/` targeted and small while you iterate.
-- Add runnable examples next to lessons (e.g., `examples/weather/`).
-
----
-
-## Quick Win Example Suggestion
-
-Create a **Weather Data API**:
-- Fetch weather from OpenWeatherMap API (free tier)
-- Cache in SQLite
-- Serve via FastAPI endpoints
-- Add tests and structured logging
-- Use the concept modules (`async_http_client`, DI, context managers, streaming) to demonstrate E2E flow
-
----
-
-If you want, I can now:
-- update the root `Readme.md` to link to this file, and
-- add a small runnable example under `examples/weather/` with code, tests, and a short README.
+- [README](../Readme.md) — quick start and developer workflow
+- [SDLC](SDLC.md) — lifecycle stages, gates, and artifacts
+- [Infrastructure Guide](../infra/README.md) — GitOps, ArgoCD, Kustomize
+- [Local K8s Setup](LOCAL_K8S_SETUP.md) — run ArgoCD locally
+- [Deploy Runbook](DEPLOY_RUNBOOK.md) — release + rollback
+- [Monitoring](monitoring.md) — metrics, logs, traces

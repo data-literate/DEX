@@ -12,9 +12,6 @@ spec:
     repoURL: https://github.com/data-literate/DEX
     targetRevision: main
     path: infra/argocd/base
-    
-    kustomize:
-      version: v5.0.0
   
   destination:
     server: https://kubernetes.default.svc
@@ -51,12 +48,15 @@ spec:
       - name: dex-dev
         namespace: dex-dev
         environment: dev
+        branch: dev
       - name: dex-stage
         namespace: dex-stage
         environment: stage
+        branch: main
       - name: dex-prod
         namespace: dex-prod
         environment: prod
+        branch: main
   template:
     metadata:
       name: "{{name}}"
@@ -65,7 +65,7 @@ spec:
       project: dex-project
       source:
         repoURL: https://github.com/data-literate/DEX
-        targetRevision: main
+        targetRevision: "{{branch}}"
         path: "infra/argocd/overlays/{{environment}}"
       destination:
         server: https://kubernetes.default.svc

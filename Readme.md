@@ -1,229 +1,201 @@
 # DEX — DataEngineX
 
-This repository contains DEX (DataEngineX), a Python-based data engineering and ML example platform.
-**This README** summarizes how to set up, develop, test, and deploy the project, and describes the project's CI/CD and SDLC practices.
+This repository contains **DEX (DataEngineX)**, a Python-based data engineering and ML platform with **production-ready CI/CD and GitOps automation**.
 
-**Contents**
-- Project overview
-- Quick start
-- Development workflow
-- Tests & linters
-- CI/CD and SDLC
-- Collaboration & contributing
-**Project overview**
+## Quick Links
+- **Local Development**: See [Quick Start](#quick-start-local) below
+- **Infrastructure & Kubernetes**: See [infra/README.md](infra/README.md)
+- **Contributing**: See [CONTRIBUTING.md](CONTRIBUTING.md)
 
-- Language: Python (>=3.11)
-- Packaging: Poetry
-- Web API: FastAPI
-- Runners: Uvicorn
-- Linting / formatting: Ruff, Black
-- Type checking: MyPy
-- Tests: Pytest
+## Project Stack
 
-Repository layout (high-level)
-- `src/` — application package `dataenginex`
-- `app/` — legacy app entrypoints (migrated)
-- `pipelines/` — example data pipelines
-- `tests/` — unit tests
-- `infra/` — infrastructure/IaC skeleton
-- `docs/` — documentation and runbooks
-Quick start (local)
+| Component | Technology |
+|---|---|
+| Language | Python 3.11+ |
+| Package Manager | Poetry |
+| Web API | FastAPI with Uvicorn |
+| Code Quality | Ruff, Black, MyPy |
+| Testing | Pytest |
+| **Container** | **Docker, ghcr.io registry** |
+| **Kubernetes** | **ArgoCD, Kustomize, Multi-environment** |
+| **CI/CD** | **GitHub Actions (fully automated)** |
 
-Prerequisites: Git, Python 3.11+, Poetry, pipx (optional)
-1. Clone the repository
+## Repository Structure
 
-```bash
-git clone <repo-url>
-cd DEX
 ```
-2. Install dependencies (development environment)
+DEX/
+├── src/dataenginex/          # Main application package
+├── tests/                    # Unit and integration tests
+├── pipelines/weather/        # Example data pipelines
+├── learning/                 # Python concept modules
+├── infra/argocd/             # Kubernetes manifests (GitOps)
+├── docs/                     # Runbooks and guides
+├── .github/workflows/        # CI/CD automation
+├── pyproject.toml            # Poetry configuration
+└── Dockerfile                # Container image build
+```
+
+## Quick Start (Local)
+
+### Prerequisites
+- Git, Python 3.11+, Poetry
+- (Optional) Docker for running containerized app
+
+### 1. Clone & Install
 
 ```bash
+git clone https://github.com/data-literate/DEX
+cd DEX
 poetry install
 ```
-3. Run the API locally
+
+### 2. Run the API
 
 ```bash
 poetry run uvicorn dataenginex.main:app --reload
 ```
-Visit http://127.0.0.1:8000/ to see the health endpoint.
 
----
-Development workflow
+Visit **http://127.0.0.1:8000** to verify the health endpoint.
 
-- Create a short-lived feature branch from `main`: `git switch -c feat/JIRA-123-description`.
-- Work locally and run linters/tests frequently.
-- Open a pull request (PR) against `main` when ready. PRs should have at least one reviewer and pass CI.
-- Use semantic version tags for releases (e.g. `v1.2.0`).
+### 3. Run Tests
 
-Branching rules (recommended)
-- `main` — protected; only mergeable when CI passes and approvals are in place.
-- `feature/*`, `fix/*` — short-lived branches for changes.
-- Releases: create annotated tags and optionally `release/*` branches if needed.
----
-
-Tests & linters
-
-- Run linters and type checks locally:
 ```bash
-poetry run ruff .
+poetry run pytest -v
+```
+
+### 4. Run Code Quality Checks
+
+```bash
+poetry run ruff check src/ tests/
 poetry run black --check .
-poetry run mypy . --ignore-missing-imports
+poetry run mypy src/
 ```
 
-- Apply automatic formatting:
+## CI/CD Pipeline Overview
+
+Every commit to `main` or `dev` triggers an automated pipeline:
+
+### 1. **CI Workflow** (Continuous Integration)
+- **Lint** (ruff, black, mypy) → catch code quality issues
+- **Test** (pytest) → run unit and integration tests
+- **Build** Docker image with commit SHA tag (`sha-{commit}`)
+- **Push** to `ghcr.io/data-literate/dex`
+
+### 2. **CD Workflow** (Continuous Deployment)
+- **Update** environment manifests with new image tag (dev overlay for `dev` branch, stage/prod overlays for `main` branch)
+- **Commit** changes back to repository automatically
+- **Security Scan** (Trivy, CodeQL) for vulnerabilities
+
+### 3. **ArgoCD Auto-Sync**
+- **Detects** git changes to manifests
+- **Syncs** to Kubernetes (dev → stage → prod)
+- **Validates** deployment health
+
+See [infra/README.md](infra/README.md) for detailed architecture.
+
+## Multi-Environment Deployment
+
+All three environments deploy automatically via ArgoCD:
+
+| Environment | Replicas | Namespace | Status |
+|---|---|---|---|
+| **dev** | 2 | `dex-dev` | Synced & Healthy  |
+| **stage** | 2 | `dex-stage` | Synced & Healthy  |
+| **prod** | 3 | `dex-prod` | Synced & Healthy  |
+
+**Branch Protection on `main`:**
+- Pull request review required
+- Status checks pass (CI, Security Scan)
+- Branches up to date before merge
+- No force pushes or deletions
+
+## Local Kubernetes Testing
+
+To test ArgoCD deployments locally:
+
 ```bash
-poetry run black .
+# Start ArgoCD
+kubectl apply -f infra/argocd/application.yaml
+
+# Check application status
+kubectl get application -n argocd
+
+# Access ArgoCD UI
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+# Visit https://localhost:8080
 ```
-- Run tests:
+
+See [docs/LOCAL_K8S_SETUP.md](docs/LOCAL_K8S_SETUP.md) for detailed setup instructions.
+
+## Documentation
+
+**Core Documentation:**
+- **[docs/README.md](docs/README.md)**  Start here: repository tour, workflows, and key references
+- **[infra/README.md](infra/README.md)**  Kubernetes architecture, kustomize overlays, ArgoCD workflows
+- **[CONTRIBUTING.md](CONTRIBUTING.md)**  Development workflow and PR process
+- **[docs/SDLC.md](docs/SDLC.md)**  Software development lifecycle and branching strategy
+- **[docs/DEPLOY_RUNBOOK.md](docs/DEPLOY_RUNBOOK.md)**  Release and rollback runbook
+- **[docs/monitoring.md](docs/monitoring.md)**  Monitoring and alerting setup
+
+## Development Workflow
+
+This repository follows a gated workflow: local checks → PR review → automated CI/CD. Work is tracked using GitHub Issues and GitHub Projects. For full lifecycle details, see [docs/SDLC.md](docs/SDLC.md).
+
+### Day-to-Day Steps
+
+1. Create or update a GitHub Issue and add it to the GitHub Project board
+2. Create a feature branch: `git switch -c feat/short-description`
+3. Implement changes and add/update tests
+4. Run local checks:
+	- `poetry run pytest -v`
+	- `poetry run ruff check src/ tests/`
+	- `poetry run black --check .`
+	- `poetry run mypy src/`
+5. Open a PR to `dev` and request review (deploys to dev environment)
+6. After validation in dev, open a release PR from `dev` → `main`
+7. Merge after required checks pass (deploys to stage/prod)
+
+### Required Gates
+
+- CI checks must pass (lint, formatting, type check, tests, security scan)
+- At least one reviewer approval
+- Branch must be up to date with the target branch (`dev` or `main`)
+
+## Useful Commands
 
 ```bash
-poetry run pytest -q
-```
-There is a `poe lint` task (Poethepoet) that runs the standard linting sequence:
-
-```bash
-poe lint
-```
----
-
-CI/CD and SDLC (summary)
-
-- CI runs on PRs and pushes: installs dependencies, runs linters, type checks, unit tests, and builds artifacts.
-- Artifacts (wheel or Docker image) are built once and promoted across environments.
-- Environments: `dev` (auto-deploy), `staging` (post-merge), `prod` (manual approval required).
-- Security: dependency scanning (Dependabot/renovate, Snyk), SAST (semgrep/bandit), and secret scanning should be enabled in CI.
-- IaC and manifests live under `infra/` and `deploy/` (skeletons available).
-
-Example GitHub Actions files are available in `.github/workflows/` to run CI and deployments; adjust registry and secrets for your provider.
----
-
-Collaboration & contributing
-
-- Please follow the `CONTRIBUTING.md` guidelines for commit messages, PR size, and testing requirements.
-- Use the PR template to describe the change, testing performed, and any manual steps.
-- `CODEOWNERS` enforces code review by owners for critical directories.
-
-Recommended PR checklist:
-- [ ] Tests added or updated
-- [ ] Linting and formatting passed
-- [ ] Type checks passing
-- [ ] Documentation updated (if applicable)
-
----
-
-Useful commands
-
-- Install deps: `poetry install`
-- Run app: `poetry run uvicorn dataenginex.main:app --reload`
-- Run tests: `poetry run pytest -q`
-- Run linters: `poetry run ruff . && poetry run black --check . && poetry run mypy . --ignore-missing-imports`
-- Format code: `poetry run black .`
-
----
-
-Where to go next
-
-- To enable CI: add repository secrets (DOCKER_REGISTRY, CLOUD_CREDENTIALS) and review `.github/workflows/ci.yml`.
-- To deploy: configure the CD workflow with your cloud provider credentials and target cluster.
-- To contribute: read `CONTRIBUTING.md` and open a small PR following the template.
-
-If you want, I can scaffold the suggested CI and CD workflows, PR templates, and `CONTRIBUTING.md` next.
-# DEX — DataEngineX
-
-**DEX (DataEngineX)** is a comprehensive, **Python-based Data & AI Engine** designed to demonstrate end-to-end workflows in **data engineering, data analysis, machine learning, deep learning, generative AI, MLOps, and DevOps**.  
-
-This project is built to serve as a **portfolio-ready, open-source platform**, showcasing modern Python data workflows, production-style pipelines, automated ML operations, and scalable deployment practices.
-
----
-
-## 🚀 Project Overview
-
-DEX aims to demonstrate the **full lifecycle of Python-based data projects**:
-
-1. **Data Collection & Engineering** – Acquire, clean, transform, and store data.  
-2. **Exploratory Data Analysis (EDA) & Visualization** – Analyze datasets and extract insights.  
-3. **Machine Learning & Deep Learning** – Build classical ML models, neural networks, and LLM pipelines.  
-4. **Pipelines & Workflow Automation** – Python-based ETL, ML, and AI workflows.  
-5. **MLOps** – Experiment tracking, model versioning, CI/CD, and automated retraining.  
-6. **DevOps & Deployment** – Containerized APIs, cloud-ready services, monitoring, and logging.  
-7. **Experimentation & Documentation** – Reproducible notebooks, reports, and dashboards for all phases.
-
-DEX is **extensible**, allowing integration of new datasets, models, and AI technologies as learning progresses.
-
----
-
-
-## 💡 Key Features
-
-### **Data Engineering & Analysis**
-- Python-based ETL pipelines for ingestion and transformation on **Databricks**  
-- Databricks notebooks for collaborative data engineering and analysis  
-- Feature engineering and preprocessing  
-- Exploratory Data Analysis (EDA) with **Matplotlib, Seaborn, Plotly**  
-- Dataset versioning and management
-
-### **Machine Learning & Deep Learning**
-- Classical ML models: **scikit-learn, XGBoost, LightGBM**  
-- Deep Learning models: **TensorFlow, PyTorch**  
-- Generative AI / LLMs: **HuggingFace Transformers, LangChain, OpenAI API**  
-- Hyperparameter tuning and evaluation
-
-### **Pipelines & Automation**
-- Python scripts for end-to-end workflows  
-- Orchestration using **Prefect or Airflow**  
-- Modular pipelines for reproducibility
-
-### **MLOps**
-- Experiment tracking: **MLflow, Weights & Biases**  
-- Model versioning, retraining, and deployment triggers  
-- Metrics dashboards for model performance monitoring  
-- Reproducibility and logging best practices
-
-### **DevOps & Deployment**
-- Containerized services using **Docker**  
-- REST APIs using **FastAPI or Flask**  
-- Cloud-ready deployment on **AWS / GCP / Azure**  
-- Automated CI/CD pipelines using **GitHub Actions**  
-- Logging and monitoring dashboards
-
-### **Portfolio & Documentation**
-- Organized notebooks and scripts for each phase  
-- Experiment tracking and reporting  
-- Interactive dashboards for insights and metrics
-
----
-
-## 🧰 Python Tech Stack & Open-Source Tools
-
-| Area                        | Tools / Technologies                           |
-|-------------------------------|-----------------------------------------------|
-| Data Processing               | Python, Apache PySpark, Pandas, NumPy, Databricks         |
-| ETL / Pipelines               | Python scripts, Airflow, Prefect, Databricks Workflows             |
-| Storage                       | SQLite, PostgreSQL, Parquet, Databricks Delta Lake                  |
-| Machine Learning              | scikit-learn, XGBoost, LightGBM             |
-| Deep Learning / AI            | PyTorch, TensorFlow, HuggingFace, LangChain |
-| Visualization                 | Matplotlib, Seaborn, Plotly                  |
-| MLOps / Experiment Tracking   | MLflow, Weights & Biases, DVC               |
-| Deployment & APIs             | FastAPI, Flask, Docker                        |
-| CI/CD / DevOps                | GitHub Actions, Docker, Terraform (optional) |
-| Monitoring / Logging          | MLflow dashboards, Prometheus/Grafana, Python logging |
-
----
-
-## 📌 How to Get Started
-
-1. **Clone the repository**
-
-```bash
-git clone https://github.com/data-literate/DEX.git
-cd DEX
-python3 -m pip install pipx
-python3 -m pipx ensurepath
-pipx install uv poethepoet poetry
-
-poetry lock
+# Install dependencies
 poetry install
-poetry env list
 
-poetry run uvicorn dataenginex.main:app --host 127.0.0.1 --port 8000 --reload
+# Run app locally
+poetry run uvicorn dataenginex.main:app --reload
+
+# Run tests
+poetry run pytest -v
+
+# Run all quality checks
+poetry run ruff check src/ tests/
+poetry run black --check .
+poetry run mypy src/
+
+# Auto-format code
+poetry run black .
+
+# Build Docker image locally
+docker build -t dex:latest .
+
+# Run Docker image
+docker run -p 8000:8000 dex:latest
+```
+
+## Next Steps
+
+1. **For local development**: Follow the Quick Start above
+2. **For Kubernetes/ArgoCD testing**: See [docs/LOCAL_K8S_SETUP.md](docs/LOCAL_K8S_SETUP.md)
+3. **For infrastructure details**: See [infra/README.md](infra/README.md)
+4. **For contributing code**: See [CONTRIBUTING.md](CONTRIBUTING.md)
+
+---
+
+**Status**: Production-ready CI/CD pipeline  | All environments synced & healthy  | Ready for development 
+

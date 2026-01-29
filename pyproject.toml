@@ -99,4 +99,4 @@ skip_covered = true
 # Poethepoet tasks: define common developer tasks (poe lint)
 [tool.poe.tasks]
 # Run Ruff, Black (check) and MyPy
-lint = "ruff . && black --check . && mypy . --ignore-missing-imports"
+lint = "ruff check src/ tests/ && black --check . && mypy src/ --ignore-missing-imports"
