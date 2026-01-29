@@ -13,7 +13,7 @@ replicas:
 images:
   - name: data-literate/dex
     newName: ghcr.io/data-literate/dex
-    newTag: sha-88e35999
+    newTag: sha-c835f556
 
 patchesStrategicMerge:
   - deployment.yaml
