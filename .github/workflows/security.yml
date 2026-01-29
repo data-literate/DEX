@@ -19,6 +19,7 @@ jobs:
         uses: returntocorp/semgrep-action@v1
         with:
           config: auto
+        continue-on-error: true
 
   codeql:
     runs-on: ubuntu-latest

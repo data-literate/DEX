@@ -26,6 +26,7 @@
 - [ ] Replace manual Helm deployment with ArgoCD ApplicationSet for multi-env promotion (dev → staging → prod). [P1 W2-3]
 - [ ] Add git-based configuration repo (separate from source) with kustomize overlays per environment. [P1 W2-3]
 - [ ] Stand up SonarQube (AWS or SonarCloud), run scans in CI, and hook results to GitHub PRs. [P1 W1-2]
+- [ ] **DEBUG: Fix semgrep security scan failure in GitHub Actions workflow (currently failing, needs investigation)** [P2 W1]
 
 ## Testing
 - [ ] Expand unit tests for FastAPI entrypoints and `src/pyconcepts` modules; target measurable coverage. [P1 W2-3]

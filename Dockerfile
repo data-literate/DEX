@@ -24,6 +24,7 @@ COPY src/ /app/src/
 
 # Set environment variables
 ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONPATH="/app/src:$PYTHONPATH" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
@@ -31,4 +32,4 @@ ENV PATH="/app/.venv/bin:$PATH" \
 EXPOSE 8000
 
 # Run the FastAPI application
-CMD ["uvicorn", "dataenginex.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "dataenginex.main:app", "--host", "0.0.0.0", "--port", "8000"]
