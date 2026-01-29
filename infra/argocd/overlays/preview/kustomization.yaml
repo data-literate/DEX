@@ -3,7 +3,7 @@ kind: Kustomization
 
 # Namespace set by ApplicationSet template (dex-pr-XX)
 
-bases:
+resources:
   - ../../base
 
 replicas:
@@ -14,5 +14,5 @@ images:
   - name: data-literate/dex
     # Tag set by ApplicationSet template (sha-XXXXX)
 
-patchesStrategicMerge:
-  - deployment.yaml
+patches:
+  - path: deployment.yaml

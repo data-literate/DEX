@@ -3,7 +3,7 @@ kind: Kustomization
 
 namespace: dex-prod
 
-bases:
+resources:
   - ../../base
 
 replicas:
@@ -15,5 +15,5 @@ images:
     newName: ghcr.io/data-literate/dex
     newTag: sha-03216e24
 
-patchesStrategicMerge:
-  - deployment.yaml
+patches:
+  - path: deployment.yaml
