@@ -1,4 +1,4 @@
-name: Auto-Approve
+name: Copilot Auto-Approve PR
 
 on:
   pull_request:
@@ -10,62 +10,76 @@ permissions:
   pull-requests: write
 
 jobs:
-  auto-approve:
-    name: Auto-Approve if Copilot Satisfied
+  request-copilot-review:
+    name: Request Copilot Review
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     
     steps:
-      - name: Check Copilot Review Status
+      - name: Request review from Copilot
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // Fetch all reviews on the PR
-            const reviews = await github.rest.pulls.listReviews({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number
-            });
-
-            // Find Copilot's latest review
-            const copilotReview = reviews.data
-              .filter(r => r.user.login === 'copilot-pull-request-reviewer')
-              .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))[0];
-
-            // Check if Copilot has made any comments (other than the overview)
-            const comments = await github.rest.pulls.listReviewComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number
-            });
-
-            // Only count unresolved Copilot comments
-            const copilotComments = comments.data.filter(c => 
-              c.user.login === 'Copilot' && 
-              c.in_reply_to_id === undefined // Top-level comments only (not replies)
-            );
+            const pr = context.payload.pull_request;
             
-            // Check if comments are resolved (position is null for resolved/outdated comments)
-            const unresolvedComments = copilotComments.filter(c => c.position !== null);
-            const hasCopilotComments = unresolvedComments.length > 0;
+            console.log(`Requesting Copilot review for PR #${pr.number}`);
+            
+            try {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                reviewers: ['copilot-pull-request-reviewer']
+              });
+              console.log('✓ Copilot review requested successfully');
+            } catch (error) {
+              console.log(`Note: ${error.message}`);
+              console.log('Copilot reviews are automatic, no manual request needed');
+            }
 
-            console.log(`Copilot review found: ${copilotReview ? 'yes' : 'no'}`);
-            console.log(`Total Copilot comments: ${copilotComments.length}`);
-            console.log(`Unresolved Copilot comments: ${unresolvedComments.length}`);
-
-            // Only auto-approve if from repo owner AND Copilot has no comments
-            if (context.payload.pull_request.user.login === context.repo.owner &&
-                !hasCopilotComments) {
-              
-              console.log('Approving PR: repo owner + Copilot satisfied');
+  auto-approve:
+    name: Auto-Approve if Copilot Satisfied
+    runs-on: ubuntu-latest
+    # Only run if the review is from Copilot
+    if: github.event_name == 'pull_request_review' && github.event.review.user.login == 'copilot-pull-request-reviewer'
+    
+    steps:
+      - name: Check Copilot Review and Auto-Approve
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const review = context.payload.review;
+            
+            console.log(`Copilot review submitted for PR #${pr.number}`);
+            console.log(`Review body: ${review.body.substring(0, 200)}...`);
+            
+            // Check if Copilot's review indicates no new comments
+            const hasNoNewComments = review.body.includes('generated no new comments') || 
+                                     review.body.includes('generated 0 comments');
+            
+            // Check if PR is from repository owner
+            const isOwner = pr.user.login === context.repo.owner;
+            
+            console.log(`Has no new comments: ${hasNoNewComments}`);
+            console.log(`PR from owner: ${isOwner} (${pr.user.login})`);
+            
+            if (isOwner && hasNoNewComments) {
+              console.log('✓ Auto-approving PR: Owner + Copilot satisfied (no new comments)');
               
               await github.rest.pulls.createReview({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                pull_number: context.issue.number,
+                pull_number: pr.number,
                 event: 'APPROVE',
-                body: 'Auto-approved: Copilot review satisfied (no comments). Changes approved by repository owner.'
+                body: '✅ Auto-approved: Copilot review completed with no new comments.'
               });
+              
+              console.log('✓ Approval submitted successfully');
             } else {
-              console.log(`Skipping approval - Owner: ${context.payload.pull_request.user.login === context.repo.owner}, Copilot comments: ${hasCopilotComments}`);
+              console.log(`✗ Skipping approval:`);
+              console.log(`  - PR from owner: ${isOwner}`);
+              console.log(`  - Copilot satisfied: ${hasNoNewComments}`);
             }
