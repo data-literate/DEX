@@ -160,7 +160,7 @@ rf_model = model.stages[1]
 if hasattr(rf_model, "featureImportances"):
     importances = rf_model.featureImportances.toArray()
     feature_importance = sorted(
-        zip(feature_cols, importances),
+        zip(feature_cols, importances, strict=False),
         key=lambda x: x[1],
         reverse=True,
     )

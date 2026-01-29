@@ -274,7 +274,7 @@ class WeatherModelTrainer:
 
         if hasattr(regressor, "featureImportances"):
             importances = regressor.featureImportances.toArray()
-            feature_importance = dict(zip(feature_cols, importances))
+            feature_importance = dict(zip(feature_cols, importances, strict=False))
 
             # Sort by importance
             sorted_importance = dict(
