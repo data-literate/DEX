@@ -82,7 +82,6 @@ from = "src"
 # -----------------------
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=dataenginex --cov-report=xml"
 
 # -----------------------
 # Coverage configuration
