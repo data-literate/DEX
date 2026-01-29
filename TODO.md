@@ -1,32 +1,63 @@
 # TODO
 
-## Priorities (proposed owners / target windows)
-- Week 1-2 — Platform: CI pipeline (lint/type/test/build/push), Docker image build and push, SonarQube/SonarCloud wiring, Docker Desktop K8s setup.
-- Week 2-3 — Platform/DevOps: Local ArgoCD setup, git repo + manifests, kustomize overlays, image updater testing, local workflow documentation.
-- Week 2-3 — Architecture: Define module boundaries, implement separation of concerns, module interfaces, shared data layer strategy.
-- Week 1-2 — Backend: Health/readiness probes, graceful shutdown, structured logging with request IDs, basic metrics/tracing.
-- Week 2-3 — Backend: E2E API test via uvicorn, unit tests for FastAPI and `src/pyconcepts` modules.
-- Week 2-4 — Backend: Implement `pyconcepts` exercises and expose `/api/external-data` and `/api/insights` endpoints.
-- Week 2-3 — Platform/DevOps (continued): ArgoCD cluster setup (staging/prod), ApplicationSet, image updater automation, notifications, RBAC.
-- Week 3-4 — Architecture: Dependency mapping, service extraction criteria, identify first extraction candidate, document strategy.
-- Week 3-4 — Data/ML: Experiment tracking + model registry (MLflow/W&B), model serving/monitoring plan, retraining job spec.
-- Week 3-4 — DataOps: Data quality framework, orchestration (Airflow/Prefect), pipeline observability and testing.
-- Week 3-4 — Data Engineering: Incremental processing, partitioning, transformation testing, feature engineering library.
-- Week 3-4 — MLOps: ML CI/CD pipeline, model versioning/monitoring/serving, automated retraining triggers.
-- Week 3-5 — Data Science: Experiment tracking workspace, feature selection, model comparison, cross-validation.
-- Week 3-5 — Platform/SRE: Caching layer (Redis/memory) and rate limiting; alerting and dashboards tied to SLOs.
-- Week 4-6 — Data Analysis: BI tool integration (Metabase/Superset), semantic layer, automated reporting, visualization.
-- Week 4-6 — Security: AuthN/AuthZ (OIDC/JWT), dependency/container scanning, secret management/rotation, harden headers.
-- Week 5+  — Architecture: Messaging/queueing plan, DR (RTO/RPO, backups), SLO/SLI/SLA definitions, load-balancing strategy.
-- Week 5+  — Research: Microservices architecture, service mesh, distributed patterns, serverless ML, cost optimization.
+## Completed ✅
 
-## Immediate: CI/CD and Quality
-- [ ] Add GitHub Actions CI to run lint, type-check, and tests; build and push a Docker image tagged with the commit SHA (plus `latest` on `main`). [P1 W1-2]
-- [ ] Set up ArgoCD cluster and repository structure for GitOps-driven deployments. [P1 W2-3]
-- [ ] Replace manual Helm deployment with ArgoCD ApplicationSet for multi-env promotion (dev → staging → prod). [P1 W2-3]
-- [ ] Add git-based configuration repo (separate from source) with kustomize overlays per environment. [P1 W2-3]
-- [ ] Stand up SonarQube (AWS or SonarCloud), run scans in CI, and hook results to GitHub PRs. [P1 W1-2]
-- [ ] **DEBUG: Fix semgrep security scan failure in GitHub Actions workflow (currently failing, needs investigation)** [P2 W1]
+### CI/CD & Platform (Complete)
+- ✅ GitHub Actions CI pipeline (lint, type-check, tests, build, push)
+- ✅ Docker image build and push to ghcr.io
+- ✅ GitHub Security scanning (CodeQL, Trivy)
+- ✅ ArgoCD cluster setup and local testing
+- ✅ Kustomize overlays for dev, stage, prod, preview
+- ✅ ApplicationSet for multi-environment promotion
+- ✅ Git-based configuration repo with auto-sync
+- ✅ Branch protection on main branch
+- ✅ CD workflow with git commit automation
+- ✅ Multi-environment deployment (all 3 envs synced & healthy)
+
+## In Progress 🚀
+
+### Backend & API
+- [ ] Add health/readiness probes (partial)
+- [ ] Structured logging with request IDs
+- [ ] Metrics and tracing integration
+- [ ] E2E API tests
+- [ ] Implement pyconcepts exercises and API endpoints
+
+### Data & ML
+- [ ] MLflow or W&B integration for experiment tracking
+- [ ] Model registry and serving strategy
+- [ ] Automated retraining job spec
+- [ ] Data quality framework
+
+## Backlog (Future)
+
+### Architecture
+- [ ] Service extraction strategy and first extraction candidate
+- [ ] Microservices architecture and patterns
+- [ ] Service mesh (Istio/Linkerd) evaluation
+
+### DevOps & Platform
+- [ ] Caching layer (Redis) and rate limiting
+- [ ] Alerting and dashboards tied to SLOs
+- [ ] Secret management and rotation
+- [ ] Disaster recovery (RTO/RPO, backups)
+
+### Security
+- [ ] AuthN/AuthZ (OIDC/JWT)
+- [ ] Hardened security headers
+- [ ] RBAC fine-tuning
+- [ ] Dependency scanning enhancements
+
+### Data Engineering
+- [ ] Incremental processing and partitioning
+- [ ] Transformation testing framework
+- [ ] Feature engineering library
+- [ ] Airflow/Prefect orchestration
+
+### Analytics & BI
+- [ ] Metabase/Superset integration
+- [ ] Semantic layer
+- [ ] Automated reporting and dashboards
 
 ## Testing
 - [ ] Expand unit tests for FastAPI entrypoints and `src/pyconcepts` modules; target measurable coverage. [P1 W2-3]

@@ -121,7 +121,7 @@ kubectl get applications -n argocd
 # dex         OutOfSync     Missing
 # dex-dev     OutOfSync     Missing
 # dex-stage   OutOfSync     Missing
-# dex         OutOfSync     Missing (prod)
+# dex-prod    OutOfSync     Missing
 ```
 
 ## Step 7: Sync Applications
@@ -184,10 +184,10 @@ Test endpoints:
 $newTag = "sha-test1234"
 (Get-Content infra/argocd/overlays/dev/kustomization.yaml) -replace 'newTag:.*', "newTag: $newTag" | Set-Content infra/argocd/overlays/dev/kustomization.yaml
 
-# Commit and push
+# Commit and push (dev branch tracks dev environment)
 git add infra/argocd/overlays/dev/kustomization.yaml
 git commit -m "test: update dev image to $newTag"
-git push origin main
+git push origin dev
 ```
 
 Watch ArgoCD detect change:

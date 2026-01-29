@@ -220,6 +220,6 @@ git push origin promote-stage-sha-abc12345
 
 ## References
 
-- [Promotion Workflow Documentation](../docs/PROMOTION_WORKFLOW.md)
+- [Infrastructure Promotion Workflow](../infra/README.md)
 - [ArgoCD Sync Documentation](https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/)
 - [Kustomize Documentation](https://kustomize.io/)
