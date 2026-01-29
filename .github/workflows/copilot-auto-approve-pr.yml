@@ -33,7 +33,7 @@ jobs:
               .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))[0];
 
             // Check if Copilot has made any comments (other than the overview)
-            const comments = await github.rest.pulls.listComments({
+            const comments = await github.rest.pulls.listReviewComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.issue.number
