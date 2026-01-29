@@ -4,7 +4,7 @@ This page is the entry point for developers. It explains how the repo is organiz
 
 ## What This Repo Does
 
-DEX (DataEngineX) is a Python platform that ships a FastAPI service and supports ML/data pipelines with a production‑grade CI/CD + GitOps deployment flow.
+DEX (DataEngineX) is a Python platform that ships a FastAPI service and supports ML/data pipelines with a production-grade CI/CD + GitOps deployment flow.
 
 ## How Changes Flow (High Level)
 
@@ -46,9 +46,9 @@ poetry run uvicorn dataenginex.main:app --reload
 
 ```bash
 poetry run pytest -v
-poetry run ruff check .
-poetry run black --check .
-poetry run mypy src/
+poetry run ruff . && poetry run black --check . && poetry run mypy . --ignore-missing-imports
+# Or use the poe lint shortcut:
+poe lint
 ```
 
 ## Where To Go Next

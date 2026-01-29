@@ -235,7 +235,7 @@ spec:
   ```yaml
   images:
     - name: ghcr.io/data-literate/dex
-     newTag: sha-XXXXXXXX
+      newTag: sha-XXXXXXXX
   ```
 2. **Commit & Push**:
   ```

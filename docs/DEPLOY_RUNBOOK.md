@@ -7,7 +7,7 @@ This runbook describes how to release and rollback DEX using the `dev` → `main
 - **dev**: Deploys from `dev` branch via GitOps (auto-sync)
 - **stage/prod**: Deploys from `main` branch via GitOps (auto-sync)
 
-## Pre‑Deploy Checklist
+## Pre-Deploy Checklist
 
 - CI is green on the target branch (`dev` or `main`).
 - Image exists in registry: `ghcr.io/data-literate/dex:sha-XXXXXXXX`.

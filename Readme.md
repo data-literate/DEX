@@ -73,7 +73,7 @@ poetry run mypy src/
 
 ## CI/CD Pipeline Overview
 
-Every commit to `main` triggers an automated pipeline:
+Every commit to `main` or `dev` triggers an automated pipeline:
 
 ### 1. **CI Workflow** (Continuous Integration)
 - **Lint** (ruff, black, mypy) → catch code quality issues
@@ -82,7 +82,7 @@ Every commit to `main` triggers an automated pipeline:
 - **Push** to `ghcr.io/data-literate/dex`
 
 ### 2. **CD Workflow** (Continuous Deployment)
-- **Update** dev environment manifest with new image tag
+- **Update** environment manifests with new image tag (dev overlay for `dev` branch, stage/prod overlays for `main` branch)
 - **Commit** changes back to repository automatically
 - **Security Scan** (Trivy, CodeQL) for vulnerabilities
 

@@ -106,7 +106,7 @@ This document defines the software development lifecycle (SDLC) for DEX, includi
 1. Create or update a GitHub Issue and add it to the GitHub Project board.
 2. Create a feature branch: `git switch -c feat/short-description`.
 3. Implement changes and add tests.
-4. Run local checks: `pytest`, `ruff`, `black --check`, `mypy`.
+4. Run local checks: `pytest`, `ruff check .`, `black --check`, `mypy`.
 5. Open a PR to `dev` and request review.
 6. After validation in dev, open a release PR from `dev` → `main`.
 7. Merge after all required checks pass.
