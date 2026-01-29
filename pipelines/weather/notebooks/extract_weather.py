@@ -6,10 +6,11 @@
 
 # COMMAND ----------
 
-import requests
-from datetime import datetime
-from pyspark.sql import SparkSession
 import logging
+from datetime import datetime
+
+import requests
+from pyspark.sql import SparkSession
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

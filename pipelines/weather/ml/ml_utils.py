@@ -15,36 +15,27 @@ Classes:
 """
 
 import logging
-from typing import Tuple, Dict, Any, List
-from datetime import datetime, timedelta
+from typing import Any
 
-import numpy as np
-from pyspark.sql import SparkSession, DataFrame, Window
+from pyspark.ml import Pipeline, PipelineModel
+from pyspark.ml.evaluation import RegressionEvaluator
+from pyspark.ml.feature import (
+    StandardScaler,
+    VectorAssembler,
+)
+from pyspark.ml.regression import GBTRegressor, RandomForestRegressor
+from pyspark.sql import DataFrame, SparkSession, Window
 from pyspark.sql.functions import (
-    col,
-    lag,
-    lead,
     avg,
-    stddev,
-    max as spark_max,
-    min as spark_min,
-    when,
-    hour,
+    col,
     dayofweek,
     dayofyear,
+    hour,
+    lag,
     month,
+    stddev,
     unix_timestamp,
-    abs as spark_abs,
-    round as spark_round,
 )
-from pyspark.ml import Pipeline, PipelineModel
-from pyspark.ml.feature import (
-    VectorAssembler,
-    StandardScaler,
-    StringIndexer,
-)
-from pyspark.ml.regression import RandomForestRegressor, GBTRegressor
-from pyspark.ml.evaluation import RegressionEvaluator
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +49,7 @@ class WeatherFeatureEngineer:
 
     def create_time_features(self, df: DataFrame) -> DataFrame:
         """Extract time-based features from timestamp."""
-        from pyspark.sql.functions import from_unixtime, unix_timestamp
+        from pyspark.sql.functions import from_unixtime
 
         df = df.withColumn(
             "timestamp_unix",
@@ -77,7 +68,7 @@ class WeatherFeatureEngineer:
         return df
 
     def create_lag_features(
-        self, df: DataFrame, target: str = "temperature", lags: List[int] = None
+        self, df: DataFrame, target: str = "temperature", lags: list[int] = None
     ) -> DataFrame:
         """Create lag features for temporal patterns."""
         if lags is None:
@@ -97,8 +88,8 @@ class WeatherFeatureEngineer:
     def create_rolling_features(
         self,
         df: DataFrame,
-        metrics: List[str] = None,
-        window_sizes: List[int] = None,
+        metrics: list[str] = None,
+        window_sizes: list[int] = None,
     ) -> DataFrame:
         """Create rolling window statistics."""
         if metrics is None:
@@ -149,8 +140,8 @@ class WeatherFeatureEngineer:
         return df
 
     def normalize_features(
-        self, df: DataFrame, feature_cols: List[str]
-    ) -> Tuple[DataFrame, StandardScaler]:
+        self, df: DataFrame, feature_cols: list[str]
+    ) -> tuple[DataFrame, StandardScaler]:
         """Normalize numerical features."""
         assembler = VectorAssembler(inputCols=feature_cols, outputCol="features")
         df = assembler.transform(df)
@@ -200,7 +191,7 @@ class WeatherModelTrainer:
         df: DataFrame,
         model_type: str = "random_forest",
         test_ratio: float = 0.2,
-    ) -> Tuple[PipelineModel, Dict[str, float]]:
+    ) -> tuple[PipelineModel, dict[str, float]]:
         """Train temperature prediction model."""
         # Feature columns (exclude IDs, timestamps, and target)
         feature_cols = [
@@ -275,8 +266,8 @@ class WeatherModelTrainer:
         return model, metrics
 
     def get_feature_importance(
-        self, model: PipelineModel, feature_cols: List[str]
-    ) -> Dict[str, float]:
+        self, model: PipelineModel, feature_cols: list[str]
+    ) -> dict[str, float]:
         """Extract feature importance from trained model."""
         # Get the regressor from pipeline
         regressor = model.stages[-1]
@@ -317,7 +308,7 @@ class WeatherPredictor:
 
         return predictions
 
-    def get_city_forecast(self, df: DataFrame, city: str) -> Dict[str, Any]:
+    def get_city_forecast(self, df: DataFrame, city: str) -> dict[str, Any]:
         """Get forecast for specific city."""
         city_df = df.filter(col("city") == city)
         predictions = self.predict(city_df)

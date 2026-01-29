@@ -6,13 +6,13 @@
 
 # COMMAND ----------
 
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import col
+import logging
+
 from pyspark.ml import Pipeline
+from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.ml.feature import VectorAssembler
 from pyspark.ml.regression import RandomForestRegressor
-from pyspark.ml.evaluation import RegressionEvaluator
-import logging
+from pyspark.sql import SparkSession
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -133,7 +133,7 @@ rmse = evaluator_rmse.evaluate(predictions)
 r2 = evaluator_r2.evaluate(predictions)
 mae = evaluator_mae.evaluate(predictions)
 
-logger.info(f"\n=== MODEL PERFORMANCE ===")
+logger.info("\n=== MODEL PERFORMANCE ===")
 logger.info(f"RMSE (Root Mean Squared Error): {rmse:.4f}°C")
 logger.info(f"MAE (Mean Absolute Error):      {mae:.4f}°C")
 logger.info(f"R² (Coefficient of Determination): {r2:.4f}")
@@ -203,7 +203,7 @@ logger.info(f"✓ Predictions saved to {predictions_table}")
 # COMMAND ----------
 
 logger.info("✓ Model training complete!")
-print(f"\nModel Performance Summary:")
+print("\nModel Performance Summary:")
 print(f"  RMSE: {rmse:.4f}°C")
 print(f"  MAE:  {mae:.4f}°C")
 print(f"  R²:   {r2:.4f}")

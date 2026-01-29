@@ -6,10 +6,11 @@
 
 # COMMAND ----------
 
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, abs, round
-from pyspark.ml import PipelineModel
 import logging
+
+from pyspark.ml import PipelineModel
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import abs, col, round
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -230,10 +231,10 @@ avg_abs_error = predictions.agg({"abs_error": "avg"}).collect()[0][0]
 max_abs_error = predictions.agg({"abs_error": "max"}).collect()[0][0]
 min_abs_error = predictions.agg({"abs_error": "min"}).collect()[0][0]
 
-logger.info(f"\n=== SUMMARY ===")
+logger.info("\n=== SUMMARY ===")
 logger.info(f"Average Absolute Error: {avg_abs_error:.4f}°C")
 logger.info(f"Max Absolute Error:     {max_abs_error:.4f}°C")
 logger.info(f"Min Absolute Error:     {min_abs_error:.4f}°C")
 logger.info(f"Total Predictions:      {predictions.count()}")
 
-print(f"\n✓ Prediction analysis complete")
+print("\n✓ Prediction analysis complete")

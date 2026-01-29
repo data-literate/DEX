@@ -6,21 +6,22 @@
 
 # COMMAND ----------
 
+import logging
+
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import (
-    col,
-    lag,
     avg,
-    stddev,
-    hour,
+    col,
     dayofweek,
     dayofyear,
-    month,
     from_unixtime,
+    hour,
+    lag,
+    month,
+    stddev,
     unix_timestamp,
 )
 from pyspark.sql.window import Window
-import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -1,7 +1,8 @@
-from typing import Iterator
-from contextlib import contextmanager
-import pyodbc
 import os
+from collections.abc import Iterator
+from contextlib import contextmanager
+
+import pyodbc
 from dotenv import load_dotenv
 
 load_dotenv()

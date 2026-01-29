@@ -1,9 +1,12 @@
-import httpx
-import asyncio
-import uvicorn
 import json
-import pandas as pd
 from io import StringIO
+
+import httpx
+import pandas as pd
+import uvicorn
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 """
 async def fetch(url: str) -> httpx.Response:
@@ -32,12 +35,6 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main())
 """
-# Use fastapi to create an API endpoint that fetches stock data and implement retry logic, caching and rate limiting.
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-import httpx
-import asyncio
 
 app = FastAPI()
 app.add_middleware(
@@ -61,7 +58,7 @@ async def get_stock_data(symbol: str):
             json_response = response.to_json(orient="records")
             return JSONResponse(content={"data": json.loads(json_response)})
         except httpx.HTTPError as e:
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 if __name__ == "__main__":

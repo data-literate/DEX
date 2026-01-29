@@ -1,9 +1,9 @@
-# Use this pattern to manage the lifecycle of long-running asynchronous tasks in your application.
-
-from typing import AsyncIterator
-from contextlib import asynccontextmanager
+# Use this pattern to manage the lifecycle of long-running asynchronous
+# tasks in your application.
 
 import asyncio
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 
 @asynccontextmanager

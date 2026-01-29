@@ -1,5 +1,5 @@
 """Weather pipeline module."""
 
-from .core import OpenWeatherPipeline, OpenWeatherAPIClient
+from .core import OpenWeatherAPIClient, OpenWeatherPipeline
 
 __all__ = ["OpenWeatherPipeline", "OpenWeatherAPIClient"]
