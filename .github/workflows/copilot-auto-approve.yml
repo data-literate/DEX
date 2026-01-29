@@ -1,0 +1,63 @@
+name: Auto-Approve
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  auto-approve:
+    name: Auto-Approve if Copilot Satisfied
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check Copilot Review Status
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Fetch all reviews on the PR
+            const reviews = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            // Find Copilot's latest review
+            const copilotReview = reviews.data
+              .filter(r => r.user.login === 'copilot-pull-request-reviewer')
+              .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))[0];
+
+            // Check if Copilot has made any comments (other than the overview)
+            const comments = await github.rest.pulls.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            const copilotComments = comments.data.filter(c => c.user.login === 'Copilot');
+            const hasCopilotComments = copilotComments.length > 0;
+
+            console.log(`Copilot review found: ${copilotReview ? 'yes' : 'no'}`);
+            console.log(`Copilot comments: ${copilotComments.length}`);
+
+            // Only auto-approve if from repo owner AND Copilot has no comments
+            if (context.payload.pull_request.user.login === context.repo.owner &&
+                !hasCopilotComments) {
+              
+              console.log('Approving PR: repo owner + Copilot satisfied');
+              
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                event: 'APPROVE',
+                body: 'Auto-approved: Copilot review satisfied (no comments). Changes approved by repository owner.'
+              });
+            } else {
+              console.log(`Skipping approval - Owner: ${context.payload.pull_request.user.login === context.repo.owner}, Copilot comments: ${hasCopilotComments}`);
+            }
