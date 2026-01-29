@@ -12,7 +12,7 @@ replicas:
 
 images:
   - name: data-literate/dex
-    newTag: latest
+    newTag: v0.1.0
 
 patchesStrategicMerge:
   - deployment.yaml
