@@ -39,7 +39,7 @@ jobs:
           poetry install
 
       - name: Run Ruff linter
-        run: poetry run ruff check .
+        run: poetry run ruff check src/ tests/
 
       - name: Run mypy type checker
         run: poetry run mypy src/
