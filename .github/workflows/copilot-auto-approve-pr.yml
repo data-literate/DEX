@@ -61,7 +61,8 @@ jobs:
             const hasNoNewComments = review.body.includes('generated no new comments') || 
                                      review.body.includes('generated 0 comments');
             
-            // Check if PR is from repository owner
+            // Check if PR is from repository owner (prevents auto-approving external contributions)
+            // Only repository owners should have PRs auto-approved to maintain security
             const isOwner = pr.user.login === context.repo.owner;
             
             console.log(`Has no new comments: ${hasNoNewComments}`);

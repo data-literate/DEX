@@ -46,7 +46,7 @@ poetry run uvicorn dataenginex.main:app --reload
 
 ```bash
 poetry run pytest -v
-poetry run ruff . && poetry run black --check . && poetry run mypy . --ignore-missing-imports
+poetry run ruff check src/ tests/ && poetry run black --check . && poetry run mypy src/ --ignore-missing-imports
 # Or use the poe lint shortcut:
 poe lint
 ```

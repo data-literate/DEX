@@ -66,7 +66,7 @@ poetry run pytest -v
 ### 4. Run Code Quality Checks
 
 ```bash
-poetry run ruff check .
+poetry run ruff check src/ tests/
 poetry run black --check .
 poetry run mypy src/
 ```
@@ -148,7 +148,7 @@ This repository follows a gated workflow: local checks → PR review → automat
 3. Implement changes and add/update tests
 4. Run local checks:
 	- `poetry run pytest -v`
-	- `poetry run ruff check .`
+	- `poetry run ruff check src/ tests/`
 	- `poetry run black --check .`
 	- `poetry run mypy src/`
 5. Open a PR to `dev` and request review (deploys to dev environment)
@@ -174,7 +174,7 @@ poetry run uvicorn dataenginex.main:app --reload
 poetry run pytest -v
 
 # Run all quality checks
-poetry run ruff check .
+poetry run ruff check src/ tests/
 poetry run black --check .
 poetry run mypy src/
 

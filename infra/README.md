@@ -73,10 +73,10 @@ infra/
 
 **deployment.yaml**
 - Replicas: `2` (template default, overridden by overlays)
-- Image: `ghcr.io/data-literate/dex` (tag set by overlays)
+- Image: `data-literate/dex:v1.0.0` (registry and tag set by kustomization)
 - Port: `8000` (HTTP)
-- Probes: Liveness and Readiness (checks `/health` endpoint)
-- Resources: `100m` CPU / `128Mi` memory (requests and limits)
+- Probes: Liveness (`/health`) and Readiness (`/ready`)
+- Resources: Requests: `100m` CPU / `128Mi` memory; Limits: `500m` CPU / `512Mi` memory
 
 **service.yaml**
 - Type: `ClusterIP`
@@ -121,7 +121,8 @@ replicas:
     count: 2
 
 images:
-  - name: ghcr.io/data-literate/dex
+  - name: data-literate/dex
+    newName: ghcr.io/data-literate/dex
     newTag: sha-COMMIT_SHA
 
 namespace: dex-dev
@@ -217,7 +218,7 @@ spec:
 - Push to `main` branch (release)
 
 **CI Workflow Actions** (`.github/workflows/ci.yml`):
-1. **Lint & Test**: `ruff check`, `black --check`, `mypy src/`, `pytest -v`
+1. **Lint & Test**: `ruff check src/ tests/`, `black --check`, `mypy src/`, `pytest -v`
 2. **Build Image**: `docker build -t dex:sha-XXXXXXXX .` (8-char commit SHA)
 3. **Push to Registry**: `docker push ghcr.io/data-literate/dex:sha-XXXXXXXX`
 4. **Trigger CD Workflow**: Via `workflow_run` event
@@ -234,7 +235,8 @@ spec:
 1. **Update Manifest**: Modify `infra/argocd/overlays/dev/kustomization.yaml`
   ```yaml
   images:
-    - name: ghcr.io/data-literate/dex
+    - name: data-literate/dex
+      newName: ghcr.io/data-literate/dex
       newTag: sha-XXXXXXXX
   ```
 2. **Commit & Push**:
@@ -293,13 +295,13 @@ spec:
 
 ## Image Registry Configuration
 
-**Current Registry**: `ghcr.io/data-literate/dex`
+**Current Registry**: `ghcr.io/data-literate` (configured via kustomization overlays)
 
 **To change registry**, update `infra/argocd/base/kustomization.yaml`:
 ```yaml
 images:
-  - name: ghcr.io/data-literate/dex
-    newName: docker.io/myorg/dex  # Change this
+  - name: data-literate/dex
+    newName: docker.io/myorg/dex  # Change registry here
     newTag: v1.0.0
 ```
 
