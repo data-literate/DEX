@@ -1,4 +1,4 @@
-# DEX  DataEngineX
+# DEX — DataEngineX
 
 This repository contains **DEX (DataEngineX)**, a Python-based data engineering and ML platform with **production-ready CI/CD and GitOps automation**.
 
@@ -24,15 +24,15 @@ This repository contains **DEX (DataEngineX)**, a Python-based data engineering 
 
 ```
 DEX/
- src/dataenginex/          # Main application package
- tests/                    # Unit and integration tests
- pipelines/weather/        # Example data pipelines
- learning/                 # Python concept modules
- infra/argocd/             # Kubernetes manifests (GitOps)
- docs/                     # Runbooks and guides
- .github/workflows/        # CI/CD automation
- pyproject.toml            # Poetry configuration
- Dockerfile                # Container image build
+├── src/dataenginex/          # Main application package
+├── tests/                    # Unit and integration tests
+├── pipelines/weather/        # Example data pipelines
+├── learning/                 # Python concept modules
+├── infra/argocd/             # Kubernetes manifests (GitOps)
+├── docs/                     # Runbooks and guides
+├── .github/workflows/        # CI/CD automation
+├── pyproject.toml            # Poetry configuration
+└── Dockerfile                # Container image build
 ```
 
 ## Quick Start (Local)

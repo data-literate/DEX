@@ -50,8 +50,8 @@ graph TB
 ```
 infra/
 ├── README.md                 # This documentation
-├── application.yaml          # ArgoCD Application, ApplicationSet, and AppProject manifests
 └── argocd/
+    ├── application.yaml      # ArgoCD Application, ApplicationSet, and AppProject manifests
     ├── base/                 # Shared base manifests (all environments)
     │   ├── deployment.yaml   # Deployment with probes and resource limits
     │   ├── service.yaml      # ClusterIP service exposing port 8000
@@ -384,7 +384,7 @@ echo "Admin password: $ADMIN_PASSWORD"
 
 ```bash
 # Apply ArgoCD resources (Application, ApplicationSet, AppProject)
-kubectl apply -f infra/application.yaml
+kubectl apply -f infra/argocd/application.yaml
 
 # Verify Applications created
 kubectl get applications -n argocd
