@@ -1,3 +1,5 @@
+"""Tests for main FastAPI application."""
+
 from fastapi.testclient import TestClient
 
 from dataenginex.main import app
@@ -5,13 +7,30 @@ from dataenginex.main import app
 client = TestClient(app)
 
 
-def test_root():
+def test_root() -> None:
+    """Test root endpoint."""
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {"message": "DataEngineX API", "version": "0.1.0"}
+    data = response.json()
+    assert data["message"] == "DataEngineX API"
+    assert "version" in data
+    assert data["version"] == app.version
+    # Verify request ID is added by middleware
+    assert "X-Request-ID" in response.headers
 
 
-def test_health():
+def test_health() -> None:
+    """Test health check endpoint."""
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "healthy"}
+    assert "X-Request-ID" in response.headers
+
+
+def test_readiness() -> None:
+    """Test readiness check endpoint."""
+    response = client.get("/ready")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ready"}
+    assert "X-Request-ID" in response.headers
+
