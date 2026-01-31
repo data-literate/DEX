@@ -1,9 +1,6 @@
 """Tests for structured logging configuration."""
 
-import logging
-from unittest.mock import patch
 
-import pytest
 import structlog
 
 from dataenginex.logging_config import (
@@ -11,7 +8,6 @@ from dataenginex.logging_config import (
     APP_VERSION,
     add_app_context,
     configure_logging,
-    get_logger,
 )
 
 
