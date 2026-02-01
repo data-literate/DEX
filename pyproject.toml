@@ -61,7 +61,7 @@ python-json-logger = "^2.0.7"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.2"
-pytest-cov = "^3.0.0"
+pytest-cov = "^7.0.0"
 ipykernel = "^7.1.0"
 poethepoet = "^0.40.0"
 # runtime packages used across the repo that mypy expected
