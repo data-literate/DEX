@@ -4,10 +4,13 @@ from contextlib import asynccontextmanager
 
 import structlog
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 
 from dataenginex.logging_config import APP_VERSION, configure_logging
+from dataenginex.metrics import get_metrics
+from dataenginex.metrics_middleware import PrometheusMetricsMiddleware
 from dataenginex.middleware import RequestLoggingMiddleware
+from dataenginex.tracing import configure_tracing, instrument_fastapi
 
 # Configure logging on startup
 log_level = os.getenv("LOG_LEVEL", "INFO")
@@ -15,6 +18,11 @@ json_logs = os.getenv("LOG_FORMAT", "json") == "json"
 configure_logging(log_level=log_level, json_logs=json_logs)
 
 logger = structlog.get_logger(__name__)
+
+# Configure tracing
+otlp_endpoint = os.getenv("OTLP_ENDPOINT")  # e.g., "http://localhost:4317"
+enable_console_traces = os.getenv("ENABLE_CONSOLE_TRACES", "false").lower() == "true"
+configure_tracing(otlp_endpoint=otlp_endpoint, enable_console_export=enable_console_traces)
 
 
 @asynccontextmanager
@@ -29,8 +37,19 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(title="DataEngineX", version=APP_VERSION, lifespan=lifespan)
 
-# Add request logging middleware
-app.add_middleware(RequestLoggingMiddleware)
+# Instrument FastAPI with OpenTelemetry
+instrument_fastapi(app)
+
+# Add middleware (order matters - outer to inner)
+app.add_middleware(RequestLoggingMiddleware)  # Logging
+app.add_middleware(PrometheusMetricsMiddleware)  # Metrics
+
+
+@app.get("/metrics")
+async def metrics() -> Response:
+    """Prometheus metrics endpoint."""
+    data, content_type = get_metrics()
+    return Response(content=data, media_type=content_type)
 
 
 @app.get("/")

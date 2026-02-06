@@ -34,3 +34,13 @@ def test_readiness() -> None:
     assert response.json() == {"status": "ready"}
     assert "X-Request-ID" in response.headers
 
+
+def test_metrics_endpoint() -> None:
+    """Test Prometheus metrics endpoint."""
+    response = client.get("/metrics")
+    assert response.status_code == 200
+    assert "text/plain" in response.headers["content-type"]
+    # Check for some expected Prometheus metrics format
+    content = response.text
+    assert "# HELP" in content or "# TYPE" in content or "python_info" in content
+
