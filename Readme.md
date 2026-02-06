@@ -1,41 +1,58 @@
 # DEX — DataEngineX
 
-This repository contains **DEX (DataEngineX)**, a Python-based data engineering and ML platform with **production-ready CI/CD and GitOps automation**.
+**Production-ready data engineering and ML platform** with FastAPI, automated CI/CD, and GitOps deployment.
 
-## Quick Links
-- **Local Development**: See [Quick Start](#quick-start-local) below
-- **Infrastructure & Kubernetes**: See [infra/README.md](infra/README.md)
-- **Contributing**: See [CONTRIBUTING.md](CONTRIBUTING.md)
+---
 
-## Project Stack
+## 🚀 Quick Start
+
+**New to DEX?** Start here:
+1. **[Quick Start Guide](#quick-start-local)** - Run locally in 5 minutes
+2. **[Documentation Hub](docs/README.md)** - Complete documentation index
+3. **[Contributing Guide](CONTRIBUTING.md)** - Development workflow
+
+**Key Documentation:**
+- **[CI/CD Pipeline](docs/CI_CD.md)** - Complete automation guide
+- **[Infrastructure](infra/README.md)** - Kubernetes and ArgoCD
+- **[Deployment Runbook](docs/DEPLOY_RUNBOOK.md)** - Deploy and rollback procedures
+
+---
+
+## 📋 Tech Stack
 
 | Component | Technology |
 |---|---|
-| Language | Python 3.11+ |
-| Package Manager | Poetry |
-| Web API | FastAPI with Uvicorn |
-| Code Quality | Ruff, Black, MyPy |
-| Testing | Pytest |
-| **Container** | **Docker, ghcr.io registry** |
-| **Kubernetes** | **ArgoCD, Kustomize, Multi-environment** |
-| **CI/CD** | **GitHub Actions (fully automated)** |
+| **Language** | Python 3.11+ |
+| **Package Manager** | Poetry |
+| **Web Framework** | FastAPI + Uvicorn |
+| **Code Quality** | Ruff, Black, Mypy |
+| **Testing** | Pytest with coverage |
+| **Observability** | Prometheus, OpenTelemetry, Structlog |
+| **Containers** | Docker → ghcr.io |
+| **Orchestration** | Kubernetes + Kustomize |
+| **GitOps** | ArgoCD (auto-sync) |
+| **CI/CD** | GitHub Actions |
 
-## Repository Structure
+---
+
+## 📁 Repository Structure
 
 ```
 DEX/
-├── src/dataenginex/          # Main application package
-├── tests/                    # Unit and integration tests
+├── src/dataenginex/          # FastAPI application
+├── tests/                    # Unit & integration tests
 ├── pipelines/weather/        # Example data pipelines
-├── learning/                 # Python concept modules
 ├── infra/argocd/             # Kubernetes manifests (GitOps)
-├── docs/                     # Runbooks and guides
+├── docs/                     # Documentation
 ├── .github/workflows/        # CI/CD automation
-├── pyproject.toml            # Poetry configuration
-└── Dockerfile                # Container image build
+├── scripts/                  # Development scripts
+├── pyproject.toml            # Dependencies & config
+└── Dockerfile                # Container build
 ```
 
-## Quick Start (Local)
+---
+
+## 🚀 Quick Start (Local)
 
 ### Prerequisites
 - Git, Python 3.11+, Poetry
@@ -73,25 +90,44 @@ poetry run mypy src/
 
 ## CI/CD Pipeline Overview
 
-Every commit to `main` or `dev` triggers an automated pipeline:
+```mermaid
+flowchart LR
+    subgraph "Developer"
+        Code[Write Code] --> PR[Create PR]
+    end
+    
+    subgraph "GitHub Actions"
+        PR --> CI[CI: Lint/Test/Build]
+        CI --> CD[CD: Push Image]
+        CD --> Update[Update Manifests]
+    end
+    
+    subgraph "ArgoCD"
+        Update --> Argo[Detect Git Change]
+        Argo --> Sync[Sync to K8s]
+    end
+    
+    subgraph "Kubernetes"
+        Sync --> Dev[dex-dev]
+        Sync --> Stage[dex-stage]
+        Sync --> Prod[dex-prod]
+    end
+    
+    style CI fill:#e1f5ff
+    style CD fill:#fff3cd
+    style Argo fill:#d4edda
+    style Dev fill:#d4edda
+    style Stage fill:#d4edda
+    style Prod fill:#d4edda
+```
 
-### 1. **CI Workflow** (Continuous Integration)
-- **Lint** (ruff, black, mypy) → catch code quality issues
-- **Test** (pytest) → run unit and integration tests
-- **Build** Docker image with commit SHA tag (`sha-{commit}`)
-- **Push** to `ghcr.io/data-literate/dex`
+Every commit triggers automated CI → CD → deployment:
 
-### 2. **CD Workflow** (Continuous Deployment)
-- **Update** environment manifests with new image tag (dev overlay for `dev` branch, stage/prod overlays for `main` branch)
-- **Commit** changes back to repository automatically
-- **Security Scan** (Trivy, CodeQL) for vulnerabilities
+- **CI**: Lint, test, security scan ✓ Build image → `ghcr.io/data-literate/dex:sha-XXXXXXXX`
+- **CD**: Update environment manifests → Commit to git with `[skip ci]`
+- **ArgoCD**: Detect git changes → Sync to Kubernetes clusters
 
-### 3. **ArgoCD Auto-Sync**
-- **Detects** git changes to manifests
-- **Syncs** to Kubernetes (dev → stage → prod)
-- **Validates** deployment health
-
-See [infra/README.md](infra/README.md) for detailed architecture.
+**For detailed pipeline documentation**, see [docs/CI_CD.md](docs/CI_CD.md)
 
 ## Multi-Environment Deployment
 
@@ -127,15 +163,25 @@ kubectl port-forward svc/argocd-server -n argocd 8080:443
 
 See [docs/LOCAL_K8S_SETUP.md](docs/LOCAL_K8S_SETUP.md) for detailed setup instructions.
 
-## Documentation
+---
 
-**Core Documentation:**
-- **[docs/README.md](docs/README.md)**  Start here: repository tour, workflows, and key references
-- **[infra/README.md](infra/README.md)**  Kubernetes architecture, kustomize overlays, ArgoCD workflows
-- **[CONTRIBUTING.md](CONTRIBUTING.md)**  Development workflow and PR process
-- **[docs/SDLC.md](docs/SDLC.md)**  Software development lifecycle and branching strategy
-- **[docs/DEPLOY_RUNBOOK.md](docs/DEPLOY_RUNBOOK.md)**  Release and rollback runbook
-- **[docs/monitoring.md](docs/monitoring.md)**  Monitoring and alerting setup
+## 📚 Documentation
+
+**Start Here:**
+- **[Documentation Hub](docs/README.md)** - Complete documentation index
+
+**Core Guides:**
+- **[CI/CD Pipeline](docs/CI_CD.md)** - Automated build, test, deploy
+- **[Infrastructure Setup](infra/README.md)** - Kubernetes & ArgoCD
+- **[Deployment Runbook](docs/DEPLOY_RUNBOOK.md)** - Deploy & rollback
+- **[Observability](docs/OBSERVABILITY.md)** - Metrics, logs, traces
+
+**Development:**
+- **[Contributing Guide](CONTRIBUTING.md)** - Development workflow
+- **[SDLC](docs/SDLC.md)** - Software lifecycle stages
+- **[Local K8s Setup](docs/LOCAL_K8S_SETUP.md)** - Test ArgoCD locally
+
+---
 
 ## Development Workflow
 

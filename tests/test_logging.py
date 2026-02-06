@@ -1,6 +1,5 @@
 """Tests for structured logging configuration."""
 
-
 import structlog
 
 from dataenginex.logging_config import (

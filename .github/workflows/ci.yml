@@ -41,6 +41,9 @@ jobs:
       - name: Run Ruff linter
         run: poetry run ruff check src/ tests/
 
+      - name: Run Black formatter check
+        run: poetry run black --check src/ tests/
+
       - name: Run mypy type checker
         run: poetry run mypy src/
         continue-on-error: true

@@ -2,166 +2,257 @@
 
 This folder contains CI/CD automation for DEX.
 
+> **📖 Full Documentation**: See [docs/CI_CD.md](../../docs/CI_CD.md) for comprehensive CI/CD pipeline documentation.
+
+## Workflow Architecture
+
+```mermaid
+graph TB
+    subgraph "Triggers"
+        PR[Pull Request]
+        PushDev[Push to dev]
+        PushMain[Push to main]
+        Label[PR + preview label]
+    end
+    
+    subgraph "CI Workflows"
+        CI[ci.yml<br/>Lint & Test]
+        Security[security.yml<br/>CodeQL & Semgrep]
+    end
+    
+    subgraph "CD Workflows"
+        CD[cd.yml<br/>Build & Deploy]
+        Preview[pr-preview.yaml<br/>Preview Env]
+    end
+    
+    subgraph "Outputs"
+        GHCR[ghcr.io<br/>Container Registry]
+        DevK8s[dex-dev]
+        StageK8s[dex-stage]
+        ProdK8s[dex-prod]
+        PreviewK8s[dex-pr-###]
+    end
+    
+    PR --> CI
+    PR --> Security
+    PushDev --> CI
+    PushMain --> CI
+    
+    CI -->|Success| CD
+    PushDev --> CD
+    PushMain --> CD
+    
+    Label --> Preview
+    
+    CD --> GHCR
+    CD -->|dev branch| DevK8s
+    CD -->|main branch| StageK8s
+    CD -->|main branch| ProdK8s
+    
+    Preview --> GHCR
+    Preview --> PreviewK8s
+    
+    style CI fill:#e1f5ff
+    style Security fill:#e1f5ff
+    style CD fill:#fff3cd
+    style Preview fill:#fff3cd
+    style GHCR fill:#d4edda
+    style DevK8s fill:#d4edda
+    style StageK8s fill:#d4edda
+    style ProdK8s fill:#d4edda
+    style PreviewK8s fill:#d4edda
+```
+
 ## Workflows
 
-### `ci-cd.yaml` - Main CI/CD Pipeline
-**Triggers**: Push to `main` or `develop`, Pull Requests
+### `ci.yml` - Continuous Integration
+**Triggers**: Push to `main`/`dev`, Pull Requests
 
 **Jobs**:
-1. **lint-and-test**
-   - Runs ruff linter
-   - Runs mypy type checking
-   - Runs pytest with coverage
-   - Uploads coverage report
+- **lint-and-test**: Runs ruff, mypy, pytest with coverage
 
-2. **build-and-push** (only on push to main/develop)
-   - Builds Docker image with SHA tag (`sha-XXXXXXXX`)
-   - Pushes to GitHub Container Registry (`ghcr.io`)
-   - Tags: `sha-XXXXXXXX`, `latest` (main branch only)
+**Required for merge**: ✅ All checks must pass
 
-3. **update-dev-manifest** (only on push to main)
-   - Updates `infra/argocd/overlays/dev/kustomization.yaml` with new image tag
-   - Commits changes back to repo (triggers ArgoCD sync)
-   - Uses `[skip ci]` to avoid recursive builds
+---
 
-4. **security-scan**
-   - Runs Trivy vulnerability scanner on built image
-   - Uploads SARIF results to GitHub Security tab
+### `cd.yml` - Continuous Deployment
+**Triggers**: After successful CI on `main` or `dev` branches
+
+**Jobs**:
+1. **build-and-push**: Builds Docker image with SHA tag → ghcr.io
+2. **update-dev-manifest**: Updates dev kustomization (dev branch only)
+3. **update-stage-prod-manifest**: Updates stage/prod kustomization (main branch only)
+4. **security-scan**: Runs Trivy vulnerability scanner
+
+**Image Tags**: `sha-XXXXXXXX` (immutable), `latest` (main only)
+
+---
 
 ### `pr-preview.yaml` - PR Preview Environments
 **Triggers**: PR with `preview` label
 
 **Jobs**:
-1. **check-preview-label**
-   - Checks if PR has `preview` label
-   - Only deploys if label exists
+1. **check-preview-label**: Verifies preview label exists
+2. **build-preview**: Builds image and comments on PR
 
-2. **build-preview**
-   - Builds Docker image with PR-specific tag
-   - Tags: `sha-XXXXXXXX`, `pr-###`
-   - Comments on PR with deployment details
-   - ArgoCD automatically creates `dex-pr-###` namespace
+**Usage**:
+```bash
+gh pr edit <pr-number> --add-label preview
+```
 
-## Required Secrets
+**Namespace**: `dex-pr-###` (auto-created by ArgoCD)
 
-### Repository Secrets
-- `GITHUB_TOKEN` - Automatically provided by GitHub Actions (no setup needed)
+---
 
-### Optional Secrets
-- `SONAR_TOKEN` - For SonarCloud integration
-- `SLACK_WEBHOOK_URL` - For deployment notifications
+### `security.yml` - Security Scans
+**Triggers**: Push to `main`/`dev`, Pull Requests
+
+**Jobs**:
+- **CodeQL**: Static analysis for vulnerabilities
+- **Semgrep**: OWASP Top 10 checks
+
+**Results**: GitHub Security tab
+
+---
+---
 
 ## Image Registry
 
-All images are pushed to:
-```
-ghcr.io/data-literate/dex:TAG
-```
+**Registry**: `ghcr.io/data-literate/dex`
 
-### Image Tags
+**Image Tags**:
 - `sha-XXXXXXXX` - Immutable SHA tag (8 characters)
 - `latest` - Latest main branch build
 - `pr-###` - PR-specific preview builds
 
-## ArgoCD Integration
+---
 
-### Dev Environment Auto-Deployment
-1. CI builds image: `ghcr.io/data-literate/dex:sha-abc12345`
-2. CI updates `infra/argocd/overlays/dev/kustomization.yaml`:
-   ```yaml
-   images:
-     - name: data-literate/dex
-       newTag: sha-abc12345
-   ```
-3. CI commits change with `[skip ci]` message
-4. ArgoCD detects git change → syncs dev environment
+## GitOps Flow
 
-### PR Preview Auto-Deployment
-1. Add `preview` label to PR
-2. CI builds image: `ghcr.io/data-literate/dex:sha-xyz67890`
-3. ArgoCD ApplicationSet (PR generator) detects PR
-4. ArgoCD creates `dex-pr-42` Application
-5. Deploys to `dex-pr-42` namespace
-6. Auto-cleanup when PR closes
+```mermaid
+sequenceDiagram
+    participant Dev as Developer
+    participant GH as GitHub
+    participant CI as CI
+    participant CD as CD
+    participant GHCR as ghcr.io
+    participant Argo as ArgoCD
+    participant K8s as Kubernetes
+    
+    Dev->>GH: Push to dev/main
+    GH->>CI: Run lint & test
+    CI-->>GH: ✓ Passed
+    GH->>CD: Trigger CD
+    CD->>GHCR: Build & push image (sha-XXXXXXXX)
+    CD->>GH: Update kustomization.yaml [skip ci]
+    GH->>Argo: Git change detected
+    Argo->>K8s: Sync environment
+    K8s-->>Dev: ✓ Deployed
+```
 
-## Usage
+### Dev Deployment (Automatic)
+```
+PR merged to dev → CI passes → CD builds image → CD updates dev/kustomization.yaml → ArgoCD syncs dex-dev
+```
 
-### Enable PR Preview
+### Stage/Prod Deployment (Automatic)
+```
+PR merged to main → CI passes → CD builds image → CD updates stage+prod/kustomization.yaml → ArgoCD syncs
+```
+
+### Manual Promotion (Alternative)
 ```bash
-# Add preview label via GitHub UI or:
+# Use promotion script
+.\scripts\promote.ps1 -FromEnv stage -ToEnv prod -ImageTag sha-abc12345
+```
+
+---
+
+## Quick Reference
+
+```bash
+# Check CI status
+gh pr checks <pr-number>
+
+# View workflow runs
+gh run list --workflow ci.yml
+
+# View logs
+gh run view <run-id> --log
+
+# Enable preview environment
 gh pr edit <pr-number> --add-label preview
+
+# Monitor ArgoCD deployment
+argocd app get dex-dev
+kubectl get pods -n dex-dev
 ```
 
-### Manual Promotion (Stage/Prod)
-```bash
-# After dev deployment succeeds, promote to stage:
-IMAGE_TAG="sha-abc12345"
+---
 
-# Update stage overlay
-sed -i "s|newTag:.*|newTag: $IMAGE_TAG|g" infra/argocd/overlays/stage/kustomization.yaml
+## Required Secrets
 
-# Create promotion PR
-git checkout -b promote-stage-$IMAGE_TAG
-git add infra/argocd/overlays/stage/kustomization.yaml
-git commit -m "chore: promote $IMAGE_TAG to stage"
-git push origin promote-stage-$IMAGE_TAG
+**Repository Secrets**:
+- `GITHUB_TOKEN` - Auto-provided by GitHub Actions
 
-# Create PR for review → merge → ArgoCD syncs stage
+**No additional secrets needed** for basic CI/CD operation.
 
-# Same process for prod (requires manual ArgoCD sync)
-```
+---
 
 ## Troubleshooting
 
-### Image not updating in dev
-- Check workflow run: `gh run list --workflow ci-cd.yaml`
-- Verify commit exists: `git log infra/argocd/overlays/dev/kustomization.yaml`
-- Verify image in registry: `docker pull ghcr.io/data-literate/dex:sha-XXXXXXXX`
-
-### PR preview not deploying
-- Verify `preview` label exists on PR
-- Check ArgoCD ApplicationSet: `kubectl get applicationset -n argocd`
-- Check PR generator events: `argocd appset get dex-pr-preview -n argocd`
-
-### Permission errors
-- Verify `GITHUB_TOKEN` has `packages: write` permission
-- Check GitHub Actions settings → Workflow permissions → Read and write
-
-## Local Testing
-
-### Test Docker build
-```bash
-docker build -t dex:local .
-docker run -p 8000:8000 dex:local
+```mermaid
+graph TD
+    Issue[CI/CD Issue] --> Type{Issue Type?}
+    
+    Type -->|CI Failure| CheckCI[Check CI logs]
+    CheckCI --> LocalTest[\"Run locally: lint-check.ps1\"]
+    LocalTest --> FixCode[Fix code issues]
+    FixCode --> Push[Push changes]
+    
+    Type -->|CD Not Triggering| CheckWorkflow[\"Check: gh run list\"]
+    CheckWorkflow --> VerifyCI[Verify CI passed first]
+    VerifyCI --> CheckTrigger[Check workflow_run trigger]
+    
+    Type -->|Image Not Deploying| CheckKust[Check kustomization.yaml updated]
+    CheckKust --> CheckArgo[\"argocd app get dex-env\"]
+    CheckArgo --> CheckImage[\"docker pull ghcr.io/.../sha-XXX\"]
+    CheckImage --> ForceSync[\"argocd app sync --force\"]
+    
+    Push --> End[✓ Resolved]
+    CheckTrigger --> End
+    ForceSync --> End
+    
+    style Issue fill:#f8d7da
+    style End fill:#d4edda
 ```
 
-### Test kustomize updates
+### CI Failures
 ```bash
-# Preview changes
-kustomize build infra/argocd/overlays/dev
+# Run lint locally
+poetry run ruff check src/ tests/
+poetry run mypy src/
+poetry run pytest tests/
 
-# Apply locally
-kubectl apply -k infra/argocd/overlays/dev
+# Or use automation
+.\scripts\lint-check.ps1
 ```
 
-### Test CI workflow locally (act)
-```bash
-# Install act: https://github.com/nektos/act
-act push --workflows .github/workflows/ci-cd.yaml
-```
+### CD Not Triggering
+- Verify CI passed successfully
+- Check workflow_run trigger in cd.yml
+- View workflow runs: `gh run list`
 
-## Best Practices
+### Image Not Deploying
+- Check kustomization.yaml updated: `git log infra/argocd/overlays/dev/kustomization.yaml`
+- Verify ArgoCD sync: `argocd app get dex-dev`
+- Check image exists: `docker pull ghcr.io/data-literate/dex:sha-XXXXXXXX`
 
-1. **Always use SHA tags** - Immutable, traceable, promotable
-2. **Use `[skip ci]` in manifest updates** - Avoid recursive builds
-3. **Add `preview` label selectively** - Preview envs cost resources
-4. **Clean up old images** - Use GHCR retention policies (30 days)
-5. **Review security scan results** - Check GitHub Security tab regularly
+---
 
-## Future Enhancements
+## Related Documentation
 
-- [ ] SonarCloud quality gates
-- [ ] Slack/Discord deployment notifications
-- [ ] Automated rollback on failed health checks
-- [ ] Canary deployments for prod
-- [ ] E2E smoke tests before promotion
+- **[CI/CD Pipeline Guide](../../docs/CI_CD.md)** - Complete pipeline documentation
+- **[SDLC](../../docs/SDLC.md)** - Development lifecycle
+- **[Deploy Runbook](../../docs/DEPLOY_RUNBOOK.md)** - Release procedures
+- **[Infrastructure](../../infra/README.md)** - GitOps and ArgoCD setup
