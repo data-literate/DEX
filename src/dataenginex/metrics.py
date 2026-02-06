@@ -1,7 +1,13 @@
 """Prometheus metrics configuration for DataEngineX."""
 
-from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
-from prometheus_client import REGISTRY
+from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    REGISTRY,
+    Counter,
+    Gauge,
+    Histogram,
+    generate_latest,
+)
 
 # Request metrics
 http_requests_total = Counter(

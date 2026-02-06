@@ -1,15 +1,16 @@
 """OpenTelemetry tracing configuration for DataEngineX."""
 
 import os
-from typing import Optional
 
+from fastapi import FastAPI
 from opentelemetry import trace
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
+    OTLPSpanExporter,
+)
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
-from fastapi import FastAPI
 
 from dataenginex.logging_config import APP_NAME, APP_VERSION
 
@@ -17,7 +18,7 @@ from dataenginex.logging_config import APP_NAME, APP_VERSION
 def configure_tracing(
     service_name: str = APP_NAME,
     service_version: str = APP_VERSION,
-    otlp_endpoint: Optional[str] = None,
+    otlp_endpoint: str | None = None,
     enable_console_export: bool = False,
 ) -> TracerProvider:
     """

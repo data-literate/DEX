@@ -43,4 +43,3 @@ def test_metrics_endpoint() -> None:
     # Check for some expected Prometheus metrics format
     content = response.text
     assert "# HELP" in content or "# TYPE" in content or "python_info" in content
-

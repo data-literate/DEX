@@ -37,7 +37,9 @@ class PrometheusMetricsMiddleware(BaseHTTPMiddleware):
             status = response.status_code
 
             # Record request metrics
-            http_requests_total.labels(method=method, endpoint=path, status=status).inc()
+            http_requests_total.labels(
+                method=method, endpoint=path, status=status
+            ).inc()
 
             return response
 

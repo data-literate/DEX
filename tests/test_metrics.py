@@ -1,5 +1,7 @@
 """Tests for Prometheus metrics."""
 
+import contextlib
+
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -19,7 +21,8 @@ def test_get_metrics() -> None:
 
     assert isinstance(data, bytes)
     assert "text/plain" in content_type
-    assert b"http_requests_total" in data or b"python_info" in data  # At least some metric
+    # At least some metric
+    assert b"http_requests_total" in data or b"python_info" in data
 
 
 def test_metrics_middleware_success() -> None:
@@ -86,10 +89,8 @@ def test_metrics_middleware_tracks_exceptions() -> None:
     )._value.get()
 
     # Make request that raises exception
-    try:
+    with contextlib.suppress(ValueError):
         client.get("/error")
-    except ValueError:
-        pass
 
     # Check exception was tracked
     final_exceptions = http_exceptions_total.labels(

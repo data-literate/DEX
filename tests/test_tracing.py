@@ -5,7 +5,6 @@ from unittest.mock import patch
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from opentelemetry import trace
 
 from dataenginex.tracing import configure_tracing, get_tracer, instrument_fastapi
 
@@ -19,7 +18,7 @@ def test_configure_tracing() -> None:
     )
 
     assert provider is not None
-    # Note: TracerProvider can only be set once globally, so we just verify it was created
+    # TracerProvider can only be set once globally, verify it was created
     assert hasattr(provider, "add_span_processor")
 
 

@@ -22,7 +22,9 @@ logger = structlog.get_logger(__name__)
 # Configure tracing
 otlp_endpoint = os.getenv("OTLP_ENDPOINT")  # e.g., "http://localhost:4317"
 enable_console_traces = os.getenv("ENABLE_CONSOLE_TRACES", "false").lower() == "true"
-configure_tracing(otlp_endpoint=otlp_endpoint, enable_console_export=enable_console_traces)
+configure_tracing(
+    otlp_endpoint=otlp_endpoint, enable_console_export=enable_console_traces
+)
 
 
 @asynccontextmanager
