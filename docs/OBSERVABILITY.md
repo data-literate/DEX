@@ -1,8 +1,28 @@
-# Observability: Metrics & Tracing
+# Observability: Metrics, Logging & Tracing
+
+**Complete guide to monitoring, debugging, and understanding DataEngineX in production.**
+
+> **Quick Links:** [Metrics](#prometheus-metrics) · [Tracing](#opentelemetry-tracing) · [Logging](#structured-logging) · [Local Testing](#local-testing) · [Troubleshooting](#troubleshooting)
+
+---
+
+## 📋 Table of Contents
+
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Prometheus Metrics](#prometheus-metrics)
+- [OpenTelemetry Tracing](#opentelemetry-tracing)
+- [Structured Logging](#structured-logging)
+- [Local Testing](#local-testing)
+- [Kubernetes Integration](#kubernetes-integration)
+- [Troubleshooting](#troubleshooting)
+- [Related Documentation](#related-documentation)
+
+---
 
 ## Overview
 
-DataEngineX implements comprehensive observability using **Prometheus** for metrics and **OpenTelemetry** for distributed tracing.
+DataEngineX implements comprehensive observability using **Prometheus** for metrics, **OpenTelemetry** for distributed tracing, and **Structlog** for structured logging.
 
 ## Architecture
 
@@ -677,3 +697,20 @@ Run observability tests:
 ```bash
 poetry run pytest tests/test_metrics.py tests/test_tracing.py -v
 ```
+
+---
+
+## Related Documentation
+
+**Deployment & Operations:**
+- **[CI/CD Pipeline](CI_CD.md)** - Automated deployments
+- **[Deployment Runbook](DEPLOY_RUNBOOK.md)** - Deploy procedures
+- **[Infrastructure](../infra/README.md)** - Kubernetes setup
+
+**Development:**
+- **[SDLC](SDLC.md)** - Development workflow
+- **[Contributing](../CONTRIBUTING.md)** - Contribution guide
+
+---
+
+**[← Back to Documentation Hub](README.md)**

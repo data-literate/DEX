@@ -1,61 +1,80 @@
-# DEX Documentation Guide (Start Here)
+# 📚 DEX Documentation Hub
 
-This page is the entry point for developers. It explains how the repo is organized, how work flows from code to deployment, and where to find deeper documentation.
+**Welcome to DataEngineX documentation!** This page helps you find what you need quickly.
 
-## What This Repo Does
+---
 
-DEX (DataEngineX) is a Python platform that ships a FastAPI service and supports ML/data pipelines with a production-grade CI/CD + GitOps deployment flow.
+## 🎯 Quick Navigation
 
-## How Changes Flow (High Level)
+### 👋 New to DEX?
+**Start here in order:**
+1. **[Main README](../Readme.md)** - Project overview and quick start
+2. **[Contributing Guide](../CONTRIBUTING.md)** - How to contribute
+3. **[SDLC](SDLC.md)** - Development workflow and stages
 
-```mermaid
-graph LR
-    Feature["feature/* branch"] --> DevPR["PR → dev"]
-    DevPR --> DevCI["CI: lint/test/build"]
-    DevCI --> DevCD["CD: update dev overlay (dev branch)"]
-    DevCD --> DevApp["ArgoCD syncs dex-dev"]
-    DevApp --> ReleasePR["Release PR: dev → main"]
-    ReleasePR --> MainCI["CI: lint/test/build"]
-    MainCI --> MainCD["CD: update stage/prod overlays (main)"]
-    MainCD --> StageProd["ArgoCD syncs dex-stage + dex-prod"]
+### 🏗️ Setting Up
+- **[CI/CD Pipeline](CI_CD.md)** - Complete automation guide
+- **[Infrastructure Setup](../infra/README.md)** - Kubernetes & ArgoCD configuration
+- **[Local K8s Setup](LOCAL_K8S_SETUP.md)** - Test deployments locally
+
+### 🚀 Deploying
+- **[Deployment Runbook](DEPLOY_RUNBOOK.md)** - Release and rollback procedures
+- **[CI/CD Pipeline](CI_CD.md)** - Automated deployment flows
+
+### 📊 Monitoring & Debugging
+- **[Observability](OBSERVABILITY.md)** - Metrics, logging, and tracing
+- **[Architecture](ARCHITECTURE.md)** - System design and components
+
+### 🛠️ Project Management
+- **[Project Management](PROJECT_MANAGEMENT.md)** - GitHub Issues, Projects, and workflow
+
+---
+
+## 📖 Documentation by Topic
+
+### Development
+```
+SDLC.md                    - Software development lifecycle
+CONTRIBUTING.md            - Contribution guidelines
+ARCHITECTURE.md            - System architecture
 ```
 
-## Repository Tour
-
+### Deployment
 ```
-root/
-├── src/dataenginex/          # FastAPI app and core code
-├── pipelines/                # Example data/ML pipelines
-├── workflows/                # Workflow definitions
-├── infra/                    # Kubernetes + ArgoCD GitOps manifests
-├── .github/workflows/        # CI/CD workflows
-├── docs/                     # Documentation (this folder)
-└── tests/                    # Unit/integration tests
+CI_CD.md                   - CI/CD pipeline (comprehensive)
+DEPLOY_RUNBOOK.md          - Deployment procedures
+../infra/README.md         - Infrastructure & GitOps
+LOCAL_K8S_SETUP.md         - Local testing guide
 ```
 
-## Common Tasks
-
-### Run Locally
-
-```bash
-poetry install
-poetry run uvicorn dataenginex.main:app --reload
+### Operations
+```
+OBSERVABILITY.md           - Metrics, logs, traces (consolidated)
+PROJECT_MANAGEMENT.md      - Issue tracking & project workflow
 ```
 
-### Run Quality Checks
+---
 
-```bash
-poetry run pytest -v
-poetry run ruff check src/ tests/ && poetry run black --check . && poetry run mypy src/ --ignore-missing-imports
-# Or use the poe lint shortcut:
-poe lint
-```
+## 🔍 Find by Task
 
-## Where To Go Next
+| I want to... | Go to... |
+|---|---|
+| Run the app locally | [Main README → Quick Start](../Readme.md#quick-start-local) |
+| Understand CI/CD | [CI/CD Pipeline](CI_CD.md) |
+| Deploy to production | [Deployment Runbook](DEPLOY_RUNBOOK.md) |
+| Set up monitoring | [Observability](OBSERVABILITY.md) |
+| Contribute code | [Contributing Guide](../CONTRIBUTING.md) |
+| Understand architecture | [Architecture](ARCHITECTURE.md) |
+| Test with Kubernetes | [Local K8s Setup](LOCAL_K8S_SETUP.md) |
+| Track issues/milestones | [Project Management](PROJECT_MANAGEMENT.md) |
 
-- [README](../Readme.md) — quick start and developer workflow
-- [SDLC](SDLC.md) — lifecycle stages, gates, and artifacts
-- [Infrastructure Guide](../infra/README.md) — GitOps, ArgoCD, Kustomize
-- [Local K8s Setup](LOCAL_K8S_SETUP.md) — run ArgoCD locally
-- [Deploy Runbook](DEPLOY_RUNBOOK.md) — release + rollback
-- [Monitoring](monitoring.md) — metrics, logs, traces
+---
+
+## 📁 Documentation Standards
+
+All documentation follows these principles:
+- **Single source of truth**: No duplication between docs
+- **Clear purpose**: Each doc covers one topic comprehensively
+- **Cross-references**: Links to related documentation
+- **Mermaid diagrams**: Visual workflows where helpful
+- **Keep updated**: Update docs with code changes

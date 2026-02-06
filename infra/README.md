@@ -211,62 +211,43 @@ spec:
 
 ## Promotion Workflow
 
-### Step 1: Code Commit → CI Workflow
+```mermaid
+graph TD
+    subgraph "Dev Branch Flow"
+        DevCommit[Push to dev] --> DevCI[CI: Lint & Test]
+        DevCI --> DevCD[CD: Build Image]
+        DevCD --> DevUpdate[Update dev/kustomization.yaml]
+        DevUpdate --> DevPush[\"Push to dev [skip ci]\"]
+        DevPush --> DevArgo[ArgoCD detects change]
+        DevArgo --> DevSync[Sync dex-dev namespace]
+    end
+    
+    subgraph "Main Branch Flow"
+        MainCommit[Push to main] --> MainCI[CI: Lint & Test]
+        MainCI --> MainCD[CD: Build Image]
+        MainCD --> MainUpdate[Update stage+prod/kustomization.yaml]
+        MainUpdate --> MainPush[\"Push to main [skip ci]\"]
+        MainPush --> MainArgo[ArgoCD detects change]
+        MainArgo --> StageSync[Sync dex-stage namespace]
+        MainArgo --> ProdSync[Sync dex-prod namespace]
+    end
+    
+    style DevSync fill:#d4edda
+    style StageSync fill:#fff3cd
+    style ProdSync fill:#f8d7da
+```
 
-**Trigger**:
-- Push to `dev` branch (integration)
-- Push to `main` branch (release)
+### How It Works
 
-**CI Workflow Actions** (`.github/workflows/ci.yml`):
-1. **Lint & Test**: `ruff check src/ tests/`, `black --check`, `mypy src/`, `pytest -v`
-2. **Build Image**: `docker build -t dex:sha-XXXXXXXX .` (8-char commit SHA)
-3. **Push to Registry**: `docker push ghcr.io/data-literate/dex:sha-XXXXXXXX`
-4. **Trigger CD Workflow**: Via `workflow_run` event
+1. **Code Commit** → Push to `dev` or `main` branch
+2. **CI Pipeline** → Lint, test, build image with SHA tag (`sha-XXXXXXXX`)
+3. **CD Pipeline** → Update kustomization.yaml with new image tag
+4. **Git Commit** → Automatic commit with `[skip ci]` to prevent recursion
+5. **ArgoCD Sync** → Detects manifest change and deploys to Kubernetes
 
----
+**For detailed CI/CD workflow documentation**, see [docs/CI_CD.md](../docs/CI_CD.md)
 
-### Step 2: CD Workflow Updates Manifests
-
-**Trigger**: CI workflow completion
-
-**CD Workflow Actions** (`.github/workflows/cd.yml`):
-
-**Dev Branch (integration)**
-1. **Update Manifest**: Modify `infra/argocd/overlays/dev/kustomization.yaml`
-  ```yaml
-  images:
-    - name: data-literate/dex
-      newName: ghcr.io/data-literate/dex
-      newTag: sha-XXXXXXXX
-  ```
-2. **Commit & Push**:
-  ```
-  git commit -m "chore: update dev image to sha-XXXXXXXX [skip ci]"
-  git push origin dev
-  ```
-
-**Main Branch (release)**
-1. **Update Manifests**: Modify `infra/argocd/overlays/stage/kustomization.yaml` and `infra/argocd/overlays/prod/kustomization.yaml`
-2. **Commit & Push**:
-  ```
-  git commit -m "chore: update stage/prod image to sha-XXXXXXXX [skip ci]"
-  git push origin main
-  ```
-
----
-
-### Step 3: ArgoCD Syncs Environments
-
-**Trigger**: Git webhook notification (manifest change detected)
-
-**ArgoCD Auto-Sync** (`syncPolicy.automated`):
-1. **Dev App** tracks branch `dev` and syncs `infra/argocd/overlays/dev` → namespace `dex-dev`
-2. **Stage App** tracks branch `main` and syncs `infra/argocd/overlays/stage` → namespace `dex-stage`
-3. **Prod App** tracks branch `main` and syncs `infra/argocd/overlays/prod` → namespace `dex-prod`
-
----
-
-### Summary: Single SHA Per Branch
+### Image Promotion Strategy
 
 | Branch | Dev | Stage | Prod |
 |--------|-----|-------|------|
