@@ -143,7 +143,7 @@ sequenceDiagram
     CI-->>GH: ✓ Passed
     GH->>CD: Trigger CD
     CD->>GHCR: Build & push image (sha-XXXXXXXX)
-    CD->>GH: Update kustomization.yaml [skip ci]
+    CD->>GH: Create PR updating kustomization.yaml
     GH->>Argo: Git change detected
     Argo->>K8s: Sync environment
     K8s-->>Dev: ✓ Deployed
