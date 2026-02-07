@@ -1,166 +1,99 @@
 # TODO
 
+## Vision Alignment
+
+DEX is an end‑to‑end framework that unifies data engineering, lakehouse warehousing, MLOps, AI serving, and DevOps. This backlog is organized by portfolio modules and platform enablers to keep execution aligned with that vision.
+
+---
+
 ## Completed ✅
 
-### CI/CD & Platform (Complete)
-- ✅ GitHub Actions CI pipeline (lint, type-check, tests, build, push)
+### Platform Foundations
+- ✅ GitHub Actions CI pipeline (lint, tests, build, push)
 - ✅ Docker image build and push to ghcr.io
-- ✅ GitHub Security scanning (CodeQL, Trivy)
-- ✅ ArgoCD cluster setup and local testing
-- ✅ Kustomize overlays for dev, stage, prod, preview
-- ✅ ApplicationSet for multi-environment promotion
-- ✅ Git-based configuration repo with auto-sync
-- ✅ Branch protection on main branch
-- ✅ CD workflow with git commit automation
-- ✅ Multi-environment deployment (all 3 envs synced & healthy)
+- ✅ Security scanning (CodeQL, Trivy)
+- ✅ ArgoCD GitOps with multi‑environment deployment
+- ✅ Kustomize overlays (dev/stage/prod/preview)
+- ✅ CD workflow with manifest updates
+- ✅ Structured logging + Prometheus metrics + OpenTelemetry tracing
 
-## In Progress 🚀
+---
 
-### Backend & API
-- [ ] Add health/readiness probes (partial)
-- [ ] Structured logging with request IDs
-- [ ] Metrics and tracing integration
+## Now (v0.2.0 – Production Hardening)
+
+### Core API & Reliability
+- [ ] Enhanced health/readiness/startup probes
 - [ ] E2E API tests
-- [ ] Implement pyconcepts exercises and API endpoints
+- [ ] Request validation and error handling
 
-### Data & ML
-- [ ] MLflow or W&B integration for experiment tracking
-- [ ] Model registry and serving strategy
-- [ ] Automated retraining job spec
-- [ ] Data quality framework
+### Observability & Ops
+- [ ] Dashboards for metrics/logs/traces (Grafana/Loki/Tempo)
+- [ ] Alerting rules tied to SLOs
 
-## Backlog (Future)
+### Dev Experience
+- [ ] Clean API examples and `pyconcepts` endpoints
 
-### Architecture
-- [ ] Service extraction strategy and first extraction candidate
-- [ ] Microservices architecture and patterns
-- [ ] Service mesh (Istio/Linkerd) evaluation
+---
 
-### DevOps & Platform
-- [ ] Caching layer (Redis) and rate limiting
-- [ ] Alerting and dashboards tied to SLOs
-- [ ] Secret management and rotation
-- [ ] Disaster recovery (RTO/RPO, backups)
+## Next (v0.3.0 – Data Platform)
 
-### Security
+- [ ] Data quality framework (schema + expectations)
+- [ ] Orchestration with Airflow/Dagster
+- [ ] Storage layers (raw/bronze/silver/gold)
+- [ ] Weather pipeline E2E + lineage
+
+---
+
+## DEX Portfolio Modules (Roadmap)
+
+### dex-data (Engineering)
+- [ ] Spark batch pipelines with partitioning + incremental loads
+- [ ] Kafka streaming pipeline with schema validation and DLQ
+- [ ] Orchestration patterns (retry/backfill)
+
+### dex-warehouse (Warehousing)
+- [ ] dbt staging → marts models
+- [ ] ML‑ready feature tables
+- [ ] Incremental models + tests (unique/not_null)
+
+### dex-lakehouse (Storage)
+- [ ] Iceberg/Delta datasets (Parquet/Avro)
+- [ ] Bronze/silver/gold demos
+- [ ] Snapshot + time‑travel examples
+
+### dex-ml (MLOps)
+- [ ] MLflow tracking + model registry
+- [ ] Feature store integration (Feast/Tecton)
+- [ ] Model serving (batch + real‑time)
+- [ ] RAG/Vector DB example (Pinecone)
+
+### dex-api (Serving)
+- [ ] Feature retrieval APIs
+- [ ] Model inference APIs
 - [ ] AuthN/AuthZ (OIDC/JWT)
-- [ ] Hardened security headers
-- [ ] RBAC fine-tuning
-- [ ] Dependency scanning enhancements
 
-### Data Engineering
-- [ ] Incremental processing and partitioning
-- [ ] Transformation testing framework
-- [ ] Feature engineering library
-- [ ] Airflow/Prefect orchestration
+### dex-ops (DevOps)
+- [ ] Terraform IaC for AWS/GCP
+- [ ] Kubernetes templates (Helm/Kustomize)
+- [ ] Secrets management + zero‑trust IAM
 
-### Analytics & BI
-- [ ] Metabase/Superset integration
-- [ ] Semantic layer
-- [ ] Automated reporting and dashboards
+---
 
-## Testing
-- [ ] Expand unit tests for FastAPI entrypoints and `src/pyconcepts` modules; target measurable coverage. [P1 W2-3]
-- [ ] Add an integration test that exercises the API end-to-end (startup via uvicorn) with a sample request payload. [P1 W2-3]
+## Platform Enablers (Cross‑Cutting)
 
-## Local Development & Testing (Docker Desktop + ArgoCD)
-- [ ] Set up Docker Desktop with Kubernetes enabled; verify cluster connectivity via kubectl. [P1 W1-2]
-- [ ] Install ArgoCD in local K8s cluster; port-forward UI and verify Web access. [P1 W2-3]
-- [ ] Create local git repository (or GitHub fork) with Helm/kustomize manifests for DEX service. [P1 W2-3]
-- [ ] Build and push Docker image to local registry (Docker Desktop) with SHA tag. [P1 W2-3]
-- [ ] Define ArgoCD Application manifest pointing to local git repo; verify auto-sync to cluster. [P1 W2-3]
-- [ ] Create kustomize base + dev/staging overlays for local testing (different replicas, resource limits). [P1 W2-3]
-- [ ] Test ApplicationSet with parameter substitution across dev/staging environments locally. [P2 W2-4]
-- [ ] Set up ArgoCD Image Updater to detect new image tags and auto-update local manifests. [P2 W2-4]
-- [ ] Configure local webhook for deployment notifications (mock Slack via RequestBin or similar). [P2 W3-4]
-- [ ] Test rollback workflow: revert commit in git → ArgoCD syncs to previous version. [P2 W3-4]
-- [ ] Test manual vs. automated sync policies; verify health checks and resource status. [P2 W3-4]
-- [ ] Document local GitOps workflow: setup guide, common commands (argocd app sync/rollback), troubleshooting. [P1 W2-3]
-- [ ] Create Docker Compose override for local dev (alternative to local K8s for fast iteration). [P2 W3-5]
+### Security & Compliance
+- [ ] Hardened security headers (CSP/HSTS)
+- [ ] Dependency scanning automation (Dependabot/Renovate)
 
-## Application and Examples
-- [ ] Implement the `pyconcepts` exercises: async HTTP client with retries/cache, DI wiring, context managers, decorators, and streaming helpers; expose a sample `/api/external-data` endpoint. [P1 W2-4]
-- [ ] Add a streaming ETL endpoint `/api/insights` that uses transform pipelines (`var_len_args`) and streaming responses (`yield_keyword`). [P1 W2-4]
-- [ ] Create a runnable `examples/weather/` FastAPI example that surfaces the weather pipeline outputs. [P1 W2-4]
+### Resilience & Scale
+- [ ] Caching layer (Redis) + rate limiting
+- [ ] Blue/green or canary deployment strategy
+- [ ] Disaster recovery (RTO/RPO + backups)
 
-## Documentation
-- [ ] Reconcile the root Readme with `docs/README.md`; link the single-doc guide and remove duplicated sections. [P1 W1-2]
-- [ ] Add a short "how to run" snippet for the weather pipeline and reference the execution checklist. [P1 W1-2]
+### Governance
+- [ ] Data catalog/lineage tool (OpenMetadata/Amundsen)
+- [ ] Model monitoring for drift + performance
 
-## Architecture and System Design
-- [ ] Define system context and deployment topology (API service + data pipelines + model serving) with diagrams. [P3 W5+]
-- [ ] Document service boundaries and contracts for REST/GraphQL/gRPC; pick the default external surface. [P3 W5+]
-- [ ] Specify persistence choices (OLTP DB, object storage, cache) and retention policies. [P3 W5+]
-- [ ] Add messaging/queueing plan (Kafka/RabbitMQ/SQS) for async workloads and retries. [P3 W5+]
-- [ ] Design API rate limiting, pagination, idempotency, and versioning strategy. [P2 W3-5]
-- [ ] Describe backpressure, timeouts, and circuit breaker policies for upstream calls. [P2 W3-5]
-- [ ] Capture scaling plan: vertical vs. horizontal; HPA settings; resource requests/limits; GitOps-driven autoscaling. [P3 W5+]
-- [ ] Add disaster recovery/RTO-RPO targets, backup/restore runbook, and DR test cadence (backup git state and ArgoCD state). [P3 W5+]
-- [ ] Define SLO/SLI/SLA for latency, availability, and error budget policies. [P2 W3-5]
-- [ ] Document GitOps architecture: git source of truth, ArgoCD reconciliation, and promotion pipelines. [P1 W2-3]
-
-## Production Hardening
-- [ ] Add centralized config/secrets management (12-factor; .env for dev, cloud secret manager for prod). [P3 W4-6]
-- [ ] Add structured logging, request IDs, and correlation IDs; standard log fields. [P1 W1-2]
-- [ ] Add metrics (Prometheus/OpenTelemetry) for requests, dependencies, and business events. [P1 W1-2]
-- [ ] Add tracing (OpenTelemetry) spans for API, DB, cache, and external calls. [P1 W1-2]
-- [ ] Add health/readiness/liveness probes; graceful shutdown hooks. [P1 W1-2]
-- [ ] Add caching strategy (per-request cache headers + Redis/memory) with invalidation rules. [P2 W3-5]
-- [ ] Add feature flags/toggles for risky changes. [P2 W3-5]
-- [ ] Add data validation/quality checks on pipeline inputs and model features. [P2 W3-5]
-- [ ] Add blue/green or canary deployment steps in CD. [P2 W3-5]
-
-## Data and ML Platform
-- [ ] Add storage layout for raw/bronze/silver/gold layers; schema registry where relevant. [P3 W5+]
-- [ ] Add data catalog/lineage tool (e.g., OpenMetadata/Amundsen/Marquez). [P3 W5+]
-- [ ] Add experiment tracking and model registry (MLflow/W&B) with promotion workflow. [P1 W3-4]
-- [ ] Add model serving plan (batch + real-time) and monitoring for drift/performance. [P1 W3-4]
-- [ ] Add scheduled retraining job spec and dependency on fresh features. [P1 W3-4]
-
-## Security and Compliance
-- [ ] Add authentication/authorization plan (OIDC/JWT) and roles for API/pipelines. [P3 W4-6]
-- [ ] Add secrets rotation policy and least-privilege IAM roles for CI/CD and runtime. [P3 W4-6]
-- [ ] Add dependency scanning (Dependabot/Renovate), SAST (semgrep/bandit/ruff rules), and container scan. [P3 W4-6]
-- [ ] Add input validation and safe defaults for HTTP headers (CORS, CSP, HSTS if applicable). [P3 W4-6]
-
-## Observability and Ops Tooling
-- [ ] Add dashboarding for logs/metrics/traces (Grafana/Loki/Tempo or cloud equivalents). [P2 W3-5]
-- [ ] Add alerting rules tied to SLOs (latency, error rate, saturation) and on-call rotation. [P2 W3-5]
-- [ ] Add runbook links for common failures (deploy fails, DB unavailable, upstream timeout). [P2 W3-5]
-
-## GitOps & ArgoCD
-- [ ] **Create separate git repository (dex-gitops-config) for ArgoCD manifests and kustomize overlays** — DO NOT mix with application source. [P1 W1-2]
-- [ ] Stand up ArgoCD cluster in target Kubernetes environment (dev, staging, prod). [P1 W2-3]
-- [ ] Create git repository for infrastructure-as-code (separate from application source); initialize with kustomize structure. [P1 W2-3]
-- [ ] Define ArgoCD Application manifests for DEX service + dependencies (PostgreSQL, Redis, etc.); use application.yaml as template. [P1 W2-3]
-- [ ] Add ApplicationSet for multi-environment promotion with parameter substitution (image tag, replicas, etc.). [P1 W2-3]
-- [ ] Implement kustomize base + overlays for dev/staging/prod with environment-specific configs in gitops-config repo. [P1 W2-3]
-- [ ] Add image update automation (ArgoCD Image Updater) to deploy new SHA-tagged images. [P2 W2-4]
-- [ ] Integrate CI (GitHub Actions) to commit new image tags to config repo on successful builds. [P2 W2-4]
-- [ ] Add health checks and sync policies (automated vs. manual) per environment. [P2 W3-4]
-- [ ] Configure ArgoCD notifications to Slack/email on deployment success/failure. [P2 W3-4]
-- [ ] Add RBAC and secret management in ArgoCD (sealed-secrets or External Secrets Operator). [P2 W3-5]
-- [ ] Document GitOps workflow: commit → CI builds → config repo update → ArgoCD syncs. [P1 W2-3]
-- [ ] Add ArgoCD UI dashboards for deployment visibility and rollback capabilities. [P2 W3-4]
-- [ ] Set up PR preview ApplicationSet with pullRequest generator for ephemeral test environments. [P1 W2-3]
-- [ ] Add 'preview' label requirement for PR preview environments to avoid overhead. [P2 W2-3]
-
-## GitOps Promotion Workflow (Gold Standard: Build Once, Promote Same Artifact)
-- [ ] **CI builds Docker image tagged with commit SHA** (e.g., `sha-4f2c9a1`) on every push. [P1 W1-2]
-- [ ] **CI updates gitops-config repo** dev overlay with new SHA after successful build/test. [P1 W2-3]
-- [ ] ArgoCD auto-syncs dev environment with new SHA (test in dev first). [P1 W2-3]
-- [ ] Create promotion script/workflow to copy SHA from dev → staging overlay (manual or automated after QA sign-off). [P1 W2-3]
-- [ ] ArgoCD auto-syncs staging with promoted SHA (validation in staging). [P1 W2-3]
-- [ ] Create production promotion workflow: manual approval + copy SHA from staging → prod overlay. [P1 W2-3]
-- [ ] ArgoCD syncs prod with approved SHA (manual sync policy enforced). [P1 W2-3]
-- [ ] Add Git audit trail: tag promotion commits with env + approver + timestamp. [P2 W3-4]
-- [ ] Document promotion flow: dev (auto) → staging (QA approval) → prod (manual approval). [P1 W2-3]
-- [ ] Add rollback procedure: revert overlay commit → ArgoCD syncs previous SHA. [P2 W3-4]
-- [ ] Create promotion dashboard/CLI tool to visualize which SHA is in each environment. [P2 W3-5]
-- [ ] Add automated smoke tests in dev before allowing promotion to staging. [P2 W3-5]
-- [ ] Add staging validation gates (performance, security scans) before prod promotion. [P2 W3-5]
-
-## DataOps (Data Quality & Orchestration)
 - [ ] Add data quality framework: schema validation, constraint checks, anomaly detection on ingestion. [P1 W3-4]
 - [ ] Add data profiling on raw and processed datasets (statistics, nulls, distributions). [P2 W3-5]
 - [ ] Add data lineage tracking (source → transform → destination) across pipelines. [P2 W3-5]

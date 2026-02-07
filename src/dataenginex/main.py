@@ -5,7 +5,9 @@ from contextlib import asynccontextmanager
 import structlog
 import uvicorn
 from fastapi import FastAPI, Response
+from fastapi.responses import JSONResponse
 
+from dataenginex.health import HealthChecker, HealthStatus
 from dataenginex.logging_config import APP_VERSION, configure_logging
 from dataenginex.metrics import get_metrics
 from dataenginex.metrics_middleware import PrometheusMetricsMiddleware
@@ -30,10 +32,13 @@ configure_tracing(
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Application lifespan manager."""
+    app.state.startup_complete = False
     # Startup
     logger.info("application_started", environment=os.getenv("ENVIRONMENT", "dev"))
+    app.state.startup_complete = True
     yield
     # Shutdown
+    app.state.startup_complete = False
     logger.info("application_shutdown")
 
 
@@ -45,6 +50,8 @@ instrument_fastapi(app)
 # Add middleware (order matters - outer to inner)
 app.add_middleware(RequestLoggingMiddleware)  # Logging
 app.add_middleware(PrometheusMetricsMiddleware)  # Metrics
+
+health_checker = HealthChecker()
 
 
 @app.get("/metrics")
@@ -63,16 +70,32 @@ def read_root() -> dict[str, str]:
 
 @app.get("/health")
 def health_check() -> dict[str, str]:
-    """Health check endpoint."""
-    logger.debug("health_check_called")
-    return {"status": "healthy"}
+    """Liveness check endpoint."""
+    logger.debug("health check")
+    return {"status": "alive"}
 
 
 @app.get("/ready")
-def readiness_check() -> dict[str, str]:
+async def readiness_check() -> JSONResponse:
     """Readiness check endpoint."""
     logger.debug("readiness_check_called")
-    return {"status": "ready"}
+    components = await health_checker.check_all()
+    overall = health_checker.overall_status(components)
+    status_code = 200 if overall != HealthStatus.UNHEALTHY else 503
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "status": "ready" if status_code == 200 else "not_ready",
+            "components": [component.to_dict() for component in components],
+        },
+    )
+
+
+@app.get("/startup")
+def startup_check() -> dict[str, str]:
+    """Startup probe endpoint."""
+    ready = bool(getattr(app.state, "startup_complete", False))
+    return {"status": "started" if ready else "starting"}
 
 
 if __name__ == "__main__":

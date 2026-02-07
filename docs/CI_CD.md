@@ -458,14 +458,11 @@ gh run list --workflow cd.yml --status failure
 ```bash
 # Run lint checks locally
 poetry run ruff check src/ tests/
+poetry run black --check src/ tests/
 
 # Auto-fix
 poetry run ruff check src/ tests/ --fix
 poetry run black src/ tests/
-
-# Use lint automation
-.\scripts\lint-check.ps1
-.\scripts\lint-fix.ps1
 ```
 
 ### Image Not Building
@@ -549,7 +546,7 @@ git log --format="%s" -1
 
 1. **Create feature branch** from `dev`
 2. **Develop and test locally**
-3. **Run lint checks** before committing: `.\scripts\lint-check.ps1`
+3. **Run lint checks** before committing: `ruff`, `black`, `mypy`, `pytest`
 4. **Create PR** targeting `dev`
 5. **Wait for CI** to pass
 6. **Get code review** approval
@@ -628,7 +625,8 @@ test: add integration tests for API
 # Local development
 poetry install
 poetry run pytest
-.\scripts\lint-check.ps1
+poetry run ruff check src/ tests/
+poetry run black --check src/ tests/
 
 # Create PR
 gh pr create --title "feat: add feature" --body "Description"

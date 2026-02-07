@@ -2,6 +2,49 @@
 
 **Production-ready data engineering and ML platform** with FastAPI, automated CI/CD, and GitOps deployment.
 
+## The DEX Philosophy
+
+DEX (DataEngineX) is a unified framework that bridges **Data Engineering, Data Warehousing, Machine Learning, AI Agents, MLOps, and DevOps**. It specializes in building **AI‑ready infrastructure** that is automated, scalable, and resilient — the technical “plumbing” that moves AI from a research notebook to global production.
+
+**Mission:** Deliver an end‑to‑end, cohesive narrative that consolidates data pipelines, lakehouse warehousing, MLOps, AI, and DevOps into one portfolio.
+
+```mermaid
+flowchart LR
+    Ingest[Ingest: Kafka/Kinesis] --> Process[Spark/Flink Pipelines]
+    Process --> Lakehouse[Lakehouse: Iceberg/Delta]
+    Lakehouse --> Warehouse[Warehouse: Snowflake/BigQuery]
+    Warehouse --> Features[Feature Store]
+    Features --> Serve[Model Serving: FastAPI]
+    Serve --> Apps[AI Apps & Agents]
+    subgraph Ops
+        Terraform[Terraform] --> K8s[Kubernetes]
+        K8s --> GitOps[GitOps CI/CD]
+    end
+    Ops --> Ingest
+    Ops --> Serve
+```
+
+### Portfolio Modules
+
+```
+/dex-data       # Spark/Flink/Kafka pipelines + orchestration (Airflow/Dagster)
+/dex-warehouse  # dbt models + lakehouse/warehouse patterns
+/dex-lakehouse  # Parquet/Avro + Iceberg/Delta demos
+/dex-ml         # MLflow/Kubeflow + model training/serving
+/dex-api        # FastAPI layer for features + predictions
+/dex-ops        # Terraform + Kubernetes + CI/CD GitOps
+```
+
+These modules are a **roadmap** for the full DEX portfolio and will be added iteratively.
+
+### Technical Toolbox
+
+- **Data Engineering**: Spark, Kafka, Airflow, Flink, dbt
+- **Warehousing**: Snowflake, BigQuery, Redshift, Databricks
+- **MLOps & AI**: MLflow, Kubeflow, Pinecone, LangChain, PyTorch
+- **DevOps & Cloud**: AWS/GCP, Kubernetes, Docker, Terraform, GitHub Actions
+- **Languages**: Python, SQL, Go, Scala
+
 ---
 
 ## 🚀 Quick Start
@@ -88,80 +131,13 @@ poetry run black --check .
 poetry run mypy src/
 ```
 
-## CI/CD Pipeline Overview
+## CI/CD, Deployment, and K8s
 
-```mermaid
-flowchart LR
-    subgraph "Developer"
-        Code[Write Code] --> PR[Create PR]
-    end
-    
-    subgraph "GitHub Actions"
-        PR --> CI[CI: Lint/Test/Build]
-        CI --> CD[CD: Push Image]
-        CD --> Update[Update Manifests]
-    end
-    
-    subgraph "ArgoCD"
-        Update --> Argo[Detect Git Change]
-        Argo --> Sync[Sync to K8s]
-    end
-    
-    subgraph "Kubernetes"
-        Sync --> Dev[dex-dev]
-        Sync --> Stage[dex-stage]
-        Sync --> Prod[dex-prod]
-    end
-    
-    style CI fill:#e1f5ff
-    style CD fill:#fff3cd
-    style Argo fill:#d4edda
-    style Dev fill:#d4edda
-    style Stage fill:#d4edda
-    style Prod fill:#d4edda
-```
-
-Every commit triggers automated CI → CD → deployment:
-
-- **CI**: Lint, test, security scan ✓ Build image → `ghcr.io/data-literate/dex:sha-XXXXXXXX`
-- **CD**: Update environment manifests → Commit to git with `[skip ci]`
-- **ArgoCD**: Detect git changes → Sync to Kubernetes clusters
-
-**For detailed pipeline documentation**, see [docs/CI_CD.md](docs/CI_CD.md)
-
-## Multi-Environment Deployment
-
-All three environments deploy automatically via ArgoCD:
-
-| Environment | Replicas | Namespace | Status |
-|---|---|---|---|
-| **dev** | 2 | `dex-dev` | Synced & Healthy  |
-| **stage** | 2 | `dex-stage` | Synced & Healthy  |
-| **prod** | 3 | `dex-prod` | Synced & Healthy  |
-
-**Branch Protection on `main`:**
-- Pull request review required
-- Status checks pass (CI, Security Scan)
-- Branches up to date before merge
-- No force pushes or deletions
-
-## Local Kubernetes Testing
-
-To test ArgoCD deployments locally:
-
-```bash
-# Start ArgoCD
-kubectl apply -f infra/argocd/application.yaml
-
-# Check application status
-kubectl get application -n argocd
-
-# Access ArgoCD UI
-kubectl port-forward svc/argocd-server -n argocd 8080:443
-# Visit https://localhost:8080
-```
-
-See [docs/LOCAL_K8S_SETUP.md](docs/LOCAL_K8S_SETUP.md) for detailed setup instructions.
+For CI/CD workflow, deployment details, and local Kubernetes setup, see:
+- [CI/CD Pipeline](docs/CI_CD.md)
+- [Deployment Runbook](docs/DEPLOY_RUNBOOK.md)
+- [Infrastructure Setup](infra/README.md)
+- [Local K8s Setup](docs/LOCAL_K8S_SETUP.md)
 
 ---
 
@@ -185,27 +161,7 @@ See [docs/LOCAL_K8S_SETUP.md](docs/LOCAL_K8S_SETUP.md) for detailed setup instru
 
 ## Development Workflow
 
-This repository follows a gated workflow: local checks → PR review → automated CI/CD. Work is tracked using GitHub Issues and GitHub Projects. For full lifecycle details, see [docs/SDLC.md](docs/SDLC.md).
-
-### Day-to-Day Steps
-
-1. Create or update a GitHub Issue and add it to the GitHub Project board
-2. Create a feature branch: `git switch -c feat/short-description`
-3. Implement changes and add/update tests
-4. Run local checks:
-	- `poetry run pytest -v`
-	- `poetry run ruff check src/ tests/`
-	- `poetry run black --check .`
-	- `poetry run mypy src/`
-5. Open a PR to `dev` and request review (deploys to dev environment)
-6. After validation in dev, open a release PR from `dev` → `main`
-7. Merge after required checks pass (deploys to stage/prod)
-
-### Required Gates
-
-- CI checks must pass (lint, formatting, type check, tests, security scan)
-- At least one reviewer approval
-- Branch must be up to date with the target branch (`dev` or `main`)
+See [SDLC](docs/SDLC.md) and [Contributing Guide](CONTRIBUTING.md) for the full development workflow, quality gates, and branch strategy.
 
 ## Useful Commands
 

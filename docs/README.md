@@ -19,7 +19,7 @@
 
 ### 🚀 Deploying
 - **[Deployment Runbook](DEPLOY_RUNBOOK.md)** - Release and rollback procedures
-- **[CI/CD Pipeline](CI_CD.md)** - Automated deployment flows
+  
 
 ### 📊 Monitoring & Debugging
 - **[Observability](OBSERVABILITY.md)** - Metrics, logging, and tracing
@@ -27,6 +27,10 @@
 
 ### 🛠️ Project Management
 - **[Project Management](PROJECT_MANAGEMENT.md)** - GitHub Issues, Projects, and workflow
+
+### 📈 Roadmap Exports
+- **[Project Roadmap (JSON)](roadmap/project-roadmap.json)**
+- **[Project Roadmap (CSV)](roadmap/project-roadmap.csv)**
 
 ---
 

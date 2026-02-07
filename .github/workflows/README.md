@@ -69,7 +69,7 @@ graph TB
 **Triggers**: Push to `main`/`dev`, Pull Requests
 
 **Jobs**:
-- **lint-and-test**: Runs ruff, mypy, pytest with coverage
+- **lint-and-test**: Runs ruff, black, mypy, pytest with coverage
 
 **Required for merge**: ✅ All checks must pass
 
@@ -105,7 +105,7 @@ gh pr edit <pr-number> --add-label preview
 ---
 
 ### `security.yml` - Security Scans
-**Triggers**: Push to `main`/`dev`, Pull Requests
+**Triggers**: Push to `main`, Pull Requests to `main`
 
 **Jobs**:
 - **CodeQL**: Static analysis for vulnerabilities
@@ -113,7 +113,6 @@ gh pr edit <pr-number> --add-label preview
 
 **Results**: GitHub Security tab
 
----
 ---
 
 ## Image Registry
@@ -206,7 +205,7 @@ graph TD
     Issue[CI/CD Issue] --> Type{Issue Type?}
     
     Type -->|CI Failure| CheckCI[Check CI logs]
-    CheckCI --> LocalTest[\"Run locally: lint-check.ps1\"]
+    CheckCI --> LocalTest[\"Run lint locally\"]
     LocalTest --> FixCode[Fix code issues]
     FixCode --> Push[Push changes]
     
@@ -231,11 +230,9 @@ graph TD
 ```bash
 # Run lint locally
 poetry run ruff check src/ tests/
+poetry run black --check src/ tests/
 poetry run mypy src/
 poetry run pytest tests/
-
-# Or use automation
-.\scripts\lint-check.ps1
 ```
 
 ### CD Not Triggering
