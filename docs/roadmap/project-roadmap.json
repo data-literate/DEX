@@ -1,0 +1,503 @@
+﻿{
+    "items":  [
+                  {
+                      "content":  {
+                                      "body":  "## Description\nImplement structured logging framework with:\n- Request ID tracing\n- Contextual information (user, endpoint, method)\n- JSON formatting for log aggregation\n- Log level configuration\n\n## Acceptance Criteria\n- [ ] Configure structlog or loguru\n- [ ] Request ID middleware\n- [ ] Log all API requests/responses\n- [ ] Configure for different environments (dev/prod)\n- [ ] Integration with OpenTelemetry\n\n## Priority\nP1-high - Critical for production observability",
+                                      "number":  14,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "Add structured logging with request IDs and context",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/14"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzgkjiSY",
+                      "labels":  [
+                                     "P1-high",
+                                     "component:api"
+                                 ],
+                      "linked pull requests":  [
+                                                   "https://github.com/data-literate/DEX/pull/21"
+                                               ],
+                      "milestone":  {
+                                        "description":  "API production-ready with observability, health checks, validation, and testing. Target: Weeks 3-5",
+                                        "dueOn":  "2026-02-27T00:00:00Z",
+                                        "title":  "v0.2.0 - Production Hardening"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "Done",
+                      "title":  "Add structured logging with request IDs and context"
+                  },
+                  {
+                      "content":  {
+                                      "body":  "## Description\nAdd observability instrumentation:\n- Prometheus metrics endpoint (/metrics)\n- OpenTelemetry tracing with Jaeger\n- Request duration/rate/errors\n- Custom business metrics\n\n## Acceptance Criteria\n- [ ] Install prometheus_client and opentelemetry-api\n- [ ] Metrics middleware (request count, latency, errors)\n- [ ] Trace context propagation\n- [ ] Grafana dashboard examples\n- [ ] Documentation on metric types\n\n## Priority\nP1-high - Required for production monitoring",
+                                      "number":  15,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "Implement Prometheus metrics and OpenTelemetry tracing",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/15"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzgkjiSs",
+                      "labels":  [
+                                     "P1-high",
+                                     "component:api",
+                                     "component:infrastructure"
+                                 ],
+                      "linked pull requests":  [
+                                                   "https://github.com/data-literate/DEX/pull/29"
+                                               ],
+                      "milestone":  {
+                                        "description":  "API production-ready with observability, health checks, validation, and testing. Target: Weeks 3-5",
+                                        "dueOn":  "2026-02-27T00:00:00Z",
+                                        "title":  "v0.2.0 - Production Hardening"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "Done",
+                      "title":  "Implement Prometheus metrics and OpenTelemetry tracing"
+                  },
+                  {
+                      "content":  {
+                                      "body":  "## Description\nUpgrade health checks to production standards:\n- Detailed component health (DB, cache, external APIs)\n- Readiness for traffic routing\n- Liveness for pod restarts\n- Startup probes for slow initialization\n\n## Acceptance Criteria\n- [ ] Health endpoint returns component status\n- [ ] Readiness checks dependencies\n- [ ] Liveness checks basic functionality\n- [ ] Kubernetes probe configuration\n- [ ] Alerting on health failures\n\n## Priority\nP1-high - Critical for K8s orchestration",
+                                      "number":  16,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "Enhanced health/readiness/liveness probes",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/16"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzgkjiTE",
+                      "labels":  [
+                                     "P1-high",
+                                     "component:api",
+                                     "component:infrastructure"
+                                 ],
+                      "milestone":  {
+                                        "description":  "API production-ready with observability, health checks, validation, and testing. Target: Weeks 3-5",
+                                        "dueOn":  "2026-02-27T00:00:00Z",
+                                        "title":  "v0.2.0 - Production Hardening"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "In Progress",
+                      "title":  "Enhanced health/readiness/liveness probes"
+                  },
+                  {
+                      "content":  {
+                                      "body":  "## Description\nComprehensive test suite:\n- E2E API tests with test client\n- Unit tests for business logic\n- Integration tests for dependencies\n- Coverage reporting in CI\n\n## Acceptance Criteria\n- [ ] pytest-asyncio for async tests\n- [ ] Test fixtures for FastAPI client\n- [ ] \u003e80% code coverage\n- [ ] Coverage badge in README\n- [ ] CI fails on coverage drop\n\n## Priority\nP1-high - Required for confident deployments",
+                                      "number":  17,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "Implement E2E API tests with \u003e80% coverage",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/17"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzgkjiTs",
+                      "labels":  [
+                                     "P1-high",
+                                     "component:testing"
+                                 ],
+                      "milestone":  {
+                                        "description":  "API production-ready with observability, health checks, validation, and testing. Target: Weeks 3-5",
+                                        "dueOn":  "2026-02-27T00:00:00Z",
+                                        "title":  "v0.2.0 - Production Hardening"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "In Progress",
+                      "title":  "Implement E2E API tests with \u003e80% coverage"
+                  },
+                  {
+                      "content":  {
+                                      "body":  "## Description\nImplement robust validation:\n- Pydantic models for all request/response\n- Custom exception handlers\n- Validation error formatting\n- Error response standards\n\n## Acceptance Criteria\n- [ ] Pydantic models for all endpoints\n- [ ] Custom HTTPException classes\n- [ ] Exception handler middleware\n- [ ] Consistent error response format\n- [ ] Validation error tests\n\n## Priority\nP1-high - Critical for API reliability",
+                                      "number":  18,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "Add Pydantic validation and error handling",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/18"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzgkjiUE",
+                      "labels":  [
+                                     "P1-high",
+                                     "component:api"
+                                 ],
+                      "milestone":  {
+                                        "description":  "API production-ready with observability, health checks, validation, and testing. Target: Weeks 3-5",
+                                        "dueOn":  "2026-02-27T00:00:00Z",
+                                        "title":  "v0.2.0 - Production Hardening"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "In Progress",
+                      "title":  "Add Pydantic validation and error handling"
+                  },
+                  {
+                      "content":  {
+                                      "body":  "## Description\nImprove API documentation:\n- Interactive Swagger UI\n- Complete OpenAPI spec\n- Request/response examples\n- Authentication documentation\n\n## Acceptance Criteria\n- [ ] FastAPI automatic docs enhancement\n- [ ] Custom OpenAPI schema\n- [ ] Example requests for all endpoints\n- [ ] ReDoc alternative UI\n- [ ] Export OpenAPI spec for clients\n\n## Priority\nP2-medium - Important for developers",
+                                      "number":  19,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "Add API documentation with OpenAPI/Swagger",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/19"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzgkjiUk",
+                      "labels":  [
+                                     "documentation",
+                                     "P2-medium",
+                                     "component:api"
+                                 ],
+                      "milestone":  {
+                                        "description":  "API production-ready with observability, health checks, validation, and testing. Target: Weeks 3-5",
+                                        "dueOn":  "2026-02-27T00:00:00Z",
+                                        "title":  "v0.2.0 - Production Hardening"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "In Progress",
+                      "title":  "Add API documentation with OpenAPI/Swagger"
+                  },
+                  {
+                      "assignees":  [
+                                        "data-literate"
+                                    ],
+                      "content":  {
+                                      "body":  "Create Grafana dashboards for Prometheus metrics, logging, and tracing.\\n\\n- Metrics dashboards (latency, error rate, saturation)\\n- Logs dashboard (request IDs, error spikes)\\n- Tracing dashboard (span latency, top endpoints)\\n\\nDepends on observability stack already in place.",
+                                      "number":  30,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "Add dashboards for metrics/logs/traces",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/30"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzglBnSM",
+                      "labels":  [
+                                     "enhancement",
+                                     "P2-medium",
+                                     "component:infrastructure"
+                                 ],
+                      "milestone":  {
+                                        "description":  "API production-ready with observability, health checks, validation, and testing. Target: Weeks 3-5",
+                                        "dueOn":  "2026-02-27T00:00:00Z",
+                                        "title":  "v0.2.0 - Production Hardening"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "In Progress",
+                      "title":  "Add dashboards for metrics/logs/traces"
+                  },
+                  {
+                      "assignees":  [
+                                        "data-literate"
+                                    ],
+                      "content":  {
+                                      "body":  "Define alert rules for latency, error rate, and saturation.\\n\\n- Alert thresholds by environment\\n- Alertmanager routing (email/Slack placeholder)\\n- Link to runbooks",
+                                      "number":  31,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "Add alerting rules tied to SLOs",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/31"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzglBnSY",
+                      "labels":  [
+                                     "enhancement",
+                                     "P2-medium",
+                                     "component:infrastructure"
+                                 ],
+                      "milestone":  {
+                                        "description":  "API production-ready with observability, health checks, validation, and testing. Target: Weeks 3-5",
+                                        "dueOn":  "2026-02-27T00:00:00Z",
+                                        "title":  "v0.2.0 - Production Hardening"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "In Progress",
+                      "title":  "Add alerting rules tied to SLOs"
+                  },
+                  {
+                      "assignees":  [
+                                        "data-literate"
+                                    ],
+                      "content":  {
+                                      "body":  "Add example endpoints that surface pyconcepts modules.\\n\\n- /api/external-data\\n- /api/insights (streaming)\\n- Document usage",
+                                      "number":  32,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "Expose pyconcepts endpoints for examples",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/32"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzglBnSg",
+                      "labels":  [
+                                     "enhancement",
+                                     "P2-medium",
+                                     "component:api"
+                                 ],
+                      "milestone":  {
+                                        "description":  "API production-ready with observability, health checks, validation, and testing. Target: Weeks 3-5",
+                                        "dueOn":  "2026-02-27T00:00:00Z",
+                                        "title":  "v0.2.0 - Production Hardening"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "In Progress",
+                      "title":  "Expose pyconcepts endpoints for examples"
+                  },
+                  {
+                      "assignees":  [
+                                        "data-literate"
+                                    ],
+                      "content":  {
+                                      "body":  "Add schema validation + expectations for ingestion and pipeline outputs.\\n\\n- Validation hooks in pipelines\\n- Failure handling + reporting\\n- Unit tests",
+                                      "number":  33,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "Implement data quality framework",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/33"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzglBnSs",
+                      "labels":  [
+                                     "enhancement",
+                                     "P1-high",
+                                     "component:data"
+                                 ],
+                      "milestone":  {
+                                        "description":  "Data ingestion, transformation, quality framework, and orchestration. Target: Weeks 6-9",
+                                        "dueOn":  "2026-03-30T00:00:00Z",
+                                        "title":  "v0.3.0 - Data Platform Foundation"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "Todo",
+                      "title":  "Implement data quality framework"
+                  },
+                  {
+                      "assignees":  [
+                                        "data-literate"
+                                    ],
+                      "content":  {
+                                      "body":  "Introduce orchestration for batch pipelines with retries/backfill.\\n\\n- DAG definitions\\n- Scheduling\\n- Execution logs",
+                                      "number":  34,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "Add orchestration for pipelines (Airflow/Dagster)",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/34"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzglBnS4",
+                      "labels":  [
+                                     "enhancement",
+                                     "P1-high",
+                                     "component:data"
+                                 ],
+                      "milestone":  {
+                                        "description":  "Data ingestion, transformation, quality framework, and orchestration. Target: Weeks 6-9",
+                                        "dueOn":  "2026-03-30T00:00:00Z",
+                                        "title":  "v0.3.0 - Data Platform Foundation"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "Todo",
+                      "title":  "Add orchestration for pipelines (Airflow/Dagster)"
+                  },
+                  {
+                      "assignees":  [
+                                        "data-literate"
+                                    ],
+                      "content":  {
+                                      "body":  "Define storage layout and retention policies.\\n\\n- Layer folders\\n- Sample dataset\\n- Documentation",
+                                      "number":  35,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "Define storage layers (raw/bronze/silver/gold)",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/35"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzglBnTI",
+                      "labels":  [
+                                     "enhancement",
+                                     "P2-medium",
+                                     "component:data"
+                                 ],
+                      "milestone":  {
+                                        "description":  "Data ingestion, transformation, quality framework, and orchestration. Target: Weeks 6-9",
+                                        "dueOn":  "2026-03-30T00:00:00Z",
+                                        "title":  "v0.3.0 - Data Platform Foundation"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "Todo",
+                      "title":  "Define storage layers (raw/bronze/silver/gold)"
+                  },
+                  {
+                      "assignees":  [
+                                        "data-literate"
+                                    ],
+                      "content":  {
+                                      "body":  "Run weather pipeline end-to-end with lineage tracking.\\n\\n- Lineage metadata\\n- Data quality checks\\n- Pipeline reports",
+                                      "number":  36,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "Weather pipeline E2E + lineage tracking",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/36"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzglBnTQ",
+                      "labels":  [
+                                     "enhancement",
+                                     "P1-high",
+                                     "component:data"
+                                 ],
+                      "milestone":  {
+                                        "description":  "Data ingestion, transformation, quality framework, and orchestration. Target: Weeks 6-9",
+                                        "dueOn":  "2026-03-30T00:00:00Z",
+                                        "title":  "v0.3.0 - Data Platform Foundation"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "Todo",
+                      "title":  "Weather pipeline E2E + lineage tracking"
+                  },
+                  {
+                      "assignees":  [
+                                        "data-literate"
+                                    ],
+                      "content":  {
+                                      "body":  "Scope and deliver dex-data module.\\n\\n- Spark batch pipelines\\n- Kafka streaming + DLQ\\n- Orchestration patterns\\n- Data quality at ingestion",
+                                      "number":  37,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "dex-data module epic",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/37"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzglBnTc",
+                      "labels":  [
+                                     "enhancement",
+                                     "P1-high",
+                                     "component:data"
+                                 ],
+                      "milestone":  {
+                                        "description":  "Data ingestion, transformation, quality framework, and orchestration. Target: Weeks 6-9",
+                                        "dueOn":  "2026-03-30T00:00:00Z",
+                                        "title":  "v0.3.0 - Data Platform Foundation"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "Todo",
+                      "title":  "dex-data module epic"
+                  },
+                  {
+                      "assignees":  [
+                                        "data-literate"
+                                    ],
+                      "content":  {
+                                      "body":  "Scope and deliver dex-warehouse module.\\n\\n- dbt staging  marts\\n- ML-ready feature tables\\n- Incremental models + tests",
+                                      "number":  38,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "dex-warehouse module epic",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/38"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzglBnTo",
+                      "labels":  [
+                                     "enhancement",
+                                     "P2-medium",
+                                     "component:data"
+                                 ],
+                      "milestone":  {
+                                        "description":  "Data ingestion, transformation, quality framework, and orchestration. Target: Weeks 6-9",
+                                        "dueOn":  "2026-03-30T00:00:00Z",
+                                        "title":  "v0.3.0 - Data Platform Foundation"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "Todo",
+                      "title":  "dex-warehouse module epic"
+                  },
+                  {
+                      "assignees":  [
+                                        "data-literate"
+                                    ],
+                      "content":  {
+                                      "body":  "Scope and deliver dex-lakehouse module.\\n\\n- Iceberg/Delta datasets\\n- Bronze/silver/gold demos\\n- Snapshot + time-travel",
+                                      "number":  39,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "dex-lakehouse module epic",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/39"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzglBnUM",
+                      "labels":  [
+                                     "enhancement",
+                                     "P2-medium",
+                                     "component:data"
+                                 ],
+                      "milestone":  {
+                                        "description":  "Data ingestion, transformation, quality framework, and orchestration. Target: Weeks 6-9",
+                                        "dueOn":  "2026-03-30T00:00:00Z",
+                                        "title":  "v0.3.0 - Data Platform Foundation"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "Todo",
+                      "title":  "dex-lakehouse module epic"
+                  },
+                  {
+                      "assignees":  [
+                                        "data-literate"
+                                    ],
+                      "content":  {
+                                      "body":  "Scope and deliver dex-api module.\\n\\n- Feature retrieval APIs\\n- Model inference APIs\\n- AuthN/AuthZ integration",
+                                      "number":  40,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "dex-api module epic",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/40"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzglBnUU",
+                      "labels":  [
+                                     "enhancement",
+                                     "P2-medium",
+                                     "component:api"
+                                 ],
+                      "milestone":  {
+                                        "description":  "Data ingestion, transformation, quality framework, and orchestration. Target: Weeks 6-9",
+                                        "dueOn":  "2026-03-30T00:00:00Z",
+                                        "title":  "v0.3.0 - Data Platform Foundation"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "Todo",
+                      "title":  "dex-api module epic"
+                  },
+                  {
+                      "assignees":  [
+                                        "data-literate"
+                                    ],
+                      "content":  {
+                                      "body":  "Scope and deliver dex-ops module.\\n\\n- Terraform IaC for AWS/GCP\\n- Kubernetes templates\\n- Secrets management + zero-trust IAM",
+                                      "number":  41,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "dex-ops module epic",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/41"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzglBnUo",
+                      "labels":  [
+                                     "enhancement",
+                                     "P2-medium",
+                                     "component:infrastructure"
+                                 ],
+                      "milestone":  {
+                                        "description":  "Data ingestion, transformation, quality framework, and orchestration. Target: Weeks 6-9",
+                                        "dueOn":  "2026-03-30T00:00:00Z",
+                                        "title":  "v0.3.0 - Data Platform Foundation"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "Todo",
+                      "title":  "dex-ops module epic"
+                  },
+                  {
+                      "assignees":  [
+                                        "data-literate"
+                                    ],
+                      "content":  {
+                                      "body":  "Scope and deliver dex-ml module.\\n\\n- MLflow tracking + model registry\\n- Feature store integration\\n- Model serving + monitoring\\n- RAG/Vector DB example",
+                                      "number":  42,
+                                      "repository":  "data-literate/DEX",
+                                      "title":  "dex-ml module epic",
+                                      "type":  "Issue",
+                                      "url":  "https://github.com/data-literate/DEX/issues/42"
+                                  },
+                      "id":  "PVTI_lAHOAkVS4s4BN4OuzglBnUs",
+                      "labels":  [
+                                     "enhancement",
+                                     "P1-high",
+                                     "component:ml"
+                                 ],
+                      "milestone":  {
+                                        "description":  "Model training, serving, monitoring, and registry. Target: Weeks 10-13",
+                                        "dueOn":  "2026-04-29T00:00:00Z",
+                                        "title":  "v0.4.0 - ML Platform Foundation"
+                                    },
+                      "repository":  "https://github.com/data-literate/DEX",
+                      "status":  "Todo",
+                      "title":  "dex-ml module epic"
+                  }
+              ],
+    "totalCount":  19
+}

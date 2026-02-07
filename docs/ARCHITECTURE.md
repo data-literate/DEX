@@ -4,6 +4,20 @@
 
 **DEX (DataEngineX)** is evolving from a foundational API service into a complete data engineering and ML platform. We are following a phased approach: **Foundation → Core Features → Advanced Platform → Future Innovation**.
 
+## DEX Philosophy
+
+DEX is a unified framework that bridges **Data Engineering, Data Warehousing, Machine Learning, AI Agents, MLOps, and DevOps**. It focuses on building **AI‑ready infrastructure** that moves models from notebooks to production.
+
+**Portfolio Modules (Roadmap):**
+- dex-data (Spark/Flink/Kafka pipelines)
+- dex-warehouse (dbt + lakehouse/warehouse patterns)
+- dex-lakehouse (Iceberg/Delta datasets)
+- dex-ml (MLflow/Kubeflow + model serving)
+- dex-api (FastAPI feature/prediction APIs)
+- dex-ops (Terraform + Kubernetes + GitOps)
+
+See [Readme.md](../Readme.md) for the full philosophy and roadmap context.
+
 ## Current State (v0.1.0 - Foundation Complete ✅)
 
 ### Completed Infrastructure
@@ -72,124 +86,20 @@
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-## Development Phases & Milestones
+## Roadmap Overview
 
-### Phase 1: Foundation (COMPLETED ✅)
-**Target: v0.1.0 | Duration: Weeks 1-2**
-- [x] CI/CD Pipeline
-- [x] GitOps with ArgoCD
-- [x] Multi-environment deployment
-- [x] Security scanning
-- [x] Project management setup
+The detailed roadmap is tracked in [TODO.md](../TODO.md) and the GitHub Project board.
 
-### Phase 2: Production Hardening (CURRENT 🚀)
-**Target: v0.2.0 | Duration: Weeks 3-5 | Priority: P1**
+### Phases (High Level)
 
-**Focus**: Make the API production-ready with observability, health checks, and basic features.
+- **Phase 1: Foundation (v0.1.0)** — CI/CD, GitOps, multi‑env deployments
+- **Phase 2: Production Hardening (v0.2.0)** — observability, health probes, API quality
+- **Phase 3: Data Platform (v0.3.0)** — ingestion, transformation, quality, orchestration
+- **Phase 4: ML Platform (v0.4.0)** — training, registry, serving, monitoring
+- **Phase 5: Advanced Features (v0.5.0)** — auth, caching, analytics
+- **Phase 6: Production Ready (v1.0.0)** — DR, security, performance
 
-**Deliverables**:
-- Structured logging with request IDs
-- Prometheus metrics and OpenTelemetry tracing
-- Enhanced health/readiness probes
-- Graceful shutdown
-- Error handling and validation
-- API documentation (OpenAPI)
-- E2E API tests
-- Implement pyconcepts endpoints
-
-**Success Criteria**:
-- 100% test coverage for API endpoints
-- Metrics exported to Prometheus
-- Logs structured (JSON format)
-- Request-response tracking works
-- Zero-downtime deployments verified
-
-### Phase 3: Data Platform Foundation
-**Target: v0.3.0 | Duration: Weeks 6-9 | Priority: P1**
-
-**Focus**: Build data ingestion, transformation, and quality framework.
-
-**Deliverables**:
-- Data quality framework (schema validation, constraints)
-- Orchestration setup (Airflow/Prefect)
-- Storage layers (raw/bronze/silver/gold)
-- Data pipeline for weather use case
-- Data profiling and lineage
-- Pipeline testing framework
-- Data freshness monitoring
-
-**Success Criteria**:
-- Weather pipeline running on schedule
-- Data quality checks passing
-- Lineage tracked end-to-end
-- Pipeline failures alert properly
-- Idempotent pipeline runs
-
-### Phase 4: ML Platform Foundation
-**Target: v0.4.0 | Duration: Weeks 10-13 | Priority: P1**
-
-**Focus**: Model training, serving, and monitoring infrastructure.
-
-**Deliverables**:
-- MLflow/W&B integration
-- Model registry and versioning
-- Automated training pipeline
-- Model serving API (batch + real-time)
-- Model performance monitoring
-- Drift detection
-- Feature store basics
-- Weather model deployment
-
-**Success Criteria**:
-- Model training automated via pipeline
-- Model served via REST API
-- Drift detection alerts working
-- Model versioning tracked
-- A/B testing capability exists
-
-### Phase 5: Advanced Features
-**Target: v0.5.0 | Duration: Weeks 14-17 | Priority: P2**
-
-**Focus**: Authentication, caching, advanced ML, analytics.
-
-**Deliverables**:
-- JWT authentication and RBAC
-- Redis caching layer
-- Rate limiting
-- Feature flags
-- BI tool integration (Metabase/Superset)
-- Semantic layer for metrics
-- Automated reporting
-- Advanced ML features (AutoML, explainability)
-
-**Success Criteria**:
-- Auth working across all APIs
-- Cache hit rate >70%
-- BI dashboards accessible
-- Self-service analytics available
-- Feature flags control rollouts
-
-### Phase 6: Production Ready (v1.0.0)
-**Target: v1.0.0 | Duration: Weeks 18-20 | Priority: P0**
-
-**Focus**: Final hardening, documentation, disaster recovery.
-
-**Deliverables**:
-- Complete documentation
-- Disaster recovery tested
-- Security audit passed
-- Performance testing complete
-- SLO/SLI/SLA defined
-- Production runbook
-- On-call procedures
-- Cost optimization
-
-**Success Criteria**:
-- 99.9% uptime SLA
-- RTO < 1 hour, RPO < 15 minutes
-- All security scans passing
-- Performance benchmarks met
-- Documentation complete
+For execution details, see [TODO.md](../TODO.md) and [SDLC](SDLC.md).
 
 ## Modular Monolith Strategy
 

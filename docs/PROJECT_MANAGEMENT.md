@@ -149,9 +149,9 @@ Example milestones:
 ### 4. Merge & Deploy
 - Merge PR (squash preferred) → auto-closes issue
 - Issue auto-moves to "Done"
-- CD deploys to dev (if merged to `dev` branch)
-- CD deploys to stage/prod (if merged to `main` branch)
-- Monitor ArgoCD sync status
+- Deployments follow the CI/CD pipeline
+
+See [CI/CD Pipeline](CI_CD.md) for deployment automation details.
 
 ### 5. Retrospective
 - Review completed issues in milestone
@@ -216,13 +216,7 @@ gh issue list --search "API error"
 
 ## Integration with CI/CD
 
-Our CI/CD workflows automatically:
-- ✅ Run on every PR (lint, test, security scan)
-- ✅ Build and push Docker images
-- ✅ Update manifests for ArgoCD
-- ✅ Deploy to environments based on branch
-
-Status checks must pass before merge (configured in branch protection).
+CI/CD automation is documented in [CI/CD Pipeline](CI_CD.md). This guide focuses on project management mechanics.
 
 ## Useful Links
 

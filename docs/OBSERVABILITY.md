@@ -613,6 +613,32 @@ groups:
 
 ---
 
+## Health Checks
+
+DEX provides three health endpoints for Kubernetes probes:
+
+- **/health** (liveness) — returns component status and overall health
+- **/ready** (readiness) — returns readiness based on dependency checks
+- **/startup** (startup) — indicates app initialization completion
+
+### Configure Dependency Checks
+
+Set these environment variables to enable component checks:
+
+```bash
+export DEX_DB_HOST="db"
+export DEX_DB_PORT="5432"
+
+export DEX_CACHE_HOST="redis"
+export DEX_CACHE_PORT="6379"
+
+export DEX_EXTERNAL_API_URL="https://api.example.com/health"
+```
+
+If a component is not configured, it will show **skipped** in the response.
+
+---
+
 ## Troubleshooting
 
 ### Metrics not appearing
@@ -645,7 +671,7 @@ groups:
    # Make several requests
    curl http://localhost:8000/
    curl http://localhost:8000/health
-   curl http://localhost:8000/readiness
+  curl http://localhost:8000/ready
    ```
 
 4. **Verify service name** - Check application logs on startup:

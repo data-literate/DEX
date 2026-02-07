@@ -87,11 +87,9 @@ graph LR
 **Entry**: Pull request opened against `dev` (integration) or `main` (release).
 
 **Required Checks**:
-- Lint: `ruff check src/ tests/`
-- Formatting: `black --check .`
-- Types: `mypy src/`
-- Tests: `pytest -v`
-- Security: CodeQL and Trivy scans
+- CI, security, and quality checks as defined in the CI/CD pipeline.
+
+See [CI/CD Pipeline](CI_CD.md) for the authoritative list of checks.
 
 **Exit**: All checks pass and at least one reviewer approves.
 
@@ -173,14 +171,12 @@ flowchart TD
 **Steps**:
 
 1. Create or update a GitHub Issue and add it to the GitHub Project board.
-2. Create a feature branch: `git switch -c feat/short-description`.
-3. Implement changes and add tests.
-4. Run local checks: `pytest`, `ruff check src/ tests/`, `black --check`, `mypy`.
-5. Open a PR to `dev` and request review.
-6. After validation in dev, open a release PR from `dev` → `main`.
-7. Merge after all required checks pass.
+2. Create a feature branch and implement changes.
+3. Open a PR to `dev` and request review.
+4. After validation in dev, open a release PR from `dev` → `main`.
+5. Merge after all required checks pass.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for branch naming and PR conventions.
+See [Contributing Guide](../CONTRIBUTING.md) for branch naming, local checks, and PR conventions.
 
 ---
 

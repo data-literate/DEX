@@ -23,7 +23,7 @@ def test_health() -> None:
     """Test health check endpoint."""
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "healthy"}
+    assert response.json() == {"status": "alive"}
     assert "X-Request-ID" in response.headers
 
 
@@ -31,8 +31,18 @@ def test_readiness() -> None:
     """Test readiness check endpoint."""
     response = client.get("/ready")
     assert response.status_code == 200
-    assert response.json() == {"status": "ready"}
+    data = response.json()
+    assert data["status"] == "ready"
+    assert "components" in data
     assert "X-Request-ID" in response.headers
+
+
+def test_startup() -> None:
+    """Test startup check endpoint."""
+    with TestClient(app) as local_client:
+        response = local_client.get("/startup")
+    assert response.status_code == 200
+    assert response.json() == {"status": "started"}
 
 
 def test_metrics_endpoint() -> None:
