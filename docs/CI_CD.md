@@ -127,7 +127,7 @@ images:
     newTag: sha-a1b2c3d4  # ← Updated by CD
 ```
 
-**Commit Message**: `chore: update dev image to sha-XXXXXXXX [skip ci]`
+**PR Title**: `chore: update dev image to sha-XXXXXXXX`
 
 **Result**: ArgoCD detects change and syncs `dex-dev` namespace
 
@@ -145,7 +145,7 @@ images:
     newTag: sha-a1b2c3d4  # ← Updated by CD
 ```
 
-**Commit Message**: `chore: update stage/prod image to sha-XXXXXXXX [skip ci]`
+**PR Title**: `chore: update stage/prod image to sha-XXXXXXXX`
 
 **Result**: ArgoCD syncs `dex-stage` and `dex-prod` namespaces
 
@@ -225,7 +225,7 @@ sequenceDiagram
     CI-->>GH: ✓ CI passes
     GH->>CD: Trigger CD workflow
     CD->>GHCR: Build & push image (sha-XXXXXXXX)
-    CD->>GH: Update infra/argocd/overlays/dev/kustomization.yaml
+    CD->>GH: Create PR updating dev kustomization.yaml
     GH->>Argo: Git change detected
     Argo->>K8s: Sync dex-dev namespace
     K8s-->>Argo: ✓ Sync complete
@@ -249,7 +249,7 @@ sequenceDiagram
     CI-->>GH: ✓ CI passes
     GH->>CD: Trigger CD workflow
     CD->>GHCR: Build & push image (sha-XXXXXXXX)
-    CD->>GH: Update stage/prod kustomization.yaml
+    CD->>GH: Create PR updating stage/prod kustomization.yaml
     GH->>Argo: Git change detected
     Argo->>K8s: Sync dex-stage & dex-prod
     K8s-->>Argo: ✓ Sync complete
@@ -508,16 +508,6 @@ docker pull ghcr.io/data-literate/dex:sha-XXXXXXXX
 
 # Check pod image
 kubectl get pod -n dex-dev -o jsonpath='{.items[0].spec.containers[0].image}'
-```
-
-### [skip ci] Not Working
-
-```bash
-# Verify commit message format
-git log --format="%s" -1
-
-# Should contain: [skip ci] or [ci skip]
-# CD commits use: [skip ci] to avoid recursive builds
 ```
 
 ## Security Considerations
