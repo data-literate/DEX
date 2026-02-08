@@ -70,7 +70,7 @@ pytest-cov = "^7.0.0"
 ipykernel = "^7.1.0"
 # runtime packages used across the repo that mypy expected
 numpy = "^2.4"
-pandas = "^2.3"
+pandas = "^3.0"
 httpx = "^0.28.0"
 types-requests = "^2.32.4.20260107"
 ruff = "^0.15.0"
