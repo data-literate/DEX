@@ -6,10 +6,10 @@
 
 # COMMAND ----------
 
+import logging
+
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
-
-import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

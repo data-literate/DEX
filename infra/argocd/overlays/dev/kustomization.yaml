@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dex-dev
+
+resources:
+  - ../../base
+
+replicas:
+  - name: dex
+    count: 2
+
+images:
+  - name: data-literate/dex
+    newName: ghcr.io/data-literate/dex
+    newTag: sha-51c0cc9c
+
+patches:
+  - path: deployment.yaml

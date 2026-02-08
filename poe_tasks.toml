@@ -1,0 +1,51 @@
+[tool.poe]
+executor.type = "uv"
+
+[tool.poe.tasks.lint]
+shell = "ruff check src/ tests/ && black --check . && mypy src/ --ignore-missing-imports"
+help = "Run the combined lint suite."
+
+[tool.poe.tasks.lint-fix]
+shell = "ruff check src/ tests/ --fix && black src/ tests/"
+help = "Auto-fix lint issues and format code."
+
+[tool.poe.tasks.test]
+cmd = "pytest -v"
+help = "Run the test suite."
+
+[tool.poe.tasks.test-cov]
+cmd = "pytest tests/ -v --cov=src --cov-report=xml"
+help = "Run tests with coverage for CI."
+
+[tool.poe.tasks.format]
+cmd = "black ."
+help = "Format code with Black."
+
+[tool.poe.tasks.api]
+cmd = "uvicorn dataenginex.main:app --reload"
+help = "Run the FastAPI app locally."
+
+[tool.poe.tasks.weather-feature]
+cmd = "python ml/weather/notebooks/feature_engineering.py"
+help = "Run weather feature engineering pipeline."
+
+[tool.poe.tasks.weather-train]
+cmd = "python ml/weather/notebooks/train_model.py"
+help = "Train weather models."
+
+[tool.poe.tasks.weather-analyze]
+cmd = "python ml/weather/notebooks/analyze_predictions.py"
+help = "Analyze weather model predictions."
+
+[tool.poe.tasks.uv]
+cmd = "uv"
+help = "Launch the Astral uv CLI."
+
+[tool.poe.tasks.uv-lock]
+cmd = "uv lock"
+help = "Resolve dependencies from pyproject.toml and write uv.lock."
+
+[tool.poe.tasks.uv-sync]
+cmd = "uv sync"
+help = "Install dependencies from uv.lock (generated from pyproject.toml) without Poetry installs."
+env = { UV_PROJECT_ENVIRONMENT = ".venv" }

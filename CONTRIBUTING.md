@@ -7,9 +7,10 @@ Guidelines
 - Use semantic commit messages (e.g., `feat:`, `fix:`, `chore:`).
 
 Local checks
-- `poetry install`
-- `poe lint`
-- `poetry run pytest -q`
+- `uv lock`
+- `uv sync`
+- `uv run poe lint`
+- `uv run poe test`
 
 Code review
 - Assign reviewers via PR and wait for required approvals before merging.

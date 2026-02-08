@@ -1,9 +1,10 @@
 """OpenWeatherMap API Pipeline - Core extraction logic"""
 
-import requests
 import logging
-from typing import List, Dict, Any
 from datetime import datetime
+from typing import Any
+
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ class OpenWeatherAPIClient:
             "Accept": "application/json",
         }
 
-    def get_weather(self, city: str, units: str = "metric") -> Dict[str, Any]:
+    def get_weather(self, city: str, units: str = "metric") -> dict[str, Any]:
         """
         Fetch current weather for a city.
 
@@ -53,8 +54,8 @@ class OpenWeatherPipeline:
         self.extracted_data = []
 
     def extract_cities(
-        self, cities: List[str], units: str = "metric"
-    ) -> List[Dict[str, Any]]:
+        self, cities: list[str], units: str = "metric"
+    ) -> list[dict[str, Any]]:
         """
         Extract weather data for multiple cities.
 
@@ -80,7 +81,7 @@ class OpenWeatherPipeline:
 
         return self.extracted_data
 
-    def _transform_record(self, api_response: Dict[str, Any]) -> Dict[str, Any]:
+    def _transform_record(self, api_response: dict[str, Any]) -> dict[str, Any]:
         """Transform raw API response to standardized format."""
         weather = api_response["weather"][0]
         visibility_km = api_response.get("visibility", 0) / 1000
@@ -117,6 +118,6 @@ class OpenWeatherPipeline:
         logger.info(f"✓ Data validation passed for {count} records")
         return True
 
-    def get_data(self) -> List[Dict[str, Any]]:
+    def get_data(self) -> list[dict[str, Any]]:
         """Get extracted and transformed data."""
         return self.extracted_data

@@ -1,6 +1,6 @@
 """dataenginex package init.
 
-Minimal package marker for Poetry packaging and imports.
+Minimal package marker for packaging and imports.
 """
 
 __all__ = ["main"]

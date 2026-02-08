@@ -1,4 +1,5 @@
-from typing import Callable, TypeVar, ParamSpec, TypedDict
+from collections.abc import Callable
+from typing import ParamSpec, TypedDict, TypeVar
 
 P = ParamSpec("P")
 R = TypeVar("R")

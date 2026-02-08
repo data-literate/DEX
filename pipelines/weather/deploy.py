@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Deploy weather pipeline to Databricks."""
 
-import json
-import subprocess
-import logging
 import argparse
+import json
+import logging
+import subprocess
 from pathlib import Path
 
 logging.basicConfig(

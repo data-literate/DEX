@@ -1,135 +1,84 @@
-# DEX — Single Documentation
+# 📚 DEX Documentation Hub
 
-This single documentation file consolidates project guidance, quick-run instructions, conceptual notes, and the folder structure. Use this as the canonical developer guide while you explore and extend DEX.
-
----
-
-## Project Overview
-
-DEX (DataEngineX) is a Python-based Data & AI Engine demonstrating end-to-end workflows in data engineering, analysis, ML, generative AI, MLOps, and DevOps. The repository contains small, focused concept modules under `src/pyconcepts/` designed for learning and integration into runnable examples.
-
-## Quick Start — How to Run Locally
-
-Prerequisites
-- Python 3.10+ (3.12 used in this workspace)
-- Virtual environment tool (venv, poetry, or pipenv)
-
-Install dependencies (using pip):
-
-```bash
-python -m venv .venv
-source .venv/Scripts/activate    # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-Run the FastAPI application (development):
-
-```bash
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
-```
-
-Run tests:
-
-```bash
-pytest -q
-```
-
-Notes
-- If you use Poetry, run `poetry install` and `poetry run uvicorn app.main:app --reload`.
-- Ensure environment variables (API keys, DB URLs) are set via a `.env` file when needed.
+**Welcome to DataEngineX documentation!** This page helps you find what you need quickly.
 
 ---
 
-## `src/pyconcepts` — Modules, Goals and Exercises
+## 🎯 Quick Navigation
 
-This section documents each small concept module and suggests concrete exercises to integrate them end-to-end into DEX.
+### 👋 New to DEX?
+**Start here in order:**
+1. **[Main README](../Readme.md)** - Project overview and quick start
+2. **[Contributing Guide](../CONTRIBUTING.md)** - How to contribute
+3. **[SDLC](SDLC.md)** - Development workflow and stages
 
-- `async_http_client.py`
-	- Goal: implement a robust async HTTP client with retries, timeouts, and simple in-memory caching.
-	- Exercise: fetch live data from a public API (OpenWeatherMap, Coindesk, etc.), cache results for 60 seconds, expose via an endpoint `/api/external-data`.
+### 🏗️ Setting Up
+- **[CI/CD Pipeline](CI_CD.md)** - Complete automation guide
+- **[Infrastructure Setup](../infra/README.md)** - Kubernetes & ArgoCD configuration
+- **[Local K8s Setup](LOCAL_K8S_SETUP.md)** - Test deployments locally
 
-- `async_dependency_injection.py`
-	- Goal: show how to wire services (HTTP client, DB connection, config) into FastAPI using dependency injection.
-	- Exercise: create factory functions that return DB or client instances; add tests that replace dependencies with mocks to verify behavior.
+### 🚀 Deploying
+- **[Deployment Runbook](DEPLOY_RUNBOOK.md)** - Release and rollback procedures
+  
 
-- `context_managers.py`
-	- Goal: implement sync/async context managers for resource management (DB connections, temporary files, timers).
-	- Exercise: add a DB connection context manager for SQLite that opens/closes connections and times queries.
+### 📊 Monitoring & Debugging
+- **[Observability](OBSERVABILITY.md)** - Metrics, logging, and tracing
+- **[Architecture](ARCHITECTURE.md)** - System design and components
 
-- `strict_decorators.py`
-	- Goal: provide decorators for input validation, retry/backoff, and simple rate limiting.
-	- Exercise: add a `@retry` decorator used by the HTTP client; add a `@validate_types` decorator with runtime checks used in a utility function.
+### 🛠️ Project Management
+- **[Project Management](PROJECT_MANAGEMENT.md)** - GitHub Issues, Projects, and workflow
 
-- `var_len_args.py`
-	- Goal: demonstrate flexible function signatures and safe argument handling.
-	- Exercise: implement a small ETL helper that accepts variable transform functions and applies them to a DataFrame.
-
-- `yield_keyword.py`
-	- Goal: explain and demonstrate generator patterns and streaming results.
-	- Exercise: implement a streaming CSV reader that yields rows to an async endpoint using `StreamingResponse` from FastAPI.
-
-### Integrations (end-to-end ideas)
-
-- Build a small ETL endpoint `/api/insights`:
-	1. Use the async HTTP client to fetch raw data.
-	2. Use `var_len_args` transforms to clean/aggregate data.
-	3. Store results in SQLite via `context_managers` DB context.
-	4. Expose aggregated results and stream raw rows with `yield_keyword` utilities.
-
-### Testing ideas
-
-- Create unit tests for the DI layer by injecting mock HTTP clients.
-- Test retry behavior by simulating failing endpoints.
+### 📈 Roadmap Exports
+- **[Project Roadmap (JSON)](roadmap/project-roadmap.json)**
+- **[Project Roadmap (CSV)](roadmap/project-roadmap.csv)**
 
 ---
 
-## Folder Structure
+## 📖 Documentation by Topic
 
-Current (trimmed):
-
+### Development
 ```
-/ (project root)
-├─ app/
-│  └─ main.py
-├─ src/pyconcepts/
-│  ├─ async_dependency_injection.py
-│  ├─ async_http_client.py
-│  ├─ context_managers.py
-│  ├─ strict_decorators.py
-│  ├─ var_len_args.py
-│  └─ yield_keyword.py
-├─ tests/
-├─ requirements.txt
-└─ Readme.md
+SDLC.md                    - Software development lifecycle
+CONTRIBUTING.md            - Contribution guidelines
+ARCHITECTURE.md            - System architecture
 ```
 
-Proposed additions (recommended):
-
+### Deployment
 ```
-docs/                 # consolidated project documentation (this file)
-examples/             # small runnable examples (weather, ETL)
-notebooks/            # Jupyter notebooks for EDA and experiments
-infra/                # Docker, GitHub Actions, Terraform
-pipelines/            # Prefect/Airflow pipeline definitions
+CI_CD.md                   - CI/CD pipeline (comprehensive)
+DEPLOY_RUNBOOK.md          - Deployment procedures
+../infra/README.md         - Infrastructure & GitOps
+LOCAL_K8S_SETUP.md         - Local testing guide
 ```
 
-Guidance
-- Keep `docs/` targeted and small while you iterate.
-- Add runnable examples next to lessons (e.g., `examples/weather/`).
+### Operations
+```
+OBSERVABILITY.md           - Metrics, logs, traces (consolidated)
+PROJECT_MANAGEMENT.md      - Issue tracking & project workflow
+```
 
 ---
 
-## Quick Win Example Suggestion
+## 🔍 Find by Task
 
-Create a **Weather Data API**:
-- Fetch weather from OpenWeatherMap API (free tier)
-- Cache in SQLite
-- Serve via FastAPI endpoints
-- Add tests and structured logging
-- Use the concept modules (`async_http_client`, DI, context managers, streaming) to demonstrate E2E flow
+| I want to... | Go to... |
+|---|---|
+| Run the app locally | [Main README → Quick Start](../Readme.md#quick-start-local) |
+| Understand CI/CD | [CI/CD Pipeline](CI_CD.md) |
+| Deploy to production | [Deployment Runbook](DEPLOY_RUNBOOK.md) |
+| Set up monitoring | [Observability](OBSERVABILITY.md) |
+| Contribute code | [Contributing Guide](../CONTRIBUTING.md) |
+| Understand architecture | [Architecture](ARCHITECTURE.md) |
+| Test with Kubernetes | [Local K8s Setup](LOCAL_K8S_SETUP.md) |
+| Track issues/milestones | [Project Management](PROJECT_MANAGEMENT.md) |
 
 ---
 
-If you want, I can now:
-- update the root `Readme.md` to link to this file, and
-- add a small runnable example under `examples/weather/` with code, tests, and a short README.
+## 📁 Documentation Standards
+
+All documentation follows these principles:
+- **Single source of truth**: No duplication between docs
+- **Clear purpose**: Each doc covers one topic comprehensively
+- **Cross-references**: Links to related documentation
+- **Mermaid diagrams**: Visual workflows where helpful
+- **Keep updated**: Update docs with code changes

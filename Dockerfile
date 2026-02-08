@@ -3,17 +3,16 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /build
 
-# Install poetry
-RUN pip install --no-cache-dir poetry==2.3.0
+# Install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Copy dependency files
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml uv.lock ./
 
 # Install dependencies to a virtual environment
-RUN poetry config virtualenvs.in-project true && \
-    poetry install --no-dev --no-interaction --no-ansi
-
-# Runtime stage
+ENV UV_PROJECT_ENVIRONMENT=/build/.venv \
+    UV_PYTHON=python
+RUN /root/.local/bin/uv sync --frozen --no-dev
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -26,6 +25,7 @@ COPY src/ /app/src/
 
 # Set environment variables
 ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONPATH="/app/src:$PYTHONPATH" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
@@ -33,4 +33,4 @@ ENV PATH="/app/.venv/bin:$PATH" \
 EXPOSE 8000
 
 # Run the FastAPI application
-CMD ["uvicorn", "dataenginex.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "dataenginex.main:app", "--host", "0.0.0.0", "--port", "8000"]

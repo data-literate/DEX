@@ -204,7 +204,8 @@ ENVIRONMENT REQUIREMENTS
 Local Development:
   - Python 3.12+
   - requests library
-  - Poetry (environment management)
+  - uv (environment management)
+  - Poetry (project metadata only)
 
 Databricks:
   - Workspace with serverless compute
