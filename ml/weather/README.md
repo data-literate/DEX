@@ -17,15 +17,15 @@ Machine learning models for weather prediction and analysis.
 
 Run feature engineering:
 ```bash
-poetry run python notebooks/feature_engineering.py
+uv run poe weather-feature
 ```
 
 Train models:
 ```bash
-poetry run python notebooks/train_model.py
+uv run poe weather-train
 ```
 
 Analyze predictions:
 ```bash
-poetry run python notebooks/analyze_predictions.py
+uv run poe weather-analyze
 ```

@@ -61,7 +61,7 @@ jobs:
           echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
       
       - name: Build and push PR preview image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
@@ -73,7 +73,7 @@ jobs:
           platforms: linux/amd64
       
       - name: Comment on PR
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const prNumber = ${{ github.event.pull_request.number }};

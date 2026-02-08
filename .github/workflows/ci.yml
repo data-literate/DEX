@@ -28,28 +28,25 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Poetry
+      - name: Install uv
         run: |
-          curl -sSL https://install.python-poetry.org | python3 -
+          curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Install dependencies
+      - name: Install dependencies (uv)
+        env:
+          UV_PROJECT_ENVIRONMENT: .venv
+          UV_PYTHON: "3.11"
         run: |
-          poetry config virtualenvs.in-project true
-          poetry install
+          uv lock
+          uv sync
 
-      - name: Run Ruff linter
-        run: poetry run ruff check src/ tests/
-
-      - name: Run Black formatter check
-        run: poetry run black --check src/ tests/
-
-      - name: Run mypy type checker
-        run: poetry run mypy src/
+      - name: Run lint suite
+        run: uv run poe lint
         continue-on-error: true
 
       - name: Run pytest
-        run: poetry run pytest tests/ -v --cov=src --cov-report=xml
+        run: uv run poe test-cov
 
       - name: Upload coverage to SonarCloud
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

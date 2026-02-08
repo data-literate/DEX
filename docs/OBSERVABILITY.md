@@ -340,8 +340,9 @@ Total: 150ms
 
 1. **Run the application**:
    ```bash
-   poetry install
-   poetry run uvicorn dataenginex.main:app --reload
+  uv lock
+  uv sync
+  uv run poe api
    ```
 
 2. **Test metrics endpoint**:
@@ -397,7 +398,7 @@ Total: 150ms
 2. **Run application with tracing**:
    ```bash
    export OTLP_ENDPOINT="http://localhost:4317"
-   poetry run uvicorn dataenginex.main:app --reload
+  uv run poe api
    ```
 
 3. **Generate traces**:
@@ -417,7 +418,7 @@ Enable console trace export to see traces in logs:
 
 ```bash
 export ENABLE_CONSOLE_TRACES="true"
-poetry run uvicorn dataenginex.main:app --reload
+uv run poe api
 ```
 
 Make a request and check console output:
@@ -454,10 +455,10 @@ Verify metrics and tracing implementation:
 
 ```bash
 # Run observability tests
-poetry run pytest tests/test_metrics.py tests/test_tracing.py -v
+uv run poe test
 
 # Run all tests with coverage
-poetry run pytest tests/ --cov=dataenginex --cov-report=term-missing
+uv run poe test-cov
 ```
 
 **Expected:**
@@ -472,7 +473,7 @@ $env:OTLP_ENDPOINT = "http://localhost:4317"
 $env:ENABLE_CONSOLE_TRACES = "true"
 
 # Run application
-poetry run uvicorn dataenginex.main:app --reload
+uv run poe api
 
 # Test metrics
 Invoke-WebRequest -Uri http://localhost:8000/metrics
@@ -721,7 +722,7 @@ If a component is not configured, it will show **skipped** in the response.
 Run observability tests:
 
 ```bash
-poetry run pytest tests/test_metrics.py tests/test_tracing.py -v
+uv run poe test
 ```
 
 ---

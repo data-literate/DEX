@@ -61,7 +61,7 @@ jobs:
             type=raw,value=latest,enable=${{ github.event.workflow_run.head_branch == 'main' }}
       
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
@@ -87,6 +87,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
           ref: dev  # Explicitly check out dev branch
       
       - name: Update dev kustomization.yaml
@@ -98,9 +99,13 @@ jobs:
           sed -i "s|newTag:.*|newTag: $IMAGE_TAG|g" infra/argocd/overlays/dev/kustomization.yaml
           
           echo "Updated dev overlay to use image tag: $IMAGE_TAG"
+
+      - name: Clear git extraheader
+        run: |
+          git config --unset-all http.https://github.com/.extraheader || true
       
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: update dev image to sha-${{ needs.build-and-push.outputs.short_sha }} [skip ci]"
@@ -130,6 +135,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
           ref: main  # Explicitly check out main branch
 
       - name: Update stage and prod kustomization.yaml
@@ -143,8 +149,12 @@ jobs:
 
           echo "Updated stage and prod overlays to use image tag: $IMAGE_TAG"
 
+      - name: Clear git extraheader
+        run: |
+          git config --unset-all http.https://github.com/.extraheader || true
+
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: update stage/prod image to sha-${{ needs.build-and-push.outputs.short_sha }} [skip ci]"
