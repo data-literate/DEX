@@ -100,7 +100,7 @@ jobs:
           echo "Updated dev overlay to use image tag: $IMAGE_TAG"
       
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: update dev image to sha-${{ needs.build-and-push.outputs.short_sha }} [skip ci]"
@@ -144,7 +144,7 @@ jobs:
           echo "Updated stage and prod overlays to use image tag: $IMAGE_TAG"
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: update stage/prod image to sha-${{ needs.build-and-push.outputs.short_sha }} [skip ci]"
