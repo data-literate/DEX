@@ -66,7 +66,7 @@ These modules are a **roadmap** for the full DEX portfolio and will be added ite
 | Component | Technology |
 |---|---|
 | **Language** | Python 3.11+ |
-| **Package Manager** | Poetry |
+| **Package Manager** | Poetry (project metadata) + uv (installs) |
 | **Web Framework** | FastAPI + Uvicorn |
 | **Code Quality** | Ruff, Black, Mypy |
 | **Testing** | Pytest with coverage |
@@ -98,7 +98,7 @@ DEX/
 ## 🚀 Quick Start (Local)
 
 ### Prerequisites
-- Git, Python 3.11+, Poetry
+- Git, Python 3.11+, Poetry, uv
 - (Optional) Docker for running containerized app
 
 ### 1. Clone & Install
@@ -106,13 +106,14 @@ DEX/
 ```bash
 git clone https://github.com/data-literate/DEX
 cd DEX
-poetry install
+uv lock
+uv sync
 ```
 
 ### 2. Run the API
 
 ```bash
-poetry run uvicorn dataenginex.main:app --reload
+uv run poe api
 ```
 
 Visit **http://127.0.0.1:8000** to verify the health endpoint.
@@ -120,15 +121,13 @@ Visit **http://127.0.0.1:8000** to verify the health endpoint.
 ### 3. Run Tests
 
 ```bash
-poetry run pytest -v
+uv run poe test
 ```
 
 ### 4. Run Code Quality Checks
 
 ```bash
-poetry run ruff check src/ tests/
-poetry run black --check .
-poetry run mypy src/
+uv run poe lint
 ```
 
 ## CI/CD, Deployment, and K8s
@@ -167,27 +166,59 @@ See [SDLC](docs/SDLC.md) and [Contributing Guide](CONTRIBUTING.md) for the full 
 
 ```bash
 # Install dependencies
-poetry install
+uv lock
+uv sync
 
 # Run app locally
-poetry run uvicorn dataenginex.main:app --reload
+uv run poe api
 
 # Run tests
-poetry run pytest -v
+uv run poe test
 
 # Run all quality checks
-poetry run ruff check src/ tests/
-poetry run black --check .
-poetry run mypy src/
+uv run poe lint
 
 # Auto-format code
-poetry run black .
+uv run poe format
 
 # Build Docker image locally
 docker build -t dex:latest .
 
 # Run Docker image
 docker run -p 8000:8000 dex:latest
+```
+
+## Poe Tasks
+
+Poe tasks are defined in poe_tasks.toml and use uv for installs and runs (no Poetry installs).
+
+```bash
+# Run the combined lint suite
+uv run poe lint
+
+# Launch the Astral uv CLI
+uv run poe uv --help
+
+# Lock dependencies from pyproject.toml
+uv run poe uv-lock
+
+# Fast install using uv (reads uv.lock)
+uv run poe uv-sync
+```
+
+## UV + Poetry Workflow
+
+Use Poetry for project metadata, and use uv for locking and installs:
+
+```bash
+# Update dependencies by editing pyproject.toml
+# (Poetry does not install dependencies in this workflow.)
+
+# Resolve and write uv.lock from pyproject.toml
+uv run poe uv-lock
+
+# Install quickly with uv (uses .venv)
+uv run poe uv-sync
 ```
 
 ## Next Steps

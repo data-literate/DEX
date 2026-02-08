@@ -87,6 +87,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
           ref: dev  # Explicitly check out dev branch
       
       - name: Update dev kustomization.yaml
@@ -130,6 +131,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
           ref: main  # Explicitly check out main branch
 
       - name: Update stage and prod kustomization.yaml

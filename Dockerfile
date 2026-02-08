@@ -3,15 +3,16 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /build
 
-# Install poetry
-RUN pip install --no-cache-dir poetry==2.3.0
+# Install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Copy dependency files
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml uv.lock ./
 
 # Install dependencies to a virtual environment
-RUN poetry config virtualenvs.in-project true && \
-        poetry install --only main --no-interaction --no-ansi --no-root
+ENV UV_PROJECT_ENVIRONMENT=/build/.venv \
+    UV_PYTHON=python
+RUN /root/.local/bin/uv sync --frozen --no-dev
 FROM python:3.11-slim
 
 WORKDIR /app

@@ -229,10 +229,8 @@ graph TD
 ### CI Failures
 ```bash
 # Run lint locally
-poetry run ruff check src/ tests/
-poetry run black --check src/ tests/
-poetry run mypy src/
-poetry run pytest tests/
+uv run poe lint
+uv run poe test
 ```
 
 ### CD Not Triggering

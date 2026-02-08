@@ -140,7 +140,7 @@ src/
 ### Core Stack (Confirmed)
 - **API**: FastAPI + Uvicorn
 - **Language**: Python 3.11+
-- **Package Management**: Poetry
+- **Package Management**: Poetry (metadata) + uv (installs)
 - **Container**: Docker
 - **Orchestration**: Kubernetes + ArgoCD
 - **CI/CD**: GitHub Actions

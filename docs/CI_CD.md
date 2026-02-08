@@ -69,13 +69,10 @@ Runs code quality checks and test suite:
 
 ```bash
 # Linting
-poetry run ruff check src/ tests/
-
-# Type checking
-poetry run mypy src/
+uv run poe lint
 
 # Tests with coverage
-poetry run pytest tests/ -v --cov=src --cov-report=xml
+uv run poe test-cov
 ```
 
 **Requirements**: All checks must pass before merge
@@ -457,12 +454,10 @@ gh run list --workflow cd.yml --status failure
 
 ```bash
 # Run lint checks locally
-poetry run ruff check src/ tests/
-poetry run black --check src/ tests/
+uv run poe lint
 
 # Auto-fix
-poetry run ruff check src/ tests/ --fix
-poetry run black src/ tests/
+uv run poe lint-fix
 ```
 
 ### Image Not Building
@@ -613,10 +608,10 @@ test: add integration tests for API
 
 ```bash
 # Local development
-poetry install
-poetry run pytest
-poetry run ruff check src/ tests/
-poetry run black --check src/ tests/
+uv lock
+uv sync
+uv run poe test
+uv run poe lint
 
 # Create PR
 gh pr create --title "feat: add feature" --body "Description"

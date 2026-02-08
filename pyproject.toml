@@ -8,6 +8,40 @@ authors = [
 ]
 readme = "Readme.md"
 requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.32.0",
+    "pyspark>=4.1.1",
+    "databricks-cli",
+    "fastapi>=0.128.0",
+    "uvicorn>=0.40.0",
+    "python-dotenv>=1.0.0",
+    "structlog>=25.5.0",
+    "python-json-logger>=4.0.0",
+    "prometheus-client>=0.24.0",
+    "opentelemetry-api>=1.39.0",
+    "opentelemetry-sdk>=1.39.0",
+    "opentelemetry-instrumentation-fastapi>=0.60b1",
+    "opentelemetry-exporter-otlp>=1.39.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "ipykernel>=7.1.0",
+    "numpy>=2.4",
+    "pandas>=2.3",
+    "httpx>=0.28.0",
+    "types-requests>=2.32.4.20260107",
+    "ruff>=0.15.0",
+    "black>=26.1.0",
+    "mypy>=1.19.1",
+    "uv>=0.10.0",
+]
+dex = [
+    "pyspark>=4.1.1",
+    "databricks-cli",
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -48,38 +82,17 @@ warn_return_any = true
 warn_unreachable = true
 no_implicit_optional = true
 
-[tool.poetry.dependencies]
-python = "^3.11"
-requests = "^2.32.0"
-pyspark = ">=4.1.1"
-databricks-cli = "*"
-fastapi = "^0.128.0"
-uvicorn = { extras = ["standard"], version = "^0.40.0" }
-python-dotenv = "^1.0.0"
-structlog = "^25.5.0"
-python-json-logger = "^4.0.0"
-prometheus-client = "^0.24.0"
-opentelemetry-api = "^1.39.0"
-opentelemetry-sdk = "^1.39.0"
-opentelemetry-instrumentation-fastapi = "^0.60b1"
-opentelemetry-exporter-otlp = "^1.39.0"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^9.0.2"
-pytest-cov = "^7.0.0"
-ipykernel = "^7.1.0"
-# runtime packages used across the repo that mypy expected
-numpy = "^2.4"
-pandas = "^2.3"
-httpx = "^0.28.0"
-types-requests = "^2.32.4.20260107"
-ruff = "^0.15.0"
-black = "^26.1.0"
-mypy = "^1.19.1"
 
 [tool.poetry.scripts]
 # CLI entry using short form `dex` pointing to FastAPI app for convenience
 dex = "dataenginex.main:app"
+
+[tool.uv]
+# Prefer uv-managed Python to avoid Windows Store Python issues during locking/sync.
+python-preference = "only-managed"
+default-groups = ["dev", "dex"]
+
+
 
 [[tool.poetry.packages]]
 include = "dataenginex"
@@ -101,8 +114,3 @@ source = ["dataenginex"]
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-
-# Poethepoet tasks: define common developer tasks (poe lint)
-[tool.poe.tasks]
-# Run Ruff, Black (check) and MyPy
-lint = "ruff check src/ tests/ && black --check . && mypy src/ --ignore-missing-imports"
