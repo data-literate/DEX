@@ -55,6 +55,10 @@ def test_e2e_root_health_ready() -> None:
 
             ready = client.get(f"{base_url}/ready")
             assert ready.status_code in {200, 503}
-            assert "status" in ready.json()
+            payload = ready.json()
+            if ready.status_code == 200:
+                assert "status" in payload
+            else:
+                assert payload["error"] == "service_unavailable"
     finally:
         _stop_server(server)

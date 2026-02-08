@@ -3,6 +3,11 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /build
 
+# Install curl for uv installer
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
@@ -25,7 +30,7 @@ COPY src/ /app/src/
 
 # Set environment variables
 ENV PATH="/app/.venv/bin:$PATH" \
-    PYTHONPATH="/app/src:$PYTHONPATH" \
+    PYTHONPATH="/app/src" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 

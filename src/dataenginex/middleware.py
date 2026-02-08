@@ -22,6 +22,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         """Process request and add logging context."""
         # Generate request ID
         request_id = str(uuid.uuid4())
+        request.state.request_id = request_id
 
         # Bind context for this request
         clear_contextvars()
