@@ -53,3 +53,21 @@ def test_metrics_endpoint() -> None:
     # Check for some expected Prometheus metrics format
     content = response.text
     assert "# HELP" in content or "# TYPE" in content or "python_info" in content
+
+
+def test_docs_endpoints() -> None:
+    """Swagger UI and ReDoc should be available."""
+    swagger = client.get("/docs")
+    assert swagger.status_code == 200
+    assert "Swagger UI" in swagger.text
+
+    redoc = client.get("/redoc")
+    assert redoc.status_code == 200
+    assert "Redoc" in redoc.text or "ReDoc" in redoc.text
+
+
+def test_openapi_yaml_export() -> None:
+    """OpenAPI YAML export should be available."""
+    response = client.get("/openapi.yaml")
+    assert response.status_code == 200
+    assert "openapi:" in response.text
