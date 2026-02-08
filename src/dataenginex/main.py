@@ -5,9 +5,11 @@ from typing import Any
 
 import structlog
 import uvicorn
+import yaml
 from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.openapi.utils import get_openapi
+from fastapi.responses import JSONResponse, PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from dataenginex.errors import APIHTTPException, ServiceUnavailableError
@@ -57,7 +59,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.info("application_shutdown")
 
 
-app = FastAPI(title="DataEngineX", version=APP_VERSION, lifespan=lifespan)
+app = FastAPI(
+    title="DataEngineX",
+    version=APP_VERSION,
+    lifespan=lifespan,
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
+)
 
 # Instrument FastAPI with OpenTelemetry
 instrument_fastapi(app)
@@ -67,6 +76,45 @@ app.add_middleware(RequestLoggingMiddleware)  # Logging
 app.add_middleware(PrometheusMetricsMiddleware)  # Metrics
 
 health_checker = HealthChecker()
+
+
+def custom_openapi() -> dict[str, object]:
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    schema = get_openapi(
+        title="DataEngineX",
+        version=APP_VERSION,
+        description=(
+            "DataEngineX API documentation.\n\n"
+            "Authentication: This API supports bearer token authentication. "
+            "Provide an Authorization header using the format `Bearer <token>` "
+            "when auth is enabled."
+        ),
+        routes=app.routes,
+    )
+
+    schema.setdefault("components", {})
+    schema["components"].setdefault("securitySchemes", {})
+    schema["components"]["securitySchemes"]["BearerAuth"] = {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Optional bearer token authentication.",
+    }
+
+    schema["tags"] = [
+        {"name": "core", "description": "Core service endpoints."},
+        {"name": "health", "description": "Health and readiness probes."},
+        {"name": "docs", "description": "OpenAPI export utilities."},
+        {"name": "observability", "description": "Metrics and telemetry."},
+    ]
+
+    app.openapi_schema = schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi  # type: ignore[method-assign]
 
 
 def _request_id(request: Request) -> str | None:
@@ -136,28 +184,28 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
     return JSONResponse(status_code=500, content=payload.model_dump())
 
 
-@app.get("/metrics")
+@app.get("/metrics", tags=["observability"])
 async def metrics() -> Response:
     """Prometheus metrics endpoint."""
     data, content_type = get_metrics()
     return Response(content=data, media_type=content_type)
 
 
-@app.get("/", response_model=RootResponse)
+@app.get("/", response_model=RootResponse, tags=["core"])
 def read_root() -> RootResponse:
     """Root endpoint returning API info."""
     logger.debug("root_endpoint_called")
     return RootResponse(message="DataEngineX API", version=APP_VERSION)
 
 
-@app.get("/health", response_model=HealthResponse)
+@app.get("/health", response_model=HealthResponse, tags=["health"])
 def health_check() -> HealthResponse:
     """Liveness check endpoint."""
     logger.debug("health check")
     return HealthResponse(status="alive")
 
 
-@app.get("/ready", response_model=ReadinessResponse)
+@app.get("/ready", response_model=ReadinessResponse, tags=["health"])
 async def readiness_check() -> ReadinessResponse:
     """Readiness check endpoint."""
     logger.debug("readiness_check_called")
@@ -168,18 +216,21 @@ async def readiness_check() -> ReadinessResponse:
         raise ServiceUnavailableError(message="Dependencies are unhealthy")
     return ReadinessResponse(
         status=status,
-        components=[ComponentStatus(**component.to_dict()) for component in components],
+        components=[
+            ComponentStatus.model_validate(component.to_dict())
+            for component in components
+        ],
     )
 
 
-@app.get("/startup", response_model=StartupResponse)
+@app.get("/startup", response_model=StartupResponse, tags=["health"])
 def startup_check() -> StartupResponse:
     """Startup probe endpoint."""
     ready = bool(getattr(app.state, "startup_complete", False))
     return StartupResponse(status="started" if ready else "starting")
 
 
-@app.post("/echo", response_model=EchoResponse)
+@app.post("/echo", response_model=EchoResponse, tags=["core"])
 def echo_payload(payload: EchoRequest) -> EchoResponse:
     """Echo endpoint to validate request/response models."""
     return EchoResponse(
@@ -187,6 +238,13 @@ def echo_payload(payload: EchoRequest) -> EchoResponse:
         count=payload.count,
         echo=[payload.message for _ in range(payload.count)],
     )
+
+
+@app.get("/openapi.yaml", tags=["docs"], response_class=PlainTextResponse)
+def openapi_yaml() -> PlainTextResponse:
+    """Export the OpenAPI schema in YAML format."""
+    schema = app.openapi()
+    return PlainTextResponse(yaml.safe_dump(schema, sort_keys=False))
 
 
 if __name__ == "__main__":
