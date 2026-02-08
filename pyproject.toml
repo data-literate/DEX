@@ -37,6 +37,7 @@ dev = [
     "black>=26.1.0",
     "mypy>=1.19.1",
     "uv>=0.10.0",
+    "poethepoet>=0.40.0",
 ]
 dex = [
     "pyspark>=4.1.1",
