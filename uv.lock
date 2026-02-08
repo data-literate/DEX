@@ -443,7 +443,7 @@ dex = [
 [package.metadata]
 requires-dist = [
     { name = "databricks-cli" },
-    { name = "fastapi", specifier = ">=0.128.0" },
+    { name = "fastapi", specifier = ">=0.128.4" },
     { name = "opentelemetry-api", specifier = ">=1.39.0" },
     { name = "opentelemetry-exporter-otlp", specifier = ">=1.39.0" },
     { name = "opentelemetry-instrumentation-fastapi", specifier = ">=0.60b1" },
@@ -461,10 +461,10 @@ requires-dist = [
 dev = [
     { name = "black", specifier = ">=26.1.0" },
     { name = "httpx", specifier = ">=0.28.0" },
-    { name = "ipykernel", specifier = ">=7.1.0" },
+    { name = "ipykernel", specifier = ">=7.2.0" },
     { name = "mypy", specifier = ">=1.19.1" },
     { name = "numpy", specifier = ">=2.4" },
-    { name = "pandas", specifier = ">=2.3" },
+    { name = "pandas", specifier = ">=3.0" },
     { name = "poethepoet", specifier = ">=0.40.0" },
     { name = "pytest", specifier = ">=9.0.2" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
