@@ -147,9 +147,11 @@ scrape_configs:
   - job_name: 'dataenginex'
     scrape_interval: 15s
     static_configs:
-      - targets: ['localhost:8000']
+      - targets: ['dataenginex:8000']
     metrics_path: '/metrics'
 ```
+
+If you run the API outside Docker, use `localhost:8000` as the target.
 
 ### Grafana Dashboard
 
@@ -305,18 +307,6 @@ docker run -d --name jaeger \
   jaegertracing/all-in-one:1.60
 ```
 
-**PowerShell:**
-```powershell
-docker run -d --name jaeger `
-  -e COLLECTOR_OTLP_ENABLED=true `
-  -e SPAN_STORAGE_TYPE=memory `
-  -p 16686:16686 `
-  -p 4317:4317 `
-  -p 4318:4318 `
-  -p 14250:14250 `
-  jaegertracing/all-in-one:1.60
-```
-
 Access Jaeger UI: http://localhost:16686
 
 ### Example Trace
@@ -331,6 +321,26 @@ Trace ID: 7f8a3b2c1d4e5f6a
 │
 Total: 150ms
 ```
+
+---
+
+## Grafana Dashboards
+
+Prebuilt dashboards are available in [infra/grafana](../infra/grafana/README.md):
+
+- **DEX Metrics**: request rate, latency, error rate, in-flight.
+- **DEX Logs**: log volume, error spikes, recent logs, and request IDs (Loki).
+- **DEX Traces**: trace list, top endpoints, and span latency (Tempo/TraceQL).
+
+### Import Steps
+
+1. Open Grafana → **Dashboards** → **New** → **Import**.
+2. Upload the JSON from infra/grafana/dashboards.
+3. Select Prometheus/Loki/Tempo data sources when prompted.
+
+### Notes
+
+Dashboards assume default labels (e.g., `app=dataenginex`). If your labels differ, edit the dashboard variables and panel queries.
 
 ---
 
@@ -363,11 +373,24 @@ Total: 150ms
    # Make some requests
    curl http://localhost:8000/
    curl http://localhost:8000/health
-   curl http://localhost:8000/readiness
+  curl http://localhost:8000/ready
    
    # Check updated metrics
    curl http://localhost:8000/metrics
    ```
+
+### Local Observability Stack (Prometheus + Grafana + Jaeger)
+
+Use the bundled compose file for one-command local testing:
+
+```bash
+docker compose -f docker-compose.yml up -d
+```
+
+Then open:
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000 (admin / admin)
+- Jaeger: http://localhost:16686
 
 ### Test with Jaeger (Optional)
 
@@ -383,18 +406,6 @@ Total: 150ms
      jaegertracing/all-in-one:1.60
    ```
    
-   **PowerShell:**
-   ```powershell
-   docker run -d --name jaeger `
-     -e COLLECTOR_OTLP_ENABLED=true `
-     -e SPAN_STORAGE_TYPE=memory `
-     -p 16686:16686 `
-     -p 4317:4317 `
-     -p 4318:4318 `
-     -p 14250:14250 `
-     jaegertracing/all-in-one:1.60
-   ```
-
 2. **Run application with tracing**:
    ```bash
    export OTLP_ENDPOINT="http://localhost:4317"
@@ -464,23 +475,6 @@ uv run poe test-cov
 **Expected:**
 - 23 tests passing
 - Coverage >90%
-
-### PowerShell (Windows)
-
-```powershell
-# Set environment variables
-$env:OTLP_ENDPOINT = "http://localhost:4317"
-$env:ENABLE_CONSOLE_TRACES = "true"
-
-# Run application
-uv run poe api
-
-# Test metrics
-Invoke-WebRequest -Uri http://localhost:8000/metrics
-
-# Generate traffic
-1..10 | ForEach-Object { Invoke-WebRequest -Uri http://localhost:8000/ }
-```
 
 ---
 
@@ -658,13 +652,9 @@ If a component is not configured, it will show **skipped** in the response.
    ```
 
 2. **Check OTLP_ENDPOINT is set**:
-   ```bash
-   # Bash/Linux
-   echo $OTLP_ENDPOINT
-   
-   # PowerShell
-   $env:OTLP_ENDPOINT
-   ```
+  ```bash
+  echo $OTLP_ENDPOINT
+  ```
    Should output: `http://localhost:4317`
 
 3. **Generate traffic** - Jaeger only shows services that have sent traces:

@@ -162,7 +162,7 @@ PR merged to main → CI passes → CD builds image → CD updates stage+prod/ku
 ### Manual Promotion (Alternative)
 ```bash
 # Use promotion script
-.\scripts\promote.ps1 -FromEnv stage -ToEnv prod -ImageTag sha-abc12345
+./scripts/promote.sh --from-env stage --to-env prod --image-tag sha-abc12345
 ```
 
 ---

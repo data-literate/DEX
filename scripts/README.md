@@ -1,22 +1,22 @@
 # Promotion Scripts
 
-PowerShell scripts for managing GitOps image promotion workflow.
+Ubuntu-friendly workflow for managing GitOps image promotion using bash scripts.
 
 ## Scripts
 
-### `promote.ps1`
+### `promote.sh`
 Promotes container images between environments by updating kustomization.yaml and creating PRs.
 
-**Usage:**
-```powershell
+**Usage (Ubuntu):**
+```bash
 # Promote from dev to stage (auto-detects current dev image)
-.\scripts\promote.ps1 -FromEnv dev -ToEnv stage
+./scripts/promote.sh --from-env dev --to-env stage
 
 # Promote specific image from stage to prod
-.\scripts\promote.ps1 -FromEnv stage -ToEnv prod -ImageTag sha-abc12345
+./scripts/promote.sh --from-env stage --to-env prod --image-tag sha-abc12345
 
 # Promote with auto-merge (requires permissions)
-.\scripts\promote.ps1 -FromEnv dev -ToEnv stage -AutoMerge
+./scripts/promote.sh --from-env dev --to-env stage --auto-merge
 ```
 
 **Features:**
@@ -27,17 +27,23 @@ Promotes container images between environments by updating kustomization.yaml an
 - Creates GitHub PR with checklist (requires `gh` CLI)
 - Supports auto-merge with `-AutoMerge` flag
 
-**Prerequisites:**
+**Prerequisites (Ubuntu):**
+- bash
 - GitHub CLI (`gh`) installed and authenticated
 - Git configured with push access to repository
 - On `main` branch with no uncommitted changes
 
-### `get-tags.ps1`
+Make the scripts executable once:
+```bash
+chmod +x ./scripts/*.sh
+```
+
+### `get-tags.sh`
 Displays current deployed image tags across all environments.
 
-**Usage:**
-```powershell
-.\scripts\get-tags.ps1
+**Usage (Ubuntu):**
+```bash
+./scripts/get-tags.sh
 ```
 
 **Output Example:**
@@ -51,7 +57,7 @@ Displays current deployed image tags across all environments.
 
 📊 Environment Status:
   ⚠️  Dev and Stage are out of sync
-     Run: .\scripts\promote.ps1 -FromEnv dev -ToEnv stage
+    Run: ./scripts/promote.sh --from-env dev --to-env stage
   ✅ Stage and Prod are in sync
 ```
 
@@ -59,12 +65,12 @@ Displays current deployed image tags across all environments.
 
 ### Standard Flow: Dev → Stage → Prod
 
-```powershell
+```bash
 # 1. Check current tags
-.\scripts\get-tags.ps1
+./scripts/get-tags.sh
 
 # 2. Promote dev → stage
-.\scripts\promote.ps1 -FromEnv dev -ToEnv stage
+./scripts/promote.sh --from-env dev --to-env stage
 
 # 3. Wait for PR review + merge
 # 4. ArgoCD auto-syncs stage (~3 minutes)
@@ -74,7 +80,7 @@ kubectl rollout status deployment/dex -n dex-stage
 kubectl get pods -n dex-stage
 
 # 6. Promote stage → prod
-.\scripts\promote.ps1 -FromEnv stage -ToEnv prod
+./scripts/promote.sh --from-env stage --to-env prod
 
 # 7. Wait for PR review + merge
 # 8. Manually sync prod in ArgoCD
@@ -87,15 +93,15 @@ kubectl get pods -n dex
 
 ### Emergency Hotfix: Direct to Prod
 
-```powershell
+```bash
 # NOT RECOMMENDED - breaks gold-standard workflow
 # Only for critical security patches
 
 # 1. Get tested SHA from stage
-$hotfixTag = "sha-emergency"
+hotfixTag="sha-emergency"
 
 # 2. Promote directly to prod
-.\scripts\promote.ps1 -FromEnv stage -ToEnv prod -ImageTag $hotfixTag
+./scripts/promote.sh --from-env stage --to-env prod --image-tag "$hotfixTag"
 
 # 3. Fast-track PR approval
 # 4. Manual ArgoCD sync
@@ -104,7 +110,7 @@ argocd app sync dex --force
 
 ### Rollback
 
-```powershell
+```bash
 # Option 1: Git revert (recommended)
 git log infra/argocd/overlays/prod/kustomization.yaml
 git revert <commit-sha>
@@ -115,7 +121,7 @@ argocd app history dex
 argocd app rollback dex <revision>
 
 # Option 3: Manual promotion to previous tag
-.\scripts\promote.ps1 -FromEnv stage -ToEnv prod -ImageTag sha-previous123
+./scripts/promote.sh --from-env stage --to-env prod --image-tag sha-previous123
 ```
 
 ## Integration with CI/CD
@@ -133,12 +139,12 @@ GitHub Actions automatically updates dev overlay on `main` branch push:
 
 ### Manual Stage/Prod Promotion
 Use promotion scripts for controlled stage/prod deployments:
-```powershell
+```bash
 # After dev is stable
-.\scripts\promote.ps1 -FromEnv dev -ToEnv stage
+./scripts/promote.sh --from-env dev --to-env stage
 
 # After stage validation
-.\scripts\promote.ps1 -FromEnv stage -ToEnv prod
+./scripts/promote.sh --from-env stage --to-env prod
 ```
 
 ### Future: Automated Stage Promotion (Optional)
@@ -155,13 +161,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Promote to stage
-        run: pwsh scripts/promote.ps1 -FromEnv dev -ToEnv stage -AutoMerge
+        run: ./scripts/promote.sh --from-env dev --to-env stage --auto-merge
 ```
 
 ## Troubleshooting
 
 ### "Could not find image tag"
-```powershell
+```bash
 # Check kustomization.yaml format
 cat infra/argocd/overlays/dev/kustomization.yaml
 
@@ -172,30 +178,29 @@ cat infra/argocd/overlays/dev/kustomization.yaml
 ```
 
 ### "You have uncommitted changes"
-```powershell
+```bash
 # Stash changes
 git stash
 
 # Run promotion
-.\scripts\promote.ps1 -FromEnv dev -ToEnv stage
+./scripts/promote.sh --from-env dev --to-env stage
 
 # Restore changes
 git stash pop
 ```
 
 ### "gh: command not found"
-```powershell
-# Install GitHub CLI
-winget install --id GitHub.cli
-
-# Or download from: https://cli.github.com/
+```bash
+# Install GitHub CLI (Ubuntu)
+sudo apt-get update
+sudo apt-get install -y gh
 
 # Authenticate
 gh auth login
 ```
 
 ### PR creation fails
-```powershell
+```bash
 # Check gh auth status
 gh auth status
 
@@ -214,7 +219,7 @@ git push origin promote-stage-sha-abc12345
 3. **Monitor deployments**: Check logs and metrics after promotion
 4. **Test in stage**: Run integration tests before prod promotion
 5. **Document promotions**: Use PR descriptions for audit trail
-6. **Keep environments in sync**: Regularly check with `get-tags.ps1`
+6. **Keep environments in sync**: Regularly check with `get-tags.sh`
 7. **Use SHA tags**: Immutable, traceable, promotable
 8. **Never skip stage**: Even for hotfixes, validate in stage first
 

@@ -10,7 +10,7 @@ This guide walks you through setting up ArgoCD on Docker Desktop Kubernetes for 
 
 ## Step 1: Verify Kubernetes is Running
 
-```powershell
+```bash
 # Check Docker Desktop K8s is running
 kubectl cluster-info
 
@@ -27,7 +27,7 @@ If not running:
 
 ## Step 2: Install ArgoCD
 
-```powershell
+```bash
 # Create argocd namespace
 kubectl create namespace argocd
 
@@ -39,7 +39,7 @@ kubectl wait --for=condition=Ready pods --all -n argocd --timeout=300s
 ```
 
 Verify installation:
-```powershell
+```bash
 kubectl get pods -n argocd
 
 # Expected: All pods should be Running
@@ -54,7 +54,7 @@ kubectl get pods -n argocd
 ## Step 3: Access ArgoCD UI
 
 ### Option A: Port Forward (Recommended for local)
-```powershell
+```bash
 # Port forward ArgoCD server to localhost
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 
@@ -63,9 +63,9 @@ kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
 
 ### Option B: Expose via NodePort (Alternative)
-```powershell
+```bash
 # Patch service to NodePort
-kubectl patch svc argocd-server -n argocd -p '{\"spec\":{\"type\":\"NodePort\"}}'
+kubectl patch svc argocd-server -n argocd -p '{"spec":{"type":"NodePort"}}'
 
 # Get the NodePort
 kubectl get svc argocd-server -n argocd
@@ -75,11 +75,11 @@ kubectl get svc argocd-server -n argocd
 
 ## Step 4: Get ArgoCD Admin Password
 
-```powershell
+```bash
 # Get initial admin password
-$ARGOCD_PASSWORD = kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | ForEach-Object { [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($_)) }
+ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
 
-Write-Host "ArgoCD Admin Password: $ARGOCD_PASSWORD"
+echo "ArgoCD Admin Password: $ARGOCD_PASSWORD"
 ```
 
 Login:
@@ -89,27 +89,22 @@ Login:
 
 ## Step 5: Install ArgoCD CLI (Optional but Recommended)
 
-```powershell
-# Download ArgoCD CLI for Windows
-$version = "v2.11.2"
-Invoke-WebRequest -Uri "https://github.com/argoproj/argo-cd/releases/download/$version/argocd-windows-amd64.exe" -OutFile "$env:USERPROFILE\Downloads\argocd.exe"
-
-# Move to a folder in PATH (e.g., C:\Program Files\argocd\)
-New-Item -Path "C:\Program Files\argocd" -ItemType Directory -Force
-Move-Item "$env:USERPROFILE\Downloads\argocd.exe" "C:\Program Files\argocd\argocd.exe" -Force
-
-# Add to PATH (restart terminal after)
-[Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\Program Files\argocd", [EnvironmentVariableTarget]::Machine)
+```bash
+# Download ArgoCD CLI for Linux
+version="v2.11.2"
+curl -sSL -o /tmp/argocd "https://github.com/argoproj/argo-cd/releases/download/${version}/argocd-linux-amd64"
+sudo install -m 555 /tmp/argocd /usr/local/bin/argocd
+rm /tmp/argocd
 ```
 
 Login via CLI:
-```powershell
+```bash
 argocd login localhost:8080 --username admin --password $ARGOCD_PASSWORD --insecure
 ```
 
 ## Step 6: Deploy DEX Application
 
-```powershell
+```bash
 # Apply the ArgoCD application manifest
 kubectl apply -f infra/argocd/application.yaml
 
@@ -133,7 +128,7 @@ kubectl get applications -n argocd
 4. Review changes → Click "SYNCHRONIZE"
 
 ### Option B: Via ArgoCD CLI
-```powershell
+```bash
 # Sync dev environment
 argocd app sync dex-dev
 
@@ -146,7 +141,7 @@ argocd app get dex-dev
 
 ## Step 8: Verify Deployment
 
-```powershell
+```bash
 # Check dev namespace pods
 kubectl get pods -n dex-dev
 
@@ -163,7 +158,7 @@ kubectl describe deployment dex -n dex-dev
 
 ## Step 9: Access DEX Application
 
-```powershell
+```bash
 # Port forward DEX service
 kubectl port-forward -n dex-dev svc/dex 8000:8000
 
@@ -179,10 +174,10 @@ Test endpoints:
 ## Step 10: Test GitOps Workflow
 
 ### Simulate Image Update (Manual)
-```powershell
+```bash
 # Update dev kustomization.yaml
-$newTag = "sha-test1234"
-(Get-Content infra/argocd/overlays/dev/kustomization.yaml) -replace 'newTag:.*', "newTag: $newTag" | Set-Content infra/argocd/overlays/dev/kustomization.yaml
+newTag="sha-test1234"
+sed -i "s|newTag:.*|newTag: ${newTag}|g" infra/argocd/overlays/dev/kustomization.yaml
 
 # Commit and push (dev branch tracks dev environment)
 git add infra/argocd/overlays/dev/kustomization.yaml
@@ -191,7 +186,7 @@ git push origin dev
 ```
 
 Watch ArgoCD detect change:
-```powershell
+```bash
 # ArgoCD polls git every 3 minutes by default
 # Force refresh immediately:
 argocd app refresh dex-dev
@@ -203,16 +198,16 @@ argocd app wait dex-dev --sync
 ### Test PR Preview (Requires GitHub Token)
 1. Create PR with `preview` label
 2. Check ArgoCD ApplicationSet for PR preview:
-   ```powershell
+   ```bash
    kubectl get applicationset -n argocd
    argocd appset get dex-pr-preview
    ```
-3. Verify PR namespace created: `kubectl get ns | Select-String dex-pr`
+3. Verify PR namespace created: `kubectl get ns | grep dex-pr`
 
 ## Troubleshooting
 
 ### ArgoCD pods not starting
-```powershell
+```bash
 # Check pod events
 kubectl describe pod <pod-name> -n argocd
 
@@ -224,7 +219,7 @@ kubectl logs <pod-name> -n argocd
 ```
 
 ### Application stuck in "OutOfSync"
-```powershell
+```bash
 # Check sync status
 argocd app get dex-dev
 
@@ -236,7 +231,7 @@ kubectl get events -n dex-dev --sort-by='.lastTimestamp'
 ```
 
 ### Image pull errors
-```powershell
+```bash
 # If using ghcr.io, images must be public or you need imagePullSecrets
 # For local testing, build image locally:
 docker build -t data-literate/dex:latest .
@@ -248,16 +243,16 @@ docker tag data-literate/dex:latest localhost:5000/dex:latest
 ```
 
 ### Can't access localhost:8080
-```powershell
+```bash
 # Check port forward is running
-Get-Process | Where-Object {$_.Name -eq "kubectl"}
+ps -ef | grep kubectl
 
 # Restart port forward
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
 
 ### Application health degraded
-```powershell
+```bash
 # Check deployment status
 kubectl rollout status deployment/dex -n dex-dev
 
@@ -271,7 +266,7 @@ kubectl top pods -n dex-dev
 ## Clean Up
 
 ### Remove specific application
-```powershell
+```bash
 # Delete application (keeps namespace)
 argocd app delete dex-dev
 
@@ -283,7 +278,7 @@ kubectl delete namespace dex-dev
 ```
 
 ### Uninstall ArgoCD
-```powershell
+```bash
 # Delete all ArgoCD resources
 kubectl delete -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 

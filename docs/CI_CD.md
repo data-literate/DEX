@@ -370,7 +370,7 @@ Or use the promotion script:
 
 ```bash
 # Automated promotion
-.\scripts\promote.ps1 -FromEnv stage -ToEnv prod -ImageTag sha-a1b2c3d4
+./scripts/promote.sh --from-env stage --to-env prod --image-tag sha-a1b2c3d4
 ```
 
 ## Rollback Procedures
@@ -632,7 +632,7 @@ kubectl get pods -n dex-dev
 kubectl logs -n dex-dev -l app=dex -f
 
 # Promote to production
-.\scripts\promote.ps1 -FromEnv stage -ToEnv prod
+./scripts/promote.sh --from-env stage --to-env prod
 
 # Rollback
 git revert HEAD
