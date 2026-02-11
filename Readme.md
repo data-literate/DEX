@@ -118,6 +118,17 @@ uv run poe api
 
 Visit **http://127.0.0.1:8000** to verify the health endpoint.
 
+### 2a. Run Full Stack (App + Observability)
+
+```bash
+docker compose -f docker-compose.yml up -d
+```
+
+- API: http://127.0.0.1:8000
+- Prometheus: http://127.0.0.1:9090
+- Grafana: http://127.0.0.1:3000 (admin / admin)
+- Jaeger: http://127.0.0.1:16686
+
 ### 3. Run Tests
 
 ```bash

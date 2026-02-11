@@ -16,7 +16,8 @@ COPY pyproject.toml uv.lock ./
 
 # Install dependencies to a virtual environment
 ENV UV_PROJECT_ENVIRONMENT=/build/.venv \
-    UV_PYTHON=python
+    UV_PYTHON=/usr/local/bin/python \
+    UV_PYTHON_PREFERENCE=system
 RUN /root/.local/bin/uv sync --frozen --no-dev
 FROM python:3.11-slim
 

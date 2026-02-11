@@ -67,6 +67,9 @@ infra/
 - `overlays/dev/kustomization.yaml` — Updated by CD workflow on the `dev` branch after each successful CI run on `dev`
 - `overlays/stage/kustomization.yaml` and `overlays/prod/kustomization.yaml` — Updated by CD workflow on the `main` branch after each successful CI run on `main`
 
+**Grafana Dashboards:**
+- See [infra/grafana/README.md](grafana/README.md) for prebuilt dashboards (metrics, logs, traces).
+
 ## Kustomize Overlays
 
 ### Base Configuration (`argocd/base/`)
