@@ -18,39 +18,38 @@ jobs:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    
+
     permissions:
-      contents: write  # For git commits
-      packages: write  # For ghcr.io push
-      
+      contents: read
+      packages: write
+
     outputs:
       image_tag: ${{ steps.meta.outputs.tags }}
       short_sha: ${{ steps.vars.outputs.short_sha }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0  # Full history for proper tagging
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
+          fetch-depth: 0
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Extract commit SHA
         id: vars
         run: |
           SHORT_SHA=$(git rev-parse --short=8 HEAD)
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
           echo "image_tag=sha-$SHORT_SHA" >> $GITHUB_OUTPUT
-      
+
       - name: Docker metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -59,7 +58,7 @@ jobs:
           tags: |
             type=raw,value=sha-${{ steps.vars.outputs.short_sha }}
             type=raw,value=latest,enable=${{ github.event.workflow_run.head_branch == 'main' }}
-      
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
@@ -71,123 +70,25 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64
 
-  update-dev-manifest:
-    name: Update Dev Environment Manifest
-    runs-on: ubuntu-latest
-    needs: build-and-push
-    if: github.event.workflow_run.head_branch == 'dev'
-    
-    permissions:
-      contents: write
-      pull-requests: write
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-          persist-credentials: false
-          ref: dev  # Explicitly check out dev branch
-      
-      - name: Update dev kustomization.yaml
-        run: |
-          SHORT_SHA="${{ needs.build-and-push.outputs.short_sha }}"
-          IMAGE_TAG="sha-$SHORT_SHA"
-          
-          # Update the image tag in dev overlay
-          sed -i "s|newTag:.*|newTag: $IMAGE_TAG|g" infra/argocd/overlays/dev/kustomization.yaml
-          
-          echo "Updated dev overlay to use image tag: $IMAGE_TAG"
-
-      - name: Clear git extraheader
-        run: |
-          git config --unset-all http.https://github.com/.extraheader || true
-      
-      - name: Create pull request
-        uses: peter-evans/create-pull-request@v8
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: update dev image to sha-${{ needs.build-and-push.outputs.short_sha }} [skip ci]"
-          title: "chore: update dev image to sha-${{ needs.build-and-push.outputs.short_sha }}"
-          body: |
-            Automated update of dev kustomization image tag.
-            
-            - Image: sha-${{ needs.build-and-push.outputs.short_sha }}
-          branch: "cd/update-dev-${{ needs.build-and-push.outputs.short_sha }}"
-          base: dev
-          add-paths: |
-            infra/argocd/overlays/dev/kustomization.yaml
-
-  update-stage-prod-manifest:
-    name: Update Stage and Prod Manifests
-    runs-on: ubuntu-latest
-    needs: build-and-push
-    if: github.event.workflow_run.head_branch == 'main'
-
-    permissions:
-      contents: write
-      pull-requests: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-          persist-credentials: false
-          ref: main  # Explicitly check out main branch
-
-      - name: Update stage and prod kustomization.yaml
-        run: |
-          SHORT_SHA="${{ needs.build-and-push.outputs.short_sha }}"
-          IMAGE_TAG="sha-$SHORT_SHA"
-
-          # Update the image tag in stage and prod overlays
-          sed -i "s|newTag:.*|newTag: $IMAGE_TAG|g" infra/argocd/overlays/stage/kustomization.yaml
-          sed -i "s|newTag:.*|newTag: $IMAGE_TAG|g" infra/argocd/overlays/prod/kustomization.yaml
-
-          echo "Updated stage and prod overlays to use image tag: $IMAGE_TAG"
-
-      - name: Clear git extraheader
-        run: |
-          git config --unset-all http.https://github.com/.extraheader || true
-
-      - name: Create pull request
-        uses: peter-evans/create-pull-request@v8
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: update stage/prod image to sha-${{ needs.build-and-push.outputs.short_sha }} [skip ci]"
-          title: "chore: update stage/prod image to sha-${{ needs.build-and-push.outputs.short_sha }}"
-          body: |
-            Automated update of stage/prod kustomization image tags.
-            
-            - Image: sha-${{ needs.build-and-push.outputs.short_sha }}
-          branch: "cd/update-stage-prod-${{ needs.build-and-push.outputs.short_sha }}"
-          base: main
-          add-paths: |
-            infra/argocd/overlays/stage/kustomization.yaml
-            infra/argocd/overlays/prod/kustomization.yaml
-
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
     needs: build-and-push
-    
+
     permissions:
-      security-events: write  # Required to upload SARIF results
-    
+      security-events: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ needs.build-and-push.outputs.short_sha }}
           format: 'sarif'
           output: 'trivy-results.sarif'
-      
+
       - name: Upload Trivy results to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
         with:
