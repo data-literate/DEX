@@ -22,6 +22,7 @@ jobs:
     permissions:
       contents: write  # For git commits
       packages: write  # For ghcr.io push
+      pull-requests: write  # For PR creation in downstream jobs
       
     outputs:
       image_tag: ${{ steps.meta.outputs.tags }}
@@ -87,7 +88,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-          persist-credentials: false
+          persist-credentials: true
           ref: dev  # Explicitly check out dev branch
       
       - name: Update dev kustomization.yaml
@@ -135,7 +136,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-          persist-credentials: false
+          persist-credentials: true
           ref: main  # Explicitly check out main branch
 
       - name: Update stage and prod kustomization.yaml
