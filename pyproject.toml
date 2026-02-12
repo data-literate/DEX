@@ -117,3 +117,20 @@ source = ["dataenginex"]
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
+# -----------------------
+# Semantic Release configuration
+# -----------------------
+[tool.semantic_release]
+version_variable = "pyproject.toml:version"
+commit_message = "chore(release): v{version} [skip ci]\n\n{changelog}"
+upload_to_release = true
+build_command = "pip install build && python -m build"
+changelog_file = "docs/RELEASE_NOTES.md"
+
+[tool.semantic_release.branches.main]
+match = "main"
+prerelease = false
+
+[tool.semantic_release.branches.dev]
+match = "dev"
+prerelease = "dev"
