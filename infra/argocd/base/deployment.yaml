@@ -23,6 +23,8 @@ spec:
         env:
         - name: LOG_LEVEL
           value: "info"
+        - name: ENVIRONMENT
+          value: "dev"
         resources:
           requests:
             cpu: 100m

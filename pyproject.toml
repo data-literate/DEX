@@ -10,6 +10,7 @@ readme = "Readme.md"
 requires-python = ">=3.11"
 dependencies = [
     "requests>=2.32.0",
+    "httpx>=0.27.0",
     "pyspark>=4.1.1",
     "databricks-cli",
     "fastapi>=0.128.4",

@@ -71,3 +71,6 @@ def test_openapi_yaml_export() -> None:
     response = client.get("/openapi.yaml")
     assert response.status_code == 200
     assert "openapi:" in response.text
+
+
+

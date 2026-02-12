@@ -240,6 +240,7 @@ def echo_payload(payload: EchoRequest) -> EchoResponse:
     )
 
 
+
 @app.get("/openapi.yaml", tags=["docs"], response_class=PlainTextResponse)
 def openapi_yaml() -> PlainTextResponse:
     """Export the OpenAPI schema in YAML format."""

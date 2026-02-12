@@ -31,7 +31,7 @@ DEX is an end‑to‑end framework that unifies data engineering, lakehouse ware
 - [ ] Alerting rules tied to SLOs
 
 ### Dev Experience
-- [ ] Clean API examples and `pyconcepts` endpoints
+- [ ] Clean API examples
 
 ---
 

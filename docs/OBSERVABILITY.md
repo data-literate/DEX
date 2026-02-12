@@ -591,21 +591,6 @@ kubectl rollout restart deployment/alertmanager
 
 If you manage the stack via ArgoCD, push the changes to the kustomize overlay and let ArgoCD sync the deployments automatically rather than running the commands above manually.
 
-### Proof-of-concept API endpoints
-
-These endpoints surface the modules under `src/pyconcepts` so that you can explore how the application mixes external data and streaming insights.
-
-1. **External data** — `GET /api/external-data?currency=USD`
-   - Uses `pyconcepts.external_data.fetch_external_data` to call the Coindesk API and return the latest BTC rate for the requested currency.
-   - Returns a JSON object with `symbol`, `currency`, `value`, `timestamp`, and `source` fields.
-   - Example: `curl "http://localhost:8000/api/external-data?currency=eur"`
-
-2. **Streaming insights** — `GET /api/insights?count=5&interval=0.75`
-   - Streams conservative synthetic metrics via Server-Sent Events (`text/event-stream`).
-   - Honors `count` (1–20) and `interval` seconds per event to throttle data for demos.
-   - Consume it with `curl -N http://localhost:8000/api/insights` and parse each `data: {...}` chunk as JSON.
-
-
 ---
 
 ## Best Practices

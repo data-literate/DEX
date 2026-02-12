@@ -407,6 +407,7 @@ source = { editable = "." }
 dependencies = [
     { name = "databricks-cli" },
     { name = "fastapi" },
+    { name = "httpx" },
     { name = "opentelemetry-api" },
     { name = "opentelemetry-exporter-otlp" },
     { name = "opentelemetry-instrumentation-fastapi" },
@@ -446,6 +447,7 @@ dex = [
 requires-dist = [
     { name = "databricks-cli" },
     { name = "fastapi", specifier = ">=0.128.4" },
+    { name = "httpx", specifier = ">=0.27.0" },
     { name = "opentelemetry-api", specifier = ">=1.39.0" },
     { name = "opentelemetry-exporter-otlp", specifier = ">=1.39.0" },
     { name = "opentelemetry-instrumentation-fastapi", specifier = ">=0.60b1" },

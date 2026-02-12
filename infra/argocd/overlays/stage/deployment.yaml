@@ -10,6 +10,8 @@ spec:
         env:
         - name: LOG_LEVEL
           value: "info"
+        - name: ENVIRONMENT
+          value: "stage"
         resources:
           requests:
             cpu: 100m

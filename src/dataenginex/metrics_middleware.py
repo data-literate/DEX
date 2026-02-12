@@ -7,6 +7,7 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from dataenginex.metrics import (
+    ENVIRONMENT,
     http_exceptions_total,
     http_request_duration_seconds,
     http_requests_in_flight,
@@ -27,7 +28,7 @@ class PrometheusMetricsMiddleware(BaseHTTPMiddleware):
         path = request.url.path
 
         # Track in-flight requests
-        http_requests_in_flight.inc()
+        http_requests_in_flight.labels(environment=ENVIRONMENT).inc()
 
         start_time = time.time()
 
@@ -38,23 +39,30 @@ class PrometheusMetricsMiddleware(BaseHTTPMiddleware):
 
             # Record request metrics
             http_requests_total.labels(
-                method=method, endpoint=path, status=status
+                method=method,
+                endpoint=path,
+                status=status,
+                environment=ENVIRONMENT,
             ).inc()
 
             return response
 
         except Exception as exc:
             # Track exceptions
-            http_exceptions_total.labels(exception_type=type(exc).__name__).inc()
-            http_requests_total.labels(method=method, endpoint=path, status=500).inc()
+            http_exceptions_total.labels(
+                exception_type=type(exc).__name__, environment=ENVIRONMENT
+            ).inc()
+            http_requests_total.labels(
+                method=method, endpoint=path, status=500, environment=ENVIRONMENT
+            ).inc()
             raise
 
         finally:
             # Record duration
             duration = time.time() - start_time
-            http_request_duration_seconds.labels(method=method, endpoint=path).observe(
-                duration
-            )
+            http_request_duration_seconds.labels(
+                method=method, endpoint=path, environment=ENVIRONMENT
+            ).observe(duration)
 
             # Decrement in-flight counter
-            http_requests_in_flight.dec()
+            http_requests_in_flight.labels(environment=ENVIRONMENT).dec()

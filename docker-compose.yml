@@ -6,6 +6,7 @@ services:
       - "8000:8000"
     environment:
       - LOG_LEVEL=INFO
+      - ENVIRONMENT=dev
       - OTLP_ENDPOINT=http://jaeger:4317
     depends_on:
       - prometheus
@@ -18,7 +19,10 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./infra/prometheus/alerts/dataenginex-alerts.yml:/etc/prometheus/rules/dataenginex-alerts.yml:ro
     restart: unless-stopped
+    depends_on:
+      - alertmanager
 
   grafana:
     image: grafana/grafana:latest
@@ -30,6 +34,15 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
       - prometheus
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: dex-alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./infra/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
     restart: unless-stopped
 
   jaeger:
