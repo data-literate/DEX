@@ -13,6 +13,7 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Copy dependency files
 COPY pyproject.toml uv.lock ./
+COPY Readme.md ./
 
 # Install dependencies to a virtual environment
 ENV UV_PROJECT_ENVIRONMENT=/build/.venv \

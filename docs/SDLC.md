@@ -106,11 +106,17 @@ See [CI/CD Pipeline](CI_CD.md) for the authoritative list of checks.
 **Actions**:
 - Build container image once and tag with commit SHA.
 - Push image to registry.
+- Document the release in `docs/RELEASE_NOTES.md` and link the file from the release PR.
 - Update environment manifests via GitOps.
 
 **Exit**: New image tag recorded in git and ArgoCD sync completes.
 
 **Artifacts**: Image tag, git commit updating kustomization, ArgoCD sync history.
+
+**Release QA checklist**:
+- [ ] Release note linked in PR description
+- [ ] Alerts/metrics reload verified (see OBSERVABILITY.md)
+- [ ] QA checklist marked complete after release verification
 
 ---
 
