@@ -555,32 +555,56 @@ spec:
 
 ## Alerts
 
-### Example Prometheus Alerts
+### Prometheus alert rules (SLO-aligned)
 
-```yaml
-groups:
-  - name: dataenginex
-    rules:
-      - alert: HighErrorRate
-        expr: |
-          rate(http_requests_total{status=~"5.."}[5m]) > 0.05
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: "High error rate detected"
-          description: "Error rate is {{ $value }} errors/sec"
+The actual rule definitions live in `infra/prometheus/alerts/dataenginex-alerts.yml`. They expose three alerts—latency, error rate, and saturation—each scoped by `environment` so the thresholds can reflect the traffic patterns for dev, stage, and prod. Every alert annotation links to the [deployment runbook](https://github.com/data-literate/DEX/blob/main/docs/DEPLOY_RUNBOOK.md).
 
-      - alert: HighLatency
-        expr: |
-          histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "High latency detected"
-          description: "P95 latency is {{ $value }}s"
+| Alert | Environment | Threshold | Severity | Receiver |
+|-------|-------------|-----------|----------|----------|
+| `DataEngineXLatencyHigh` | prod | P95 latency > 0.75s (5m window) | `page` | critical slack (#dex-alerts) |
+|                         | stage | P95 latency > 1.0s | `page` | same |
+|                         | dev | P95 latency > 1.5s | `warning` | email (alerts@dataenginex.io) |
+| `DataEngineXErrorRateHigh` | prod | 5xx fraction > 1% | `page` | critical slack |
+|                         | stage | 5xx fraction > 3% | `page` | critical slack |
+|                         | dev | 5xx fraction > 5% | `warning` | email |
+| `DataEngineXSaturationHigh` | prod | In-flight > 25 | `page` | critical slack |
+|                             | stage | In-flight > 15 | `warning` | email |
+|                             | dev | In-flight > 10 | `warning` | email |
+
+The production `alertmanager` configuration in `infra/alertmanager/alertmanager.yml` routes all `severity=page` alerts to a Slack webhook (`#dex-alerts`) while `severity=warning` alerts go to the ops email alias. Alerts sharing the same `alertname` and `environment` are deduplicated via inhibit rules so warnings do not trigger when a page is active.
+
+### Reloading Alert Rules
+
+Whenever the alert rules or Alertmanager config changes, reapply the manifests so Prometheus and Alertmanager scrape the latest thresholds. Reload the rules in the following order to avoid gaps:
+
+1. Reapply the Prometheus rule set managed in GitOps:
+```bash
+kubectl apply -f infra/prometheus/alerts/dataenginex-alerts.yml
+kubectl rollout restart deployment/prometheus
 ```
+2. Reconfigure Alertmanager so receivers and runbooks stay up to date:
+```bash
+kubectl apply -f infra/alertmanager/alertmanager.yml
+kubectl rollout restart deployment/alertmanager
+```
+3. Verify the alerts appear in Alertmanager UI and reference the release runbook described in [`docs/DEPLOY_RUNBOOK.md`](https://github.com/data-literate/DEX/blob/main/docs/DEPLOY_RUNBOOK.md).
+
+If you manage the stack via ArgoCD, push the changes to the kustomize overlay and let ArgoCD sync the deployments automatically rather than running the commands above manually.
+
+### Proof-of-concept API endpoints
+
+These endpoints surface the modules under `src/pyconcepts` so that you can explore how the application mixes external data and streaming insights.
+
+1. **External data** — `GET /api/external-data?currency=USD`
+   - Uses `pyconcepts.external_data.fetch_external_data` to call the Coindesk API and return the latest BTC rate for the requested currency.
+   - Returns a JSON object with `symbol`, `currency`, `value`, `timestamp`, and `source` fields.
+   - Example: `curl "http://localhost:8000/api/external-data?currency=eur"`
+
+2. **Streaming insights** — `GET /api/insights?count=5&interval=0.75`
+   - Streams conservative synthetic metrics via Server-Sent Events (`text/event-stream`).
+   - Honors `count` (1–20) and `interval` seconds per event to throttle data for demos.
+   - Consume it with `curl -N http://localhost:8000/api/insights` and parse each `data: {...}` chunk as JSON.
+
 
 ---
 
