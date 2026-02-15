@@ -25,8 +25,8 @@ cmd = "pytest tests/integration/ -v --tb=short"
 help = "Run integration tests only"
 
 [tool.poe.tasks.test-cov]
-cmd = "pytest tests/ -v --cov=dataenginex --cov-report=html --cov-report=term-missing"
-help = "Run tests with coverage report"
+cmd = "pytest tests/ -v --cov=dataenginex --cov=careerdex --cov=weatherdex --cov-report=html --cov-report=xml:coverage.xml --cov-report=term-missing"
+help = "Run tests with coverage report (HTML + XML + terminal)"
 
 # Code Quality
 [tool.poe.tasks.lint]

@@ -26,18 +26,21 @@ jobs:
         if: always()
         with:
           script: |
-            const axios = require('axios');
             if (!process.env.SLACK_WEBHOOK) return;
             try {
-              await axios.post(process.env.SLACK_WEBHOOK, {
-                text: '🎉 Release Process Started',
-                blocks: [{
-                  type: 'section',
-                  text: {
-                    type: 'mrkdwn',
-                    text: `*🎉 Release Process Started*\n*Branch:* main`
-                  }
-                }]
+              await fetch(process.env.SLACK_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  text: '🎉 Release Process Started',
+                  blocks: [{
+                    type: 'section',
+                    text: {
+                      type: 'mrkdwn',
+                      text: `*🎉 Release Process Started*\n*Branch:* main`
+                    }
+                  }]
+                })
               });
             } catch (e) { console.log('Slack notification failed'); }
         env:
@@ -96,18 +99,21 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const axios = require('axios');
             if (!process.env.SLACK_WEBHOOK) return;
             try {
-              await axios.post(process.env.SLACK_WEBHOOK, {
-                text: '✅ Release Created Successfully',
-                blocks: [{
-                  type: 'section',
-                  text: {
-                    type: 'mrkdwn',
-                    text: `*✅ Release Created*\n*Version:* ${process.env.VERSION}\n*Tag:* ${process.env.TAG}\n*Release:* <${process.env.URL}|View Release>`
-                  }
-                }]
+              await fetch(process.env.SLACK_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  text: '✅ Release Created Successfully',
+                  blocks: [{
+                    type: 'section',
+                    text: {
+                      type: 'mrkdwn',
+                      text: `*✅ Release Created*\n*Version:* ${process.env.VERSION}\n*Tag:* ${process.env.TAG}\n*Release:* <${process.env.URL}|View Release>`
+                    }
+                  }]
+                })
               });
             } catch (e) { console.log('Slack notification failed'); }
         env:
@@ -121,18 +127,21 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const axios = require('axios');
             if (!process.env.SLACK_WEBHOOK) return;
             try {
-              await axios.post(process.env.SLACK_WEBHOOK, {
-                text: '❌ Release Process Failed',
-                blocks: [{
-                  type: 'section',
-                  text: {
-                    type: 'mrkdwn',
-                    text: `*❌ Release Failed*\n*Details:* <${process.env.URL}|View Details>`
-                  }
-                }]
+              await fetch(process.env.SLACK_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  text: '❌ Release Process Failed',
+                  blocks: [{
+                    type: 'section',
+                    text: {
+                      type: 'mrkdwn',
+                      text: `*❌ Release Failed*\n*Details:* <${process.env.URL}|View Details>`
+                    }
+                  }]
+                })
               });
             } catch (e) { console.log('Slack notification failed'); }
         env:
