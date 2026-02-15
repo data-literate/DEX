@@ -1,8 +1,10 @@
 # DataEngineX (DEX)
 
-[![CI/CD](https://github.com/data-literate/DEX/actions/workflows/ci.yml/badge.svg)](https://github.com/data-literate/DEX/actions)
+[![CI/CD](https://github.com/data-literate/DEX/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/data-literate/DEX/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen)](https://github.com/data-literate/DEX)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue)](https://github.com/data-literate/DEX/releases)
 
 A production-ready data engineering framework with medallion architecture, Airflow orchestration, and enterprise observability. DEX is both a core framework and a mono-repo for sub-projects built on top of it.
 
@@ -23,12 +25,13 @@ uv run poe test              # Run tests
 docker compose up -d
 ```
 
-| Service    | URL                         |
-|------------|-----------------------------|
-| API        | http://localhost:8000        |
-| Prometheus | http://localhost:9090        |
-| Grafana    | http://localhost:3000        |
-| Jaeger     | http://localhost:16686       |
+| Service      | URL                         |
+|--------------|-----------------------------|
+| API          | http://localhost:8000        |
+| Prometheus   | http://localhost:9090        |
+| AlertManager | http://localhost:9093        |
+| Grafana      | http://localhost:3000        |
+| Jaeger       | http://localhost:16686       |
 
 ---
 

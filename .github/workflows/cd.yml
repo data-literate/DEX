@@ -34,18 +34,21 @@ jobs:
         if: always()
         with:
           script: |
-            const axios = require('axios');
             if (!process.env.SLACK_WEBHOOK) return;
             try {
-              await axios.post(process.env.SLACK_WEBHOOK, {
-                text: '🚀 CD Pipeline Started - Docker Build',
-                blocks: [{
-                  type: 'section',
-                  text: {
-                    type: 'mrkdwn',
-                    text: `*🚀 CD Pipeline Started*\n*Branch:* ${process.env.BRANCH}`
-                  }
-                }]
+              await fetch(process.env.SLACK_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  text: '🚀 CD Pipeline Started - Docker Build',
+                  blocks: [{
+                    type: 'section',
+                    text: {
+                      type: 'mrkdwn',
+                      text: `*🚀 CD Pipeline Started*\n*Branch:* ${process.env.BRANCH}`
+                    }
+                  }]
+                })
               });
             } catch (e) { console.log('Slack notification failed'); }
         env:
@@ -130,18 +133,21 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const axios = require('axios');
             if (!process.env.SLACK_WEBHOOK) return;
             try {
-              await axios.post(process.env.SLACK_WEBHOOK, {
-                text: '✅ CD Pipeline Completed Successfully',
-                blocks: [{
-                  type: 'section',
-                  text: {
-                    type: 'mrkdwn',
-                    text: `*✅ CD Pipeline Completed*\n*Image:* ${process.env.TAG}\n*SHA:* ${process.env.SHA}`
-                  }
-                }]
+              await fetch(process.env.SLACK_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  text: '✅ CD Pipeline Completed Successfully',
+                  blocks: [{
+                    type: 'section',
+                    text: {
+                      type: 'mrkdwn',
+                      text: `*✅ CD Pipeline Completed*\n*Image:* ${process.env.TAG}\n*SHA:* ${process.env.SHA}`
+                    }
+                  }]
+                })
               });
             } catch (e) { console.log('Slack notification failed'); }
         env:
@@ -154,20 +160,40 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const axios = require('axios');
             if (!process.env.SLACK_WEBHOOK) return;
             try {
-              await axios.post(process.env.SLACK_WEBHOOK, {
-                text: '❌ CD Pipeline Failed',
-                blocks: [{
-                  type: 'section',
-                  text: {
-                    type: 'mrkdwn',
-                    text: `*❌ CD Pipeline Failed*\n*Details:* <${process.env.URL}|View Details>`
-                  }
-                }]
+              await fetch(process.env.SLACK_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  text: '❌ CD Pipeline Failed',
+                  blocks: [
+                    {
+                      type: 'section',
+                      text: {
+                        type: 'mrkdwn',
+                        text: `*❌ CD Pipeline Failed*`
+                      }
+                    },
+                    {
+                      type: 'section',
+                      fields: [
+                        { type: 'mrkdwn', text: `*Workflow:*\nContinuous Deployment` },
+                        { type: 'mrkdwn', text: `*Branch:*\n${process.env.BRANCH}` },
+                        { type: 'mrkdwn', text: `*Triggered by:*\n${process.env.ACTOR}` },
+                        { type: 'mrkdwn', text: `*Run:*\n<${process.env.URL}|View Details>` }
+                      ]
+                    },
+                    {
+                      type: 'context',
+                      elements: [{ type: 'mrkdwn', text: `📦 Docker build or security scan failed — check logs for details` }]
+                    }
+                  ]
+                })
               });
-            } catch (e) { console.log('Slack notification failed'); }
+            } catch (e) { console.log('Slack notification failed:', e.message); }
         env:
           SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          ACTOR: ${{ github.actor }}
           URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

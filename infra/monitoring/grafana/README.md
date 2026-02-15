@@ -10,8 +10,14 @@ This folder contains ready-to-import Grafana dashboards for DataEngineX observab
 
 ## Import
 
+### Automatic (docker compose)
+
+Dashboards and the Prometheus datasource are auto-provisioned when using `docker compose up -d`. No manual import needed.
+
+### Manual
+
 1. Open Grafana → **Dashboards** → **New** → **Import**.
-2. Upload the JSON from `infra/grafana/dashboards/`.
+2. Upload the JSON from `infra/monitoring/grafana/dashboards/`.
 3. Select the correct data sources when prompted.
 
 ## Data Sources

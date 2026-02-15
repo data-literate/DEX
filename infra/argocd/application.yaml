@@ -138,11 +138,6 @@ spec:
             duration: 5s
             factor: 2
             maxDuration: 1m
-      
-      # Auto-cleanup when PR is closed
-      syncPolicy:
-        automated:
-          prune: true
 
 ---
 apiVersion: argoproj.io/v1alpha1
