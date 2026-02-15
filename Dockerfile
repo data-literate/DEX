@@ -24,6 +24,10 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# Create non-root user
+RUN groupadd --gid 1000 dex \
+    && useradd --uid 1000 --gid dex --shell /bin/bash dex
+
 # Copy virtual environment from builder
 COPY --from=builder /build/.venv /app/.venv
 
@@ -36,8 +40,11 @@ ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
+# Switch to non-root user
+USER dex
+
 # Expose FastAPI default port
 EXPOSE 8000
 
 # Run the FastAPI application
-CMD ["python", "-m", "uvicorn", "dataenginex.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "dataenginex.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,51 +1,125 @@
 [tool.poe]
 executor.type = "uv"
 
-[tool.poe.tasks.lint]
-shell = "ruff check src/ tests/ && black --check . && mypy src/ --ignore-missing-imports"
-help = "Run the combined lint suite."
+# Installation & Setup
+[tool.poe.tasks.install]
+shell = "poetry install --with dev && pre-commit install"
+help = "Install dependencies and pre-commit hooks"
 
-[tool.poe.tasks.lint-fix]
-shell = "ruff check src/ tests/ --fix && black src/ tests/"
-help = "Auto-fix lint issues and format code."
+# Development
+[tool.poe.tasks.dev]
+cmd = "uvicorn dataenginex.api.main:app --reload --port 8000"
+help = "Run development server on localhost:8000"
 
+# Testing
 [tool.poe.tasks.test]
-cmd = "pytest -v"
-help = "Run the test suite."
+cmd = "pytest tests/ -v --tb=short"
+help = "Run all tests"
+
+[tool.poe.tasks.test-unit]
+cmd = "pytest tests/unit/ -v --tb=short"
+help = "Run unit tests only"
+
+[tool.poe.tasks.test-integration]
+cmd = "pytest tests/integration/ -v --tb=short"
+help = "Run integration tests only"
 
 [tool.poe.tasks.test-cov]
-cmd = "pytest tests/ -v --cov=src --cov-report=xml"
-help = "Run tests with coverage for CI."
+cmd = "pytest tests/ -v --cov=dataenginex --cov-report=html --cov-report=term-missing"
+help = "Run tests with coverage report"
+
+# Code Quality
+[tool.poe.tasks.lint]
+shell = "ruff check src/ tests/"
+help = "Run ruff lint on source and test files"
+
+[tool.poe.tasks.lint-fix]
+shell = "ruff check --fix src/ tests/ && ruff format src/ tests/"
+help = "Auto-fix lint issues and format code"
 
 [tool.poe.tasks.format]
-cmd = "black ."
-help = "Format code with Black."
+shell = "ruff format src/ tests/"
+help = "Format code with ruff"
 
-[tool.poe.tasks.api]
-cmd = "uvicorn dataenginex.main:app --reload"
-help = "Run the FastAPI app locally."
+[tool.poe.tasks.typecheck]
+cmd = "mypy src/dataenginex/ --config-file=pyproject.toml"
+help = "Run mypy type checking with project config"
 
+[tool.poe.tasks.security]
+shell = "pip-audit --progress-spinner off 2>&1 || echo 'pip-audit not installed — run: uv pip install pip-audit'"
+help = "Audit dependencies for known vulnerabilities"
+
+[tool.poe.tasks.pre-commit]
+cmd = "pre-commit run --all-files"
+help = "Run all pre-commit hooks"
+
+[tool.poe.tasks.check-all]
+shell = "poe lint && poe typecheck && poe test"
+help = "Run lint, typecheck, and tests in sequence"
+
+[tool.poe.tasks.clean]
+shell = "find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; find . -type f -name '*.pyc' -delete 2>/dev/null; rm -rf .pytest_cache .mypy_cache .ruff_cache dist build *.egg-info 2>/dev/null; echo 'Cache and artifacts cleaned'"
+help = "Remove cache and build artifacts"
+
+# Docker
+[tool.poe.tasks.docker-build]
+cmd = "docker build -t dex:latest ."
+help = "Build Docker image"
+
+[tool.poe.tasks.docker-up]
+cmd = "docker compose up -d"
+help = "Start services with Docker Compose"
+
+[tool.poe.tasks.docker-down]
+cmd = "docker compose down"
+help = "Stop Docker Compose services"
+
+[tool.poe.tasks.docker-logs]
+cmd = "docker compose logs -f"
+help = "View Docker Compose logs"
+
+# Kubernetes
+[tool.poe.tasks.k8s-deploy]
+cmd = "kubectl apply -k infra/argocd/base/"
+help = "Deploy to Kubernetes via Kustomize"
+
+[tool.poe.tasks.k8s-delete]
+cmd = "kubectl delete -k infra/argocd/base/"
+help = "Delete Kubernetes resources"
+
+# Documentation
+[tool.poe.tasks.docs]
+shell = "cd docs && sphinx-build -b html . _build/html && echo 'Documentation built. Open docs/_build/html/index.html'"
+help = "Generate and serve documentation"
+
+# Version
+[tool.poe.tasks.version]
+shell = "grep version pyproject.toml | head -1"
+help = "Show project version"
+
+# Weather Pipeline Tasks
 [tool.poe.tasks.weather-feature]
-cmd = "python ml/weather/notebooks/feature_engineering.py"
-help = "Run weather feature engineering pipeline."
+cmd = "python src/weatherdex/notebooks/feature_engineering.py"
+help = "Run weather feature engineering pipeline"
 
 [tool.poe.tasks.weather-train]
-cmd = "python ml/weather/notebooks/train_model.py"
-help = "Train weather models."
+cmd = "python src/weatherdex/notebooks/train_model.py"
+help = "Train weather models"
 
 [tool.poe.tasks.weather-analyze]
-cmd = "python ml/weather/notebooks/analyze_predictions.py"
-help = "Analyze weather model predictions."
+cmd = "python src/weatherdex/notebooks/analyze_predictions.py"
+help = "Analyze weather model predictions"
 
+# UV Package Manager
 [tool.poe.tasks.uv]
 cmd = "uv"
-help = "Launch the Astral uv CLI."
+help = "Launch the Astral uv CLI"
 
 [tool.poe.tasks.uv-lock]
 cmd = "uv lock"
-help = "Resolve dependencies from pyproject.toml and write uv.lock."
+help = "Resolve dependencies from pyproject.toml and write uv.lock"
 
 [tool.poe.tasks.uv-sync]
 cmd = "uv sync"
-help = "Install dependencies from uv.lock (generated from pyproject.toml) without Poetry installs."
+help = "Install dependencies from uv.lock"
 env = { UV_PROJECT_ENVIRONMENT = ".venv" }

@@ -2,4 +2,5 @@
 /.github/ @data-literate/infra-team
 /infra/ @data-literate/infra-team
 /src/ @data-literate/backend-team
-/pipelines/ @data-literate/data-team
+/src/careerdex/ @data-literate/data-team
+/src/weatherdex/ @data-literate/data-team
