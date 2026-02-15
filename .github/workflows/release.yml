@@ -134,16 +134,34 @@ jobs:
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   text: '❌ Release Process Failed',
-                  blocks: [{
-                    type: 'section',
-                    text: {
-                      type: 'mrkdwn',
-                      text: `*❌ Release Failed*\n*Details:* <${process.env.URL}|View Details>`
+                  blocks: [
+                    {
+                      type: 'section',
+                      text: {
+                        type: 'mrkdwn',
+                        text: `*❌ Release Process Failed*`
+                      }
+                    },
+                    {
+                      type: 'section',
+                      fields: [
+                        { type: 'mrkdwn', text: `*Workflow:*\nRelease` },
+                        { type: 'mrkdwn', text: `*Branch:*\nmain` },
+                        { type: 'mrkdwn', text: `*Commit:*\n\`${process.env.SHA?.substring(0, 8)}\`` },
+                        { type: 'mrkdwn', text: `*Triggered by:*\n${process.env.ACTOR}` },
+                        { type: 'mrkdwn', text: `*Run:*\n<${process.env.URL}|View Details>` }
+                      ]
+                    },
+                    {
+                      type: 'context',
+                      elements: [{ type: 'mrkdwn', text: `🏷️ Release tag creation or GitHub Release failed — check logs` }]
                     }
-                  }]
+                  ]
                 })
               });
-            } catch (e) { console.log('Slack notification failed'); }
+            } catch (e) { console.log('Slack notification failed:', e.message); }
         env:
           SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
           URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
