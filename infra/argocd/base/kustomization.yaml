@@ -6,6 +6,10 @@ namespace: default
 resources:
   - deployment.yaml
   - service.yaml
+  - hpa.yaml
+  - ingress.yaml
+  - pdb.yaml
+  - networkpolicy.yaml
 
 images:
   - name: data-literate/dex
