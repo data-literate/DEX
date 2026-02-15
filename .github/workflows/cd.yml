@@ -12,6 +12,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/dex
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
 jobs:
   build-and-push:
@@ -28,6 +29,29 @@ jobs:
       short_sha: ${{ steps.vars.outputs.short_sha }}
 
     steps:
+      - name: Notify CD Start
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const axios = require('axios');
+            if (!process.env.SLACK_WEBHOOK) return;
+            try {
+              await axios.post(process.env.SLACK_WEBHOOK, {
+                text: '🚀 CD Pipeline Started - Docker Build',
+                blocks: [{
+                  type: 'section',
+                  text: {
+                    type: 'mrkdwn',
+                    text: `*🚀 CD Pipeline Started*\n*Branch:* ${process.env.BRANCH}`
+                  }
+                }]
+              });
+            } catch (e) { console.log('Slack notification failed'); }
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+
       - name: Checkout code
         uses: actions/checkout@v6
         with:
@@ -93,3 +117,57 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'trivy-results.sarif'
+
+  notify-deployment:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: [build-and-push, security-scan]
+    if: always()
+
+    steps:
+      - name: Notify CD Success
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const axios = require('axios');
+            if (!process.env.SLACK_WEBHOOK) return;
+            try {
+              await axios.post(process.env.SLACK_WEBHOOK, {
+                text: '✅ CD Pipeline Completed Successfully',
+                blocks: [{
+                  type: 'section',
+                  text: {
+                    type: 'mrkdwn',
+                    text: `*✅ CD Pipeline Completed*\n*Image:* ${process.env.TAG}\n*SHA:* ${process.env.SHA}`
+                  }
+                }]
+              });
+            } catch (e) { console.log('Slack notification failed'); }
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          TAG: ${{ needs.build-and-push.outputs.image_tag }}
+          SHA: ${{ needs.build-and-push.outputs.short_sha }}
+
+      - name: Notify CD Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const axios = require('axios');
+            if (!process.env.SLACK_WEBHOOK) return;
+            try {
+              await axios.post(process.env.SLACK_WEBHOOK, {
+                text: '❌ CD Pipeline Failed',
+                blocks: [{
+                  type: 'section',
+                  text: {
+                    type: 'mrkdwn',
+                    text: `*❌ CD Pipeline Failed*\n*Details:* <${process.env.URL}|View Details>`
+                  }
+                }]
+              });
+            } catch (e) { console.log('Slack notification failed'); }
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

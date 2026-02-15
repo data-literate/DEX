@@ -10,10 +10,36 @@ permissions:
   contents: read
   security-events: write
 
+env:
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
 jobs:
   semgrep:
     runs-on: ubuntu-latest
     steps:
+      - name: Notify Security Scan Start
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const axios = require('axios');
+            if (!process.env.SLACK_WEBHOOK) return;
+            try {
+              await axios.post(process.env.SLACK_WEBHOOK, {
+                text: '🔒 Security Scans Started',
+                blocks: [{
+                  type: 'section',
+                  text: {
+                    type: 'mrkdwn',
+                    text: `*🔒 Security Scans Started*\n*Branch:* ${process.env.REF}\n*Tools:* Semgrep, CodeQL`
+                  }
+                }]
+              });
+            } catch (e) { console.log('Slack notification failed'); }
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          REF: ${{ github.ref_name }}
+
       - uses: actions/checkout@v6
       - name: Run Semgrep
         uses: returntocorp/semgrep-action@v1
@@ -31,3 +57,57 @@ jobs:
           languages: python
       - name: Perform CodeQL Scan
         uses: github/codeql-action/analyze@v4
+
+  notify-security:
+    name: Notify Security Status
+    runs-on: ubuntu-latest
+    needs: [semgrep, codeql]
+    if: always()
+
+    steps:
+      - name: Notify Security Success
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const axios = require('axios');
+            if (!process.env.SLACK_WEBHOOK) return;
+            try {
+              await axios.post(process.env.SLACK_WEBHOOK, {
+                text: '✅ Security Scans Passed',
+                blocks: [{
+                  type: 'section',
+                  text: {
+                    type: 'mrkdwn',
+                    text: `*✅ Security Scans Completed*\n*Branch:* ${process.env.REF}\n*All Checks:* Passed`
+                  }
+                }]
+              });
+            } catch (e) { console.log('Slack notification failed'); }
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          REF: ${{ github.ref_name }}
+
+      - name: Notify Security Issues
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const axios = require('axios');
+            if (!process.env.SLACK_WEBHOOK) return;
+            try {
+              await axios.post(process.env.SLACK_WEBHOOK, {
+                text: '⚠️ Security Issues Detected',
+                blocks: [{
+                  type: 'section',
+                  text: {
+                    type: 'mrkdwn',
+                    text: `*⚠️ Security Issues Detected*\n*Branch:* ${process.env.REF}\n*Details:* <${process.env.URL}|View Details>`
+                  }
+                }]
+              });
+            } catch (e) { console.log('Slack notification failed'); }
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          REF: ${{ github.ref_name }}
+          URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
