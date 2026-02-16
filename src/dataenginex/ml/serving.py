@@ -7,13 +7,12 @@ and provides a structured request/response contract for inference.
 
 from __future__ import annotations
 
-import logging
 import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 @dataclass

@@ -9,14 +9,13 @@ per-step metrics for observability.
 from __future__ import annotations
 
 import contextlib
-import logging
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 @dataclass

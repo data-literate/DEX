@@ -1,30 +1,39 @@
+# ---------------------------------------------------------------
+# ArgoCD Application — Single-environment (default namespace)
+# Watches the base overlay on main branch.
+# For multi-env deployment see the ApplicationSet below.
+# ---------------------------------------------------------------
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: dex
   namespace: argocd
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+    - resources-finalizer.argocd.argoproj.io  # Clean up K8s resources on app deletion
 spec:
   project: dex-project
-  
+
+  # Git source — points at the base Kustomization
   source:
     repoURL: https://github.com/data-literate/DEX
     targetRevision: main
     path: infra/argocd/base
-  
+
+  # Target cluster & namespace
   destination:
     server: https://kubernetes.default.svc
     namespace: default
-  
+
+  # Sync policy — fully automated with self-healing
   syncPolicy:
     automated:
-      prune: true
-      selfHeal: true
-    
+      prune: true           # Remove resources no longer in Git
+      selfHeal: true        # Re-apply if someone manually edits
+
     syncOptions:
-      - CreateNamespace=true
-    
+      - CreateNamespace=true  # Auto-create namespace if missing
+
+    # Retry on transient failures
     retry:
       limit: 5
       backoff:

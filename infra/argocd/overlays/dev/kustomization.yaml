@@ -1,19 +1,23 @@
+# ---------------------------------------------------------------
+# DEV overlay — Low-resource, debug-level configuration.
+# Applied to dex-dev namespace via ArgoCD ApplicationSet.
+# ---------------------------------------------------------------
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 namespace: dex-dev
 
 resources:
-  - ../../base
+  - ../../base              # Inherits all base manifests
 
 replicas:
   - name: dex
-    count: 2
+    count: 2                # 2 pods for basic availability
 
 images:
   - name: data-literate/dex
     newName: ghcr.io/data-literate/dex
-    newTag: sha-51c0cc9c
+    newTag: sha-51c0cc9c    # Pinned to specific commit SHA
 
 patches:
-  - path: deployment.yaml
+  - path: deployment.yaml   # Dev-specific env vars & resource limits

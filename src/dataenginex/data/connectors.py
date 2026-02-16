@@ -8,8 +8,9 @@ without touching pipeline logic.
 
 from __future__ import annotations
 
+import csv
+import io
 import json
-import logging
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -19,9 +20,7 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-
-logger = logging.getLogger(__name__)
-
+from loguru import logger
 
 # ---------------------------------------------------------------------------
 # Connector metadata
@@ -329,8 +328,5 @@ class FileConnector(DataConnector):
 
     @staticmethod
     def _load_csv(text: str) -> list[dict[str, Any]]:
-        import csv
-        import io
-
         reader = csv.DictReader(io.StringIO(text))
         return [dict(row) for row in reader]

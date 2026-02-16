@@ -9,7 +9,6 @@ The ``BaseTrainer`` ABC defines a standard train → evaluate → save lifecycle
 from __future__ import annotations
 
 import json
-import logging
 import pickle
 import time
 from abc import ABC, abstractmethod
@@ -18,7 +17,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 @dataclass

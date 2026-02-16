@@ -10,7 +10,6 @@ Implements a token-bucket algorithm per client IP.  Configuration:
 
 from __future__ import annotations
 
-import logging
 import os
 import time
 from dataclasses import dataclass
@@ -18,10 +17,9 @@ from typing import Any
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from loguru import logger
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
-
-logger = logging.getLogger(__name__)
 
 
 @dataclass

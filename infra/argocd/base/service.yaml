@@ -1,3 +1,8 @@
+# ---------------------------------------------------------------
+# DataEngineX API — ClusterIP Service
+# Internal-only service that fronts the dex Deployment.
+# External access is handled by the Ingress resource.
+# ---------------------------------------------------------------
 apiVersion: v1
 kind: Service
 metadata:
@@ -5,11 +10,11 @@ metadata:
   labels:
     app: dex
 spec:
-  type: ClusterIP
+  type: ClusterIP               # Cluster-internal only; Ingress handles external
   ports:
-  - port: 8000
-    targetPort: 8000
+  - port: 8000                  # Service port
+    targetPort: 8000            # Must match containerPort in Deployment
     protocol: TCP
     name: http
   selector:
-    app: dex
+    app: dex                    # Routes to pods with label app=dex

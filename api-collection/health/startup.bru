@@ -1,0 +1,16 @@
+meta {
+  name: Startup
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base_url}}/startup
+  body: none
+  auth: none
+}
+
+docs {
+  Startup probe — returns {"status": "started"} once the application
+  has completed initialization. Used by Kubernetes startup probes.
+}

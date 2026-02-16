@@ -1,6 +1,14 @@
+# ---------------------------------------------------------------
+# DataEngineX SLO Alert Rules
+# Fires alerts when latency (P95), error rate (5xx), or in-flight
+# saturation exceed per-environment thresholds.
+# Each rule links to the Deploy Runbook for remediation steps.
+# ---------------------------------------------------------------
 groups:
   - name: dataenginex-slos
     rules:
+      # --- Latency alerts (P95 threshold) ---
+      # Prod: > 750 ms for 3 min → page
       - alert: DataEngineXLatencyHigh
         expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{environment="prod"}[5m])) > 0.75
         for: 3m

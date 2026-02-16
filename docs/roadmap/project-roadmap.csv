@@ -19,3 +19,4 @@
 "dex-api module epic","https://github.com/data-literate/DEX/issues/40","Todo","v0.3.0 - Data Platform Foundation","enhancement, P2-medium, component:api"
 "dex-ops module epic","https://github.com/data-literate/DEX/issues/41","Todo","v0.3.0 - Data Platform Foundation","enhancement, P2-medium, component:infrastructure"
 "dex-ml module epic","https://github.com/data-literate/DEX/issues/42","Todo","v0.4.0 - ML Platform Foundation","enhancement, P1-high, component:ml"
+"Purchase dataenginex.io domain and configure DNS","","Todo","Backlog","P2-medium, component:infrastructure"

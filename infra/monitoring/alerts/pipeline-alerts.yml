@@ -1,3 +1,8 @@
+# ---------------------------------------------------------------
+# DataEngineX Pipeline Alert Rules
+# Monitors pipeline execution, data quality scores, ingestion
+# volume, deduplication rates, layer loss, and connector health.
+# ---------------------------------------------------------------
 groups:
   - name: dex_pipeline_alerts
     rules:

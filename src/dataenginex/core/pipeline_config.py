@@ -6,9 +6,6 @@ including the CareerDEX job ingestion pipeline with 3-hour cycles (via
 Apache Airflow).
 """
 
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 class PipelineConfig:
@@ -22,24 +19,28 @@ class PipelineConfig:
     # Job ingestion sources and target volumes
     CAREERDEX_JOB_SOURCES = {
         "linkedin": {
+            "type": "rest_api",
             "expected_daily_jobs": 10000,
             "cycles_per_day": 8,  # 24 hours / 3 hours
             "expected_cycle_jobs": 1250,
             "timeout_seconds": 900,
         },
         "indeed": {
+            "type": "rest_api",
             "expected_daily_jobs": 50000,
             "cycles_per_day": 8,
             "expected_cycle_jobs": 6250,
             "timeout_seconds": 1200,
         },
         "glassdoor": {
+            "type": "rest_api",
             "expected_daily_jobs": 20000,
             "cycles_per_day": 8,
             "expected_cycle_jobs": 2500,
             "timeout_seconds": 1000,
         },
         "company_career_pages": {
+            "type": "scraper",
             "expected_daily_jobs": 30000,
             "cycles_per_day": 8,
             "expected_cycle_jobs": 3750,
@@ -48,14 +49,10 @@ class PipelineConfig:
     }
     
     # Total expected jobs per cycle: 13,750 posts
-    EXPECTED_JOBS_PER_CYCLE = sum(
-        src["expected_cycle_jobs"] for src in CAREERDEX_JOB_SOURCES.values()
-    )
+    EXPECTED_JOBS_PER_CYCLE: int = 13750  # 1250 + 6250 + 2500 + 3750
     
     # Total expected jobs in system (live): ~110K per day = 1M+ rolling window
-    EXPECTED_JOBS_TOTAL = sum(
-        src["expected_daily_jobs"] for src in CAREERDEX_JOB_SOURCES.values()
-    )
+    EXPECTED_JOBS_TOTAL: int = 110000  # 10000 + 50000 + 20000 + 30000
     
     # Layer configurations live in medallion_architecture.py (MedallionArchitecture class).
     # Use MedallionArchitecture.BRONZE_CONFIG / SILVER_CONFIG / GOLD_CONFIG for the

@@ -8,14 +8,11 @@ numeric distributions, and string-length statistics.
 
 from __future__ import annotations
 
-import logging
 import statistics
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
-
-logger = logging.getLogger(__name__)
 
 
 @dataclass

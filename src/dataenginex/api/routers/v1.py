@@ -23,33 +23,40 @@ router = APIRouter(prefix="/api/v1", tags=["v1"])
 
 @router.get("/data/sources", response_model=PaginatedResponse)
 def list_data_sources(cursor: str | None = None, limit: int = 20) -> PaginatedResponse:
-    """List registered data sources."""
+    """List registered data sources (derived from pipeline config)."""
+    from dataenginex.core.pipeline_config import PipelineConfig
+
     sources: list[dict[str, Any]] = [
-        {"name": "linkedin", "type": "rest_api", "status": "active"},
-        {"name": "indeed", "type": "rest_api", "status": "active"},
-        {"name": "glassdoor", "type": "rest_api", "status": "active"},
-        {"name": "company_career_pages", "type": "scraper", "status": "active"},
+        {"name": name, "type": cfg.get("type", "unknown"), "status": "active"}
+        for name, cfg in PipelineConfig.CAREERDEX_JOB_SOURCES.items()
     ]
     return paginate(sources, cursor=cursor, limit=limit)
 
 
 @router.get("/data/quality")
 def data_quality_summary() -> dict[str, Any]:
-    """Return a summary of data quality metrics."""
+    """Return a summary of data quality metrics.
+
+    .. note::
+        Scores are **placeholder values** until the quality-tracking
+        subsystem is wired in.  See Issue backlog for live metrics epic.
+    """
+    # TODO(#future): Replace with live metrics from DataProfiler / quality store
     return {
-        "overall_score": 0.87,
+        "overall_score": 0.0,
         "dimensions": {
-            "completeness": 0.92,
-            "accuracy": 0.88,
-            "consistency": 0.91,
-            "timeliness": 0.83,
-            "uniqueness": 0.95,
+            "completeness": 0.0,
+            "accuracy": 0.0,
+            "consistency": 0.0,
+            "timeliness": 0.0,
+            "uniqueness": 0.0,
         },
         "layer_scores": {
-            "bronze": 0.70,
-            "silver": 0.87,
-            "gold": 0.95,
+            "bronze": 0.0,
+            "silver": 0.0,
+            "gold": 0.0,
         },
+        "_note": "Placeholder — connect quality store for live data",
     }
 
 

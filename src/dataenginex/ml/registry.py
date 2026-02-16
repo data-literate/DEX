@@ -8,14 +8,13 @@ Tracks model artifacts with staging lifecycle:
 from __future__ import annotations
 
 import json
-import logging
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 class ModelStage(StrEnum):

@@ -8,13 +8,10 @@ distribution checks.
 
 from __future__ import annotations
 
-import logging
 import math
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
-
-logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -52,7 +49,7 @@ class DriftDetector:
 
     PSI thresholds (industry standard):
         < 0.10  — no significant drift
-        0.10–0.25 — moderate drift
+        0.10-0.25 — moderate drift
         > 0.25  — significant drift
 
     Parameters

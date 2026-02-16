@@ -1,3 +1,12 @@
+# ---------------------------------------------------------------
+# DataEngineX API — Network Policy
+# Restricts pod-level traffic to only known consumers and
+# required backends.
+#
+# Ingress: only from the ingress-nginx controller and the
+#          monitoring namespace (Prometheus scraping).
+# Egress:  DNS, external HTTPS (APIs), PostgreSQL, Redis, Jaeger.
+# ---------------------------------------------------------------
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -12,7 +21,7 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Allow traffic from ingress controller
+    # Allow traffic from NGINX ingress controller
     - from:
         - namespaceSelector:
             matchLabels:
@@ -20,7 +29,7 @@ spec:
       ports:
         - protocol: TCP
           port: 8000
-    # Allow Prometheus scraping
+    # Allow Prometheus metric scraping
     - from:
         - namespaceSelector:
             matchLabels:
@@ -29,7 +38,7 @@ spec:
         - protocol: TCP
           port: 8000
   egress:
-    # Allow DNS
+    # Allow DNS resolution (UDP + TCP)
     - to:
         - namespaceSelector: {}
       ports:
@@ -37,18 +46,18 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-    # Allow external HTTPS (APIs, registries)
+    # Allow outbound HTTPS to external APIs and container registries
     - to:
         - ipBlock:
             cidr: 0.0.0.0/0
             except:
-              - 10.0.0.0/8
+              - 10.0.0.0/8        # Exclude private ranges
               - 172.16.0.0/12
               - 192.168.0.0/16
       ports:
         - protocol: TCP
           port: 443
-    # Allow database (PostgreSQL)
+    # Allow PostgreSQL database access
     - to:
         - podSelector:
             matchLabels:
@@ -56,7 +65,7 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
-    # Allow Redis cache
+    # Allow Redis cache access
     - to:
         - podSelector:
             matchLabels:
@@ -64,7 +73,7 @@ spec:
       ports:
         - protocol: TCP
           port: 6379
-    # Allow Jaeger tracing
+    # Allow Jaeger OTLP trace export
     - to:
         - podSelector:
             matchLabels:

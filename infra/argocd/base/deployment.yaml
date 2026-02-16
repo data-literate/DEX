@@ -1,3 +1,8 @@
+# ---------------------------------------------------------------
+# DataEngineX API — Base Deployment
+# Defines the core pod template used by all environments.
+# Environment-specific overrides live in overlays/<env>/deployment.yaml.
+# ---------------------------------------------------------------
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -5,7 +10,7 @@ metadata:
   labels:
     app: dex
 spec:
-  replicas: 2
+  replicas: 2                          # Default replica count (overridden per env)
   selector:
     matchLabels:
       app: dex
@@ -16,13 +21,14 @@ spec:
     spec:
       containers:
       - name: dex
-        image: data-literate/dex:v1.0.0
+        image: data-literate/dex:v1.0.0  # Replaced by Kustomize image transformer
         ports:
         - containerPort: 8000
-          name: http
+          name: http                     # Named port referenced by Service & Ingress
         env:
         - name: LOG_LEVEL
-          value: "info"
+          value: "info"                  # Overridden per environment overlay
+        # --- Resource requests & limits (tune per environment) ---
         resources:
           requests:
             cpu: 100m
@@ -30,12 +36,15 @@ spec:
           limits:
             cpu: 500m
             memory: 512Mi
+        # --- Kubernetes probes ---
+        # Startup probe: allows up to 150 s (30 × 5 s) for cold start
         startupProbe:
           httpGet:
             path: /startup
             port: 8000
           periodSeconds: 5
           failureThreshold: 30
+        # Liveness probe: restarts the pod if /health fails 3 times
         livenessProbe:
           httpGet:
             path: /health
@@ -43,6 +52,7 @@ spec:
           periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3
+        # Readiness probe: removes pod from Service endpoints when unhealthy
         readinessProbe:
           httpGet:
             path: /ready

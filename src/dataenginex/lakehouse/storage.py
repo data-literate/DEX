@@ -12,13 +12,12 @@ falls back to ``JsonStorage`` with a logged warning.
 from __future__ import annotations
 
 import json
-import logging
 from pathlib import Path
 from typing import Any
 
-from dataenginex.core.medallion_architecture import StorageBackend, StorageFormat
+from loguru import logger
 
-logger = logging.getLogger(__name__)
+from dataenginex.core.medallion_architecture import StorageBackend, StorageFormat
 
 # Try importing pyarrow — optional heavyweight dependency
 try:

@@ -8,12 +8,9 @@ used by storage backends to organise data into predictable directory trees.
 from __future__ import annotations
 
 import hashlib
-import logging
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
 from typing import Any
-
-logger = logging.getLogger(__name__)
 
 
 class PartitionStrategy(ABC):
