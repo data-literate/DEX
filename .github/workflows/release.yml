@@ -55,7 +55,7 @@ jobs:
       - name: Extract version from pyproject.toml
         id: version
         run: |
-          VERSION=$(grep "^version = " pyproject.toml | sed 's/version = "//;s/".*//')
+          VERSION=$(grep -m 1 "^version = " pyproject.toml | sed 's/version = "//;s/".*//')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
           echo "Extracted version: $VERSION"
