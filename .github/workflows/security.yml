@@ -69,7 +69,7 @@ jobs:
 
     steps:
       - name: Notify Security Success
-        if: success()
+        if: ${{ needs.semgrep.result == 'success' && needs.codeql.result == 'success' }}
         uses: actions/github-script@v7
         with:
           script: |
@@ -80,22 +80,34 @@ jobs:
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   text: '✅ Security Scans Passed',
-                  blocks: [{
-                    type: 'section',
-                    text: {
-                      type: 'mrkdwn',
-                      text: `*✅ Security Scans Completed*\n*Branch:* ${process.env.REF}\n*All Checks:* Passed`
+                  blocks: [
+                    {
+                      type: 'section',
+                      text: {
+                        type: 'mrkdwn',
+                        text: `*✅ Security Scans Completed*`
+                      }
+                    },
+                    {
+                      type: 'section',
+                      fields: [
+                        { type: 'mrkdwn', text: `*Branch:*\n${process.env.REF}` },
+                        { type: 'mrkdwn', text: `*Semgrep:*\n✅ Passed` },
+                        { type: 'mrkdwn', text: `*CodeQL:*\n✅ Passed` },
+                        { type: 'mrkdwn', text: `*Run:*\n<${process.env.URL}|View Details>` }
+                      ]
                     }
-                  }]
+                  ]
                 })
               });
-            } catch (e) { console.log('Slack notification failed'); }
+            } catch (e) { console.log('Slack notification failed:', e.message); }
         env:
           SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
           REF: ${{ github.ref_name }}
+          URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
       - name: Notify Security Issues
-        if: failure()
+        if: ${{ needs.semgrep.result == 'failure' || needs.codeql.result == 'failure' }}
         uses: actions/github-script@v7
         with:
           script: |

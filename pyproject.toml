@@ -1,7 +1,7 @@
 
 [project]
 name = "DataEngineX"
-version = "0.3.2"
+version = "0.3.3"
 description = "Core framework for data engineering projects"
 authors = [
     {name = "Jay", email = "jayapal.myaka99@gmail.com"}
@@ -56,7 +56,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "DataEngineX"
-version = "0.3.2"
+version = "0.3.3"
 description = "Core framework for data engineering projects"
 authors = ["Jay"]
 license = "MIT"

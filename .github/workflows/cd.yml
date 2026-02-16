@@ -129,7 +129,7 @@ jobs:
 
     steps:
       - name: Notify CD Success
-        if: success()
+        if: ${{ needs.build-and-push.result == 'success' && needs.security-scan.result == 'success' }}
         uses: actions/github-script@v7
         with:
           script: |
@@ -140,27 +140,49 @@ jobs:
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   text: '✅ CD Pipeline Completed Successfully',
-                  blocks: [{
-                    type: 'section',
-                    text: {
-                      type: 'mrkdwn',
-                      text: `*✅ CD Pipeline Completed*\n*Image:* ${process.env.TAG}\n*SHA:* ${process.env.SHA}`
+                  blocks: [
+                    {
+                      type: 'section',
+                      text: {
+                        type: 'mrkdwn',
+                        text: `*✅ CD Pipeline Completed*`
+                      }
+                    },
+                    {
+                      type: 'section',
+                      fields: [
+                        { type: 'mrkdwn', text: `*Image:*\n${process.env.TAG}` },
+                        { type: 'mrkdwn', text: `*SHA:*\n\`${process.env.SHA}\`` },
+                        { type: 'mrkdwn', text: `*Branch:*\n${process.env.BRANCH}` },
+                        { type: 'mrkdwn', text: `*Run:*\n<${process.env.URL}|View Details>` }
+                      ]
+                    },
+                    {
+                      type: 'context',
+                      elements: [{ type: 'mrkdwn', text: `🐳 Image pushed to GHCR • Security scan passed` }]
                     }
-                  }]
+                  ]
                 })
               });
-            } catch (e) { console.log('Slack notification failed'); }
+            } catch (e) { console.log('Slack notification failed:', e.message); }
         env:
           SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
           TAG: ${{ needs.build-and-push.outputs.image_tag }}
           SHA: ${{ needs.build-and-push.outputs.short_sha }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
       - name: Notify CD Failure
-        if: failure()
+        if: ${{ needs.build-and-push.result == 'failure' || needs.security-scan.result == 'failure' }}
         uses: actions/github-script@v7
         with:
           script: |
             if (!process.env.SLACK_WEBHOOK) return;
+            const buildResult = process.env.BUILD_RESULT;
+            const scanResult = process.env.SCAN_RESULT;
+            const failedJobs = [];
+            if (buildResult === 'failure') failedJobs.push('Docker Build');
+            if (scanResult === 'failure') failedJobs.push('Security Scan');
             try {
               await fetch(process.env.SLACK_WEBHOOK, {
                 method: 'POST',
@@ -178,7 +200,7 @@ jobs:
                     {
                       type: 'section',
                       fields: [
-                        { type: 'mrkdwn', text: `*Workflow:*\nContinuous Deployment` },
+                        { type: 'mrkdwn', text: `*Failed Jobs:*\n${failedJobs.join(', ')}` },
                         { type: 'mrkdwn', text: `*Branch:*\n${process.env.BRANCH}` },
                         { type: 'mrkdwn', text: `*Triggered by:*\n${process.env.ACTOR}` },
                         { type: 'mrkdwn', text: `*Run:*\n<${process.env.URL}|View Details>` }
@@ -186,7 +208,7 @@ jobs:
                     },
                     {
                       type: 'context',
-                      elements: [{ type: 'mrkdwn', text: `📦 Docker build or security scan failed — check logs for details` }]
+                      elements: [{ type: 'mrkdwn', text: `📦 Build: ${buildResult} • Scan: ${scanResult} — check logs for details` }]
                     }
                   ]
                 })
@@ -194,6 +216,8 @@ jobs:
             } catch (e) { console.log('Slack notification failed:', e.message); }
         env:
           SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          BUILD_RESULT: ${{ needs.build-and-push.result }}
+          SCAN_RESULT: ${{ needs.security-scan.result }}
           BRANCH: ${{ github.event.workflow_run.head_branch }}
           ACTOR: ${{ github.actor }}
           URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
