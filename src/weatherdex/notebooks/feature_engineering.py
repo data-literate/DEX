@@ -6,8 +6,7 @@
 
 # COMMAND ----------
 
-import logging
-
+from loguru import logger
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import (
     avg,
@@ -22,9 +21,6 @@ from pyspark.sql.functions import (
     unix_timestamp,
 )
 from pyspark.sql.window import Window
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # COMMAND ----------
 

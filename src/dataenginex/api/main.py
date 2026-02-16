@@ -12,8 +12,11 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse, PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from dataenginex.api.auth import AuthMiddleware
 from dataenginex.api.errors import APIHTTPException, ServiceUnavailableError
 from dataenginex.api.health import HealthChecker, HealthStatus
+from dataenginex.api.rate_limit import RateLimitMiddleware
+from dataenginex.api.routers.v1 import router as v1_router
 from dataenginex.core.schemas import (
     ComponentStatus,
     EchoRequest,
@@ -74,6 +77,11 @@ instrument_fastapi(app)
 # Add middleware (order matters - outer to inner)
 app.add_middleware(RequestLoggingMiddleware)  # Logging
 app.add_middleware(PrometheusMetricsMiddleware)  # Metrics
+app.add_middleware(AuthMiddleware)  # JWT authentication
+app.add_middleware(RateLimitMiddleware)  # Rate limiting
+
+# Register versioned routers
+app.include_router(v1_router)
 
 health_checker = HealthChecker()
 

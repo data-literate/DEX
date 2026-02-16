@@ -5,12 +5,11 @@ Implements the Bronze → Silver → Gold data architecture for DEX ecosystem
 with support for local Parquet storage and BigQuery cloud integration.
 """
 
-import logging
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 class StorageFormat(StrEnum):

@@ -563,7 +563,7 @@ The actual rule definitions live in `infra/prometheus/alerts/dataenginex-alerts.
 |-------|-------------|-----------|----------|----------|
 | `DataEngineXLatencyHigh` | prod | P95 latency > 0.75s (5m window) | `page` | critical slack (#dex-alerts) |
 |                         | stage | P95 latency > 1.0s | `page` | same |
-|                         | dev | P95 latency > 1.5s | `warning` | email (alerts@dataenginex.io) |
+|                         | dev | P95 latency > 1.5s | `warning` | email (alerts@dataenginex.io) <!-- TODO: domain not yet purchased --> |
 | `DataEngineXErrorRateHigh` | prod | 5xx fraction > 1% | `page` | critical slack |
 |                         | stage | 5xx fraction > 3% | `page` | critical slack |
 |                         | dev | 5xx fraction > 5% | `warning` | email |

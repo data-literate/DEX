@@ -6,14 +6,10 @@
 
 # COMMAND ----------
 
-import logging
-
+from loguru import logger
 from pyspark.ml import PipelineModel
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import abs, col, round
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # COMMAND ----------
 

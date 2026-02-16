@@ -1,12 +1,23 @@
+# ---------------------------------------------------------------
+# DataEngineX — Local Development Stack (Docker Compose)
+# Spins up the API, Prometheus, Alertmanager, Grafana, and Jaeger
+# for local observability development. Not intended for production.
+#
+# Usage:  docker compose up --build
+# Ports:  API 8000 | Prometheus 9090 | Alertmanager 9093
+#         Grafana 3000 | Jaeger UI 16686
+# ---------------------------------------------------------------
 services:
+
+  # --- DataEngineX FastAPI application ---
   dataenginex:
-    build: .
+    build: .                     # Uses ./Dockerfile
     container_name: dex-api
     ports:
-      - "8000:8000"
+      - "8000:8000"             # FastAPI / Uvicorn
     environment:
       - LOG_LEVEL=INFO
-      - OTLP_ENDPOINT=http://jaeger:4317
+      - OTLP_ENDPOINT=http://jaeger:4317   # OpenTelemetry collector (Jaeger)
     depends_on:
       - prometheus
       - jaeger
@@ -15,35 +26,39 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 10s          # Grace period for app startup
 
+  # --- Prometheus — Metrics collection ---
   prometheus:
     image: prom/prometheus:latest
     container_name: dex-prometheus
     ports:
-      - "9090:9090"
+      - "9090:9090"             # Prometheus web UI
     volumes:
       - ./infra/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./infra/monitoring/alerts:/etc/prometheus/alerts:ro
     restart: unless-stopped
 
+  # --- Alertmanager — Alert routing ---
   alertmanager:
     image: prom/alertmanager:latest
     container_name: dex-alertmanager
     ports:
-      - "9093:9093"
+      - "9093:9093"             # Alertmanager web UI
     volumes:
       - ./infra/monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
     restart: unless-stopped
 
+  # --- Grafana — Dashboards & visualisation ---
   grafana:
     image: grafana/grafana:latest
     container_name: dex-grafana
     ports:
-      - "3000:3000"
+      - "3000:3000"             # Grafana web UI
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      # Credentials read from env / .env; defaults to admin/admin
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD:-admin}
     volumes:
       - ./infra/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./infra/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
@@ -51,12 +66,13 @@ services:
       - prometheus
     restart: unless-stopped
 
+  # --- Jaeger — Distributed tracing ---
   jaeger:
     image: jaegertracing/all-in-one:1.60
     container_name: dex-jaeger
     ports:
-      - "16686:16686"
-      - "4317:4317"
+      - "16686:16686"           # Jaeger query UI
+      - "4317:4317"             # OTLP gRPC receiver
     environment:
       - COLLECTOR_OTLP_ENABLED=true
     restart: unless-stopped

@@ -1,12 +1,10 @@
 """OpenWeatherMap API Pipeline - Core extraction logic"""
 
-import logging
 from datetime import UTC, datetime
 from typing import Any
 
 import requests
-
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 class OpenWeatherAPIClient:

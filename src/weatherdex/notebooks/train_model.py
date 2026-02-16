@@ -6,16 +6,12 @@
 
 # COMMAND ----------
 
-import logging
-
+from loguru import logger
 from pyspark.ml import Pipeline
 from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.ml.feature import VectorAssembler
 from pyspark.ml.regression import RandomForestRegressor
 from pyspark.sql import SparkSession
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # COMMAND ----------
 
