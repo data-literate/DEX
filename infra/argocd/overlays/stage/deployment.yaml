@@ -1,3 +1,4 @@
+# Stage environment patch — production-like resources, info logging
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -9,10 +10,10 @@ spec:
       - name: dex
         env:
         - name: LOG_LEVEL
-          value: "info"
+          value: "info"           # Standard production verbosity
         resources:
           requests:
-            cpu: 100m
+            cpu: 100m             # Mirrors production baseline
             memory: 128Mi
           limits:
             cpu: 500m

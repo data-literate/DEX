@@ -1,0 +1,16 @@
+# ---------------------------------------------------------------
+# DataEngineX API — Pod Disruption Budget
+# Guarantees at least 1 pod remains available during voluntary
+# disruptions (node drains, cluster upgrades, etc.).
+# ---------------------------------------------------------------
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: dex-api-pdb
+  labels:
+    app: dex-api
+spec:
+  minAvailable: 1               # Keep ≥ 1 pod running at all times
+  selector:
+    matchLabels:
+      app: dex-api

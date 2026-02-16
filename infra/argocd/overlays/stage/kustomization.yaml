@@ -1,3 +1,7 @@
+# ---------------------------------------------------------------
+# STAGE overlay — Production-like configuration for QA.
+# Mirrors prod resource settings; uses 'info' log level.
+# ---------------------------------------------------------------
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -8,12 +12,12 @@ resources:
 
 replicas:
   - name: dex
-    count: 2
+    count: 2                # Same as prod minimum
 
 images:
   - name: data-literate/dex
     newName: ghcr.io/data-literate/dex
-    newTag: sha-03216e24
+    newTag: sha-03216e24    # Promote to prod after stage validation
 
 patches:
   - path: deployment.yaml

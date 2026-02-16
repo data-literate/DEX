@@ -18,31 +18,33 @@ DEX is a unified framework that bridges **Data Engineering, Data Warehousing, Ma
 
 See [Readme.md](../Readme.md) for the full philosophy and roadmap context.
 
-## Current State (v0.1.0 - Foundation Complete ✅)
+## Current State (v0.3.0 - Production Hardening ✅)
 
 ### Completed Infrastructure
-- ✅ **CI/CD**: GitHub Actions with automated lint, test, build, push
+- ✅ **CI/CD**: GitHub Actions — lint (ruff), type-check (mypy), test (pytest), build, push
 - ✅ **GitOps**: ArgoCD with multi-environment deployment (dev/stage/prod)
-- ✅ **Security**: CodeQL, Trivy scanning, branch protection
-- ✅ **Containerization**: Docker with SHA-tagged images on ghcr.io
+- ✅ **Code Quality**: Ruff (0 errors), mypy strict (0 errors), 94% test coverage
+- ✅ **Pre-commit**: ruff + mypy + standard hooks
+- ✅ **Containerization**: Multi-stage Docker with non-root user, healthcheck
 - ✅ **Infrastructure-as-Code**: Kustomize overlays for all environments
-- ✅ **Project Management**: GitHub Issues, Templates, Labels, SDLC process
+- ✅ **Observability**: Structured logging (structlog), Prometheus metrics, OpenTelemetry tracing
+- ✅ **Data Framework**: Medallion architecture (Bronze/Silver/Gold), data quality validators
+- ✅ **Security**: CodeQL, Trivy scanning, pip-audit, branch protection
 
 ### Current Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     DEX Platform (v0.1.0)                   │
+│                     DEX Platform (v0.3.0)                   │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
 │  ┌──────────────┐     ┌──────────────┐    ┌──────────────┐│
-│  │   FastAPI    │────▶│  Learning    │    │   Weather    ││
-│  │   Service    │     │   Modules    │    │   Pipeline   ││
-│  │  (3 routes)  │     │ (pyconcepts) │    │  (example)   ││
+│  │  DataEngineX │     │  CareerDEX   │    │  WeatherDEX  ││
+│  │   (API +     │     │  (Job Data   │    │  (Weather    ││
+│  │  Framework)  │     │   Platform)  │    │   Pipeline)  ││
 │  └──────────────┘     └──────────────┘    └──────────────┘│
-│         │                                                   │
-│         └───────────────────────────────────────────────────┤
-│                    No DB / No Cache / No Auth              │
+│  Observability: Prometheus + OpenTelemetry + structlog      │
+│  Quality: Ruff + mypy + pytest (94% cov) + pre-commit      │
 └─────────────────────────────────────────────────────────────┘
          │
          ▼
@@ -88,31 +90,36 @@ See [Readme.md](../Readme.md) for the full philosophy and roadmap context.
 
 ## Roadmap Overview
 
-The detailed roadmap is tracked in [TODO.md](../TODO.md) and the GitHub Project board.
+The detailed roadmap is tracked in GitHub Issues/Milestones and the Project board.
 
 ### Phases (High Level)
 
-- **Phase 1: Foundation (v0.1.0)** — CI/CD, GitOps, multi‑env deployments
-- **Phase 2: Production Hardening (v0.2.0)** — observability, health probes, API quality
-- **Phase 3: Data Platform (v0.3.0)** — ingestion, transformation, quality, orchestration
+- **Phase 1: Foundation (v0.1.0)** ✅ — CI/CD, GitOps, multi‑env deployments
+- **Phase 2: Production Hardening (v0.2.0)** ✅ — observability, health probes, API quality
+- **Phase 3: Data Platform (v0.3.0)** ✅ — medallion architecture, data quality, schemas
 - **Phase 4: ML Platform (v0.4.0)** — training, registry, serving, monitoring
 - **Phase 5: Advanced Features (v0.5.0)** — auth, caching, analytics
 - **Phase 6: Production Ready (v1.0.0)** — DR, security, performance
 
-For execution details, see [TODO.md](../TODO.md) and [SDLC](SDLC.md).
+For execution details, see GitHub Issues and [SDLC](SDLC.md).
 
 ## Modular Monolith Strategy
 
 ### Current Module Structure
 ```
 src/
-├── dataenginex/          # FastAPI app (API layer)
-├── pyconcepts/           # Learning modules
-└── (future modules)
-    ├── core/             # Shared utilities
-    ├── data_pipelines/   # Data engineering
-    ├── ml/               # ML training/serving
-    └── analytics/        # BI and reporting
+├── dataenginex/          # Core framework (API, middleware, validators, schemas)
+│   ├── api/              # FastAPI app, health, errors
+│   ├── core/             # Medallion architecture, validators, schemas
+│   └── middleware/       # Logging, metrics, tracing, request handling
+├── careerdex/            # Job data ingestion platform (phases 1-6)
+│   ├── phases/           # Implementation phases
+│   ├── dags/             # Airflow DAGs
+│   └── models/           # Data models
+└── weatherdex/           # Weather ML pipeline (reference implementation)
+    ├── core/             # Pipeline core
+    ├── ml/               # ML models
+    └── notebooks/        # Databricks notebooks
 ```
 
 ### Service Extraction Criteria
@@ -153,7 +160,7 @@ src/
 - **Secrets**: Sealed Secrets
 
 ### Data & ML Stack (v0.3.0+)
-- **Orchestration**: Airflow (preferred) or Prefect
+- **Orchestration**: Apache Airflow
 - **ML Tracking**: MLflow (preferred) or Weights & Biases
 - **BI Tool**: Metabase (preferred) or Superset
 - **Data Quality**: Great Expectations
@@ -239,25 +246,23 @@ dev (auto) → stage (QA approval) → prod (manual approval)
 
 ## Next Actions
 
-1. **Immediate** (This Week):
-   - Create GitHub milestones for v0.2.0 through v1.0.0
-   - Convert TODO.md P1 items into GitHub issues
-   - Assign issues to v0.2.0 milestone
-   - Start Phase 2 implementation
+1. **Immediate** (This Sprint):
+   - Database integration (PostgreSQL)
+   - Authentication (JWT + API keys)
+   - Cache layer (Redis)
 
-2. **Short Term** (Next 2 Weeks):
-   - Implement structured logging
-   - Add Prometheus metrics
-   - Create E2E test suite
-   - Deploy to dev environment
+2. **Short Term** (Next 2 Sprints):
+   - ML experiment tracking (MLflow)
+   - Model serving endpoints
+   - Feature store integration
 
-3. **Medium Term** (Next Month):
-   - Complete v0.2.0
-   - Start data pipeline framework
-   - Begin ML experiment tracking setup
+3. **Medium Term** (Next Quarter):
+   - Complete v0.4.0 ML platform
+   - Production hardening for v1.0.0
+   - Performance tuning and load testing
 
 ---
 
-**Last Updated**: 2026-01-30  
-**Document Owner**: Project Manager  
+**Last Updated**: 2026-02-15  
+**Document Owner**: Project Lead  
 **Review Cadence**: Bi-weekly

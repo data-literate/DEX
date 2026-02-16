@@ -1,8 +1,10 @@
-"""dataenginex package init.
+"""
+DataEngineX (DEX) — Core framework for data engineering projects.
 
-Minimal package marker for packaging and imports.
+Submodules:
+    api        – FastAPI application, health checks, error handling
+    core       – Schemas, validators, medallion architecture, pipeline config
+    middleware – Logging, metrics, tracing, request middleware
 """
 
-__all__ = ["main"]
-
-__version__ = "0.1.0"
+__version__ = "0.3.0"

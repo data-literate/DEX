@@ -1,12 +1,23 @@
+# ---------------------------------------------------------------
+# DataEngineX — Base Kustomization
+# Aggregates all base K8s manifests and sets the default image tag.
+# Environment overlays (dev/stage/prod/preview) patch on top of this.
+# ---------------------------------------------------------------
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: default
+namespace: default  # Overridden by each overlay
 
+# Base resources included in every environment
 resources:
   - deployment.yaml
   - service.yaml
+  - hpa.yaml
+  - ingress.yaml
+  - pdb.yaml
+  - networkpolicy.yaml
 
+# Default container image — overlays override newTag with commit SHA
 images:
   - name: data-literate/dex
     newName: data-literate/dex

@@ -1,245 +1,195 @@
-# DEX — DataEngineX
+# DataEngineX (DEX)
 
-**Production-ready data engineering and ML platform** with FastAPI, automated CI/CD, and GitOps deployment.
+[![CI/CD](https://github.com/data-literate/DEX/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/data-literate/DEX/actions/workflows/ci.yml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen)](https://github.com/data-literate/DEX)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue)](https://github.com/data-literate/DEX/releases)
+
+A production-ready data engineering framework with medallion architecture, Airflow orchestration, and enterprise observability. DEX is both a core framework and a mono-repo for sub-projects built on top of it.
+
+---
+
+## Quick Start
+
+```bash
+git clone https://github.com/data-literate/DEX && cd DEX
+uv lock && uv sync          # Install dependencies
+uv run poe dev               # Run dev server → http://localhost:8000
+uv run poe test              # Run tests
+```
+
+### Full Stack (API + Observability)
+
+```bash
+docker compose up -d
+```
+
+| Service      | URL                         |
+|--------------|-----------------------------|
+| API          | http://localhost:8000        |
+| Prometheus   | http://localhost:9090        |
+| AlertManager | http://localhost:9093        |
+| Grafana      | http://localhost:3000        |
+| Jaeger       | http://localhost:16686       |
+
+---
+
+## Project Structure
+
+```
+DEX/
+├── src/
+│   ├── dataenginex/           # Core framework (installable package)
+│   │   ├── api/               #   FastAPI endpoints, health, errors
+│   │   ├── core/              #   Schemas, validators, medallion architecture
+│   │   └── middleware/        #   Logging, metrics, tracing
+│   │
+│   ├── careerdex/             # AI job matching & recommendations
+│   │   ├── core/              #   Notifications (Slack)
+│   │   ├── dags/              #   Airflow DAGs
+│   │   ├── models/            #   ML models
+│   │   └── phases/            #   Implementation phases
+│   │
+│   └── weatherdex/            # Weather prediction pipeline
+│       ├── core/              #   API client & pipeline
+│       ├── ml/                #   PySpark ML utilities
+│       └── notebooks/         #   Jupyter notebooks
+│
+├── tests/                     # Test suite
+│   ├── unit/                  #   Unit tests
+│   └── integration/           #   End-to-end tests
+│
+├── infra/                     # Infrastructure
+│   ├── argocd/                #   Kubernetes manifests (Kustomize + GitOps)
+│   │   ├── base/              #     Base deployment, service
+│   │   └── overlays/          #     dev, stage, prod overrides
+│   └── monitoring/            #   Observability configs
+│       ├── prometheus.yml     #     Metrics scraping
+│       ├── alertmanager.yml   #     Alert routing
+│       ├── alerts/            #     Alert rules
+│       └── grafana/           #     Dashboards
+│
+├── docs/                      # Documentation
+├── scripts/                   # Utility scripts
+├── learning/                  # Learning experiments
+│
+├── Dockerfile                 # Multi-stage Docker build
+├── docker-compose.yml         # Local dev stack
+├── pyproject.toml             # Project config (deps, tools)
+├── poe_tasks.toml             # Task runner (poe)
+└── CODEOWNERS
+```
+
+---
+
+## Architecture
+
+**Medallion Data Pipeline:**
+
+```
+Raw Sources (LinkedIn, Indeed, Glassdoor, APIs)
+             ↓
+        BRONZE LAYER — Raw ingestion (Parquet)
+             ↓
+        SILVER LAYER — Cleaned & validated (quality ≥ 75%)
+             ↓
+        GOLD LAYER — Enriched & aggregated (quality ≥ 90%)
+             ↓
+      API / ML / Analytics
+```
+
+**Tech Stack:**
+
+| Layer            | Technology                                      |
+|------------------|-------------------------------------------------|
+| Language         | Python 3.11+                                    |
+| Package Manager  | uv (installs) + Poetry (build backend)          |
+| Web Framework    | FastAPI + Uvicorn                               |
+| Orchestration    | Apache Airflow                                  |
+| ML               | PySpark                                         |
+| Code Quality     | Ruff, Black, mypy (strict)                      |
+| Testing          | pytest + coverage                               |
+| Observability    | Prometheus, Grafana, Jaeger (OpenTelemetry)     |
+| Containers       | Docker + docker compose                         |
+| Kubernetes       | Kustomize + ArgoCD (GitOps)                     |
+| CI/CD            | GitHub Actions                                  |
+
+---
+
+## Development
+
+### Common Commands
+
+```bash
+uv run poe dev               # Dev server with hot-reload
+uv run poe test              # Run all tests
+uv run poe test-unit         # Unit tests only
+uv run poe test-cov          # Tests with coverage report
+uv run poe lint              # Lint (ruff)
+uv run poe lint-fix          # Auto-fix + format
+uv run poe format            # Format (ruff)
+uv run poe typing            # Type check (mypy --strict)
+uv run poe clean             # Remove caches & artifacts
+```
+
+### Docker
+
+```bash
+uv run poe docker-build      # Build image
+uv run poe docker-up         # Start stack
+uv run poe docker-down       # Stop stack
+uv run poe docker-logs       # View logs
+```
+
+### Weather Pipeline
+
+```bash
+uv run poe weather-feature   # Feature engineering
+uv run poe weather-train     # Train models
+uv run poe weather-analyze   # Analyze predictions
+```
+
+---
+
+## Documentation
+
+| Guide                                             | Description              |
+|---------------------------------------------------|--------------------------|
+| [Documentation Hub](docs/README.md)               | Complete index           |
+| [Architecture](docs/ARCHITECTURE.md)              | System design            |
+| [Development](docs/DEVELOPMENT.md)                | Local setup              |
+| [Contributing](docs/CONTRIBUTING.md)              | Code style, PR process   |
+| [CI/CD Pipeline](docs/CI_CD.md)                   | Automation workflows     |
+| [Deployment Runbook](docs/DEPLOY_RUNBOOK.md)      | Deploy & rollback        |
+| [Observability](docs/OBSERVABILITY.md)            | Metrics, logs, traces    |
+| [Local K8s Setup](docs/LOCAL_K8S_SETUP.md)        | Test ArgoCD locally      |
+| [SDLC](docs/SDLC.md)                             | Lifecycle stages         |
+| [ADRs](docs/adr/)                                 | Architecture decisions   |
+| [CareerDEX](docs/careerdex/README.md)             | Job matching project     |
+| [Weather](docs/weather/README.md)                 | Weather pipeline         |
+
+---
 
 ## The DEX Philosophy
 
-DEX (DataEngineX) is a unified framework that bridges **Data Engineering, Data Warehousing, Machine Learning, AI Agents, MLOps, and DevOps**. It specializes in building **AI‑ready infrastructure** that is automated, scalable, and resilient — the technical “plumbing” that moves AI from a research notebook to global production.
-
-**Mission:** Deliver an end‑to‑end, cohesive narrative that consolidates data pipelines, lakehouse warehousing, MLOps, AI, and DevOps into one portfolio.
+DEX bridges **Data Engineering, Warehousing, ML, AI Agents, MLOps, and DevOps** into a unified, AI-ready platform. It is the technical infrastructure that moves AI from a research notebook to production.
 
 ```mermaid
 flowchart LR
-    Ingest[Ingest: Kafka/Kinesis] --> Process[Spark/Flink Pipelines]
-    Process --> Lakehouse[Lakehouse: Iceberg/Delta]
-    Lakehouse --> Warehouse[Warehouse: Snowflake/BigQuery]
+    Ingest[Ingest] --> Process[Spark/Flink]
+    Process --> Lakehouse[Lakehouse]
+    Lakehouse --> Warehouse[Warehouse]
     Warehouse --> Features[Feature Store]
-    Features --> Serve[Model Serving: FastAPI]
-    Serve --> Apps[AI Apps & Agents]
+    Features --> Serve[Model Serving]
+    Serve --> Apps[AI Apps]
     subgraph Ops
-        Terraform[Terraform] --> K8s[Kubernetes]
-        K8s --> GitOps[GitOps CI/CD]
+        Terraform --> K8s --> GitOps
     end
     Ops --> Ingest
     Ops --> Serve
 ```
 
-### Portfolio Modules
-
-```
-/dex-data       # Spark/Flink/Kafka pipelines + orchestration (Airflow/Dagster)
-/dex-warehouse  # dbt models + lakehouse/warehouse patterns
-/dex-lakehouse  # Parquet/Avro + Iceberg/Delta demos
-/dex-ml         # MLflow/Kubeflow + model training/serving
-/dex-api        # FastAPI layer for features + predictions
-/dex-ops        # Terraform + Kubernetes + CI/CD GitOps
-```
-
-These modules are a **roadmap** for the full DEX portfolio and will be added iteratively.
-
-### Technical Toolbox
-
-- **Data Engineering**: Spark, Kafka, Airflow, Flink, dbt
-- **Warehousing**: Snowflake, BigQuery, Redshift, Databricks
-- **MLOps & AI**: MLflow, Kubeflow, Pinecone, LangChain, PyTorch
-- **DevOps & Cloud**: AWS/GCP, Kubernetes, Docker, Terraform, GitHub Actions
-- **Languages**: Python, SQL, Go, Scala
-
 ---
 
-## 🚀 Quick Start
-
-**New to DEX?** Start here:
-1. **[Quick Start Guide](#quick-start-local)** - Run locally in 5 minutes
-2. **[Documentation Hub](docs/README.md)** - Complete documentation index
-3. **[Contributing Guide](CONTRIBUTING.md)** - Development workflow
-
-**Key Documentation:**
-- **[CI/CD Pipeline](docs/CI_CD.md)** - Complete automation guide
-- **[Infrastructure](infra/README.md)** - Kubernetes and ArgoCD
-- **[Deployment Runbook](docs/DEPLOY_RUNBOOK.md)** - Deploy and rollback procedures
-
----
-
-## 📋 Tech Stack
-
-| Component | Technology |
-|---|---|
-| **Language** | Python 3.11+ |
-| **Package Manager** | Poetry (project metadata) + uv (installs) |
-| **Web Framework** | FastAPI + Uvicorn |
-| **Code Quality** | Ruff, Black, Mypy |
-| **Testing** | Pytest with coverage |
-| **Observability** | Prometheus, OpenTelemetry, Structlog |
-| **Containers** | Docker → ghcr.io |
-| **Orchestration** | Kubernetes + Kustomize |
-| **GitOps** | ArgoCD (auto-sync) |
-| **CI/CD** | GitHub Actions |
-
----
-
-## 📁 Repository Structure
-
-```
-DEX/
-├── src/dataenginex/          # FastAPI application
-├── tests/                    # Unit & integration tests
-├── pipelines/weather/        # Example data pipelines
-├── infra/argocd/             # Kubernetes manifests (GitOps)
-├── docs/                     # Documentation
-├── .github/workflows/        # CI/CD automation
-├── scripts/                  # Development scripts
-├── pyproject.toml            # Dependencies & config
-└── Dockerfile                # Container build
-```
-
----
-
-## 🚀 Quick Start (Local)
-
-### Prerequisites
-- Git, Python 3.11+, Poetry, uv
-- (Optional) Docker for running containerized app
-
-### 1. Clone & Install
-
-```bash
-git clone https://github.com/data-literate/DEX
-cd DEX
-uv lock
-uv sync
-```
-
-### 2. Run the API
-
-```bash
-uv run poe api
-```
-
-Visit **http://127.0.0.1:8000** to verify the health endpoint.
-
-### 2a. Run Full Stack (App + Observability)
-
-```bash
-docker compose -f docker-compose.yml up -d
-```
-
-- API: http://127.0.0.1:8000
-- Prometheus: http://127.0.0.1:9090
-- Grafana: http://127.0.0.1:3000 (admin / admin)
-- Jaeger: http://127.0.0.1:16686
-
-### 3. Run Tests
-
-```bash
-uv run poe test
-```
-
-### 4. Run Code Quality Checks
-
-```bash
-uv run poe lint
-```
-
-## CI/CD, Deployment, and K8s
-
-For CI/CD workflow, deployment details, and local Kubernetes setup, see:
-- [CI/CD Pipeline](docs/CI_CD.md)
-- [Deployment Runbook](docs/DEPLOY_RUNBOOK.md)
-- [Infrastructure Setup](infra/README.md)
-- [Local K8s Setup](docs/LOCAL_K8S_SETUP.md)
-
----
-
-## 📚 Documentation
-
-**Start Here:**
-- **[Documentation Hub](docs/README.md)** - Complete documentation index
-
-**Core Guides:**
-- **[CI/CD Pipeline](docs/CI_CD.md)** - Automated build, test, deploy
-- **[Infrastructure Setup](infra/README.md)** - Kubernetes & ArgoCD
-- **[Deployment Runbook](docs/DEPLOY_RUNBOOK.md)** - Deploy & rollback
-- **[Observability](docs/OBSERVABILITY.md)** - Metrics, logs, traces
-
-**Development:**
-- **[Contributing Guide](CONTRIBUTING.md)** - Development workflow
-- **[SDLC](docs/SDLC.md)** - Software lifecycle stages
-- **[Local K8s Setup](docs/LOCAL_K8S_SETUP.md)** - Test ArgoCD locally
-
----
-
-## Development Workflow
-
-See [SDLC](docs/SDLC.md) and [Contributing Guide](CONTRIBUTING.md) for the full development workflow, quality gates, and branch strategy.
-
-## Useful Commands
-
-```bash
-# Install dependencies
-uv lock
-uv sync
-
-# Run app locally
-uv run poe api
-
-# Run tests
-uv run poe test
-
-# Run all quality checks
-uv run poe lint
-
-# Auto-format code
-uv run poe format
-
-# Build Docker image locally
-docker build -t dex:latest .
-
-# Run Docker image
-docker run -p 8000:8000 dex:latest
-```
-
-## Poe Tasks
-
-Poe tasks are defined in poe_tasks.toml and use uv for installs and runs (no Poetry installs).
-
-```bash
-# Run the combined lint suite
-uv run poe lint
-
-# Launch the Astral uv CLI
-uv run poe uv --help
-
-# Lock dependencies from pyproject.toml
-uv run poe uv-lock
-
-# Fast install using uv (reads uv.lock)
-uv run poe uv-sync
-```
-
-## UV + Poetry Workflow
-
-Use Poetry for project metadata, and use uv for locking and installs:
-
-```bash
-# Update dependencies by editing pyproject.toml
-# (Poetry does not install dependencies in this workflow.)
-
-# Resolve and write uv.lock from pyproject.toml
-uv run poe uv-lock
-
-# Install quickly with uv (uses .venv)
-uv run poe uv-sync
-```
-
-## Next Steps
-
-1. **For local development**: Follow the Quick Start above
-2. **For Kubernetes/ArgoCD testing**: See [docs/LOCAL_K8S_SETUP.md](docs/LOCAL_K8S_SETUP.md)
-3. **For infrastructure details**: See [infra/README.md](infra/README.md)
-4. **For contributing code**: See [CONTRIBUTING.md](CONTRIBUTING.md)
-
----
-
-**Status**: Production-ready CI/CD pipeline  | All environments synced & healthy  | Ready for development 
-
+**v0.3.0** | MIT License

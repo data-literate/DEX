@@ -12,6 +12,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/dex
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
 jobs:
   build-and-push:
@@ -28,6 +29,32 @@ jobs:
       short_sha: ${{ steps.vars.outputs.short_sha }}
 
     steps:
+      - name: Notify CD Start
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            if (!process.env.SLACK_WEBHOOK) return;
+            try {
+              await fetch(process.env.SLACK_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  text: '🚀 CD Pipeline Started - Docker Build',
+                  blocks: [{
+                    type: 'section',
+                    text: {
+                      type: 'mrkdwn',
+                      text: `*🚀 CD Pipeline Started*\n*Branch:* ${process.env.BRANCH}`
+                    }
+                  }]
+                })
+              });
+            } catch (e) { console.log('Slack notification failed'); }
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+
       - name: Checkout code
         uses: actions/checkout@v6
         with:
@@ -93,3 +120,104 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'trivy-results.sarif'
+
+  notify-deployment:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: [build-and-push, security-scan]
+    if: always()
+
+    steps:
+      - name: Notify CD Success
+        if: ${{ needs.build-and-push.result == 'success' && needs.security-scan.result == 'success' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (!process.env.SLACK_WEBHOOK) return;
+            try {
+              await fetch(process.env.SLACK_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  text: '✅ CD Pipeline Completed Successfully',
+                  blocks: [
+                    {
+                      type: 'section',
+                      text: {
+                        type: 'mrkdwn',
+                        text: `*✅ CD Pipeline Completed*`
+                      }
+                    },
+                    {
+                      type: 'section',
+                      fields: [
+                        { type: 'mrkdwn', text: `*Image:*\n${process.env.TAG}` },
+                        { type: 'mrkdwn', text: `*SHA:*\n\`${process.env.SHA}\`` },
+                        { type: 'mrkdwn', text: `*Branch:*\n${process.env.BRANCH}` },
+                        { type: 'mrkdwn', text: `*Run:*\n<${process.env.URL}|View Details>` }
+                      ]
+                    },
+                    {
+                      type: 'context',
+                      elements: [{ type: 'mrkdwn', text: `🐳 Image pushed to GHCR • Security scan passed` }]
+                    }
+                  ]
+                })
+              });
+            } catch (e) { console.log('Slack notification failed:', e.message); }
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          TAG: ${{ needs.build-and-push.outputs.image_tag }}
+          SHA: ${{ needs.build-and-push.outputs.short_sha }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: Notify CD Failure
+        if: ${{ needs.build-and-push.result == 'failure' || needs.security-scan.result == 'failure' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (!process.env.SLACK_WEBHOOK) return;
+            const buildResult = process.env.BUILD_RESULT;
+            const scanResult = process.env.SCAN_RESULT;
+            const failedJobs = [];
+            if (buildResult === 'failure') failedJobs.push('Docker Build');
+            if (scanResult === 'failure') failedJobs.push('Security Scan');
+            try {
+              await fetch(process.env.SLACK_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  text: '❌ CD Pipeline Failed',
+                  blocks: [
+                    {
+                      type: 'section',
+                      text: {
+                        type: 'mrkdwn',
+                        text: `*❌ CD Pipeline Failed*`
+                      }
+                    },
+                    {
+                      type: 'section',
+                      fields: [
+                        { type: 'mrkdwn', text: `*Failed Jobs:*\n${failedJobs.join(', ')}` },
+                        { type: 'mrkdwn', text: `*Branch:*\n${process.env.BRANCH}` },
+                        { type: 'mrkdwn', text: `*Triggered by:*\n${process.env.ACTOR}` },
+                        { type: 'mrkdwn', text: `*Run:*\n<${process.env.URL}|View Details>` }
+                      ]
+                    },
+                    {
+                      type: 'context',
+                      elements: [{ type: 'mrkdwn', text: `📦 Build: ${buildResult} • Scan: ${scanResult} — check logs for details` }]
+                    }
+                  ]
+                })
+              });
+            } catch (e) { console.log('Slack notification failed:', e.message); }
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          BUILD_RESULT: ${{ needs.build-and-push.result }}
+          SCAN_RESULT: ${{ needs.security-scan.result }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          ACTOR: ${{ github.actor }}
+          URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

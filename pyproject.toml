@@ -1,20 +1,18 @@
 
 [project]
 name = "DataEngineX"
-version = "0.2.0"
-description = ""
+version = "0.3.3"
+description = "Core framework for data engineering projects"
 authors = [
     {name = "Jay", email = "jayapal.myaka99@gmail.com"}
 ]
 readme = "Readme.md"
 requires-python = ">=3.11"
+license = {file = "LICENSE"}
 dependencies = [
-    "requests>=2.32.0",
-    "pyspark>=4.1.1",
-    "databricks-cli",
     "fastapi>=0.128.4",
     "uvicorn>=0.40.0",
-    "python-dotenv>=1.0.0",
+    "python-dotenv>=1.2.0",
     "pyyaml>=6.0.2",
     "structlog>=25.5.0",
     "python-json-logger>=4.0.0",
@@ -23,27 +21,33 @@ dependencies = [
     "opentelemetry-sdk>=1.39.0",
     "opentelemetry-instrumentation-fastapi>=0.60b1",
     "opentelemetry-exporter-otlp>=1.39.0",
+    "loguru>=0.7.3",
+    "email-validator>=2.0.0",
+    "httpx>=0.28.0",
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
+    "pytest-asyncio>=1.3.0",
+    "ruff>=0.15.0",
+    "mypy>=1.19.0",
+    "types-pyyaml>=6.0.12.20250822",
+    "types-requests>=2.32.4.20260107",
+    "poethepoet>=0.40.0",
+    "uv>=0.10.0",
+]
+data = [
+    "pyspark>=4.1.1",
+    "databricks-cli",
+    "apache-airflow>=2.8.0",
+    "requests>=2.32.0",
+]
+notebook = [
     "ipykernel>=7.2.0",
     "numpy>=2.4",
     "pandas>=3.0",
-    "httpx>=0.28.0",
-    "types-pyyaml>=6.0.12.20250822",
-    "types-requests>=2.32.4.20260107",
-    "ruff>=0.15.0",
-    "black>=26.1.0",
-    "mypy>=1.19.1",
-    "uv>=0.10.0",
-    "poethepoet>=0.40.0",
-]
-dex = [
-    "pyspark>=4.1.1",
-    "databricks-cli",
 ]
 
 [build-system]
@@ -52,22 +56,41 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "DataEngineX"
-version = "0.1.0"
-description = ""
+version = "0.3.3"
+description = "Core framework for data engineering projects"
 authors = ["Jay"]
 license = "MIT"
 package-mode = true
 
-[tool.black]
-line-length = 88
-target-version = ["py311"]
+[[tool.poetry.packages]]
+include = "dataenginex"
+from = "src"
+
+[[tool.poetry.packages]]
+include = "careerdex"
+from = "src"
+
+[[tool.poetry.packages]]
+include = "weatherdex"
+from = "src"
+
+[tool.poetry.scripts]
+dex = "dataenginex.api.main:app"
+
+[tool.uv]
+python-preference = "only-managed"
+default-groups = ["dev", "data", "notebook"]
 
 [tool.ruff]
-line-length = 88
+line-length = 100
 target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "C90"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/weatherdex/notebooks/*.py" = ["F821"]    # Databricks globals: spark, display, dbutils
+"src/weatherdex/notebooks/*.ipynb" = ["F821", "E501"] # Databricks globals + notebook formatting
 
 [tool.ruff.lint.mccabe]
 max-complexity = 8
@@ -76,43 +99,28 @@ max-complexity = 8
 python_version = "3.11"
 strict = true
 warn_unused_configs = true
-disallow_any_unimported = true
-disallow_any_expr = true
-disallow_any_decorated = true
 disallow_any_generics = true
 disallow_subclassing_any = true
 warn_return_any = true
 warn_unreachable = true
 no_implicit_optional = true
 
+[[tool.mypy.overrides]]
+module = ["structlog.*", "loguru.*", "prometheus_client.*", "opentelemetry.*"]
+ignore_missing_imports = true
 
-[tool.poetry.scripts]
-# CLI entry using short form `dex` pointing to FastAPI app for convenience
-dex = "dataenginex.main:app"
-
-[tool.uv]
-# Prefer uv-managed Python to avoid Windows Store Python issues during locking/sync.
-python-preference = "only-managed"
-default-groups = ["dev", "dex"]
-
-
-
-[[tool.poetry.packages]]
-include = "dataenginex"
-from = "src"
-
-# -----------------------
-# Pytest configuration
-# -----------------------
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+asyncio_mode = "auto"
+filterwarnings = [
+    "error",                                          # Treat all warnings as errors by default
+    "ignore::DeprecationWarning:websockets\\.legacy",  # uvicorn uses deprecated websockets.legacy API
+    "ignore::DeprecationWarning:uvicorn\\.protocols",  # uvicorn imports deprecated WebSocketServerProtocol
+]
 
-# -----------------------
-# Coverage configuration
-# -----------------------
 [tool.coverage.run]
 branch = true
-source = ["dataenginex"]
+source = ["dataenginex", "careerdex", "weatherdex"]
 
 [tool.coverage.report]
 show_missing = true

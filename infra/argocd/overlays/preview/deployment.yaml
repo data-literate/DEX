@@ -1,3 +1,4 @@
+# PR preview patch — ephemeral env, debug logging, minimal resources
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -9,10 +10,10 @@ spec:
       - name: dex
         env:
         - name: LOG_LEVEL
-          value: "debug"
+          value: "debug"          # Full verbosity for PR review
         resources:
           requests:
-            cpu: 50m
+            cpu: 50m              # Minimal — preview is short-lived
             memory: 64Mi
           limits:
             cpu: 200m

@@ -1,0 +1,37 @@
+# ---------------------------------------------------------------
+# DataEngineX API — Ingress
+# Exposes the API behind an NGINX ingress controller with TLS
+# termination via cert-manager and basic rate-limiting.
+#
+# TODO: Purchase dataenginex.io domain and update host entries.
+#       Until then these values serve as placeholders.
+# ---------------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dex-api-ingress
+  labels:
+    app: dex-api
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /        # Strip path prefix before forwarding
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"     # Force HTTPS
+    nginx.ingress.kubernetes.io/rate-limit-connections: "10"  # Max concurrent connections per IP
+    nginx.ingress.kubernetes.io/rate-limit-rps: "30"         # Max requests per second per IP
+    cert-manager.io/cluster-issuer: letsencrypt-prod         # Auto-provision TLS certificate
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - api.dataenginex.io      # TODO: placeholder — domain not yet purchased
+      secretName: dex-api-tls     # TLS secret created by cert-manager
+  rules:
+    - host: api.dataenginex.io    # TODO: placeholder — domain not yet purchased
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dex-api
+                port:
+                  number: 8000
