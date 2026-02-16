@@ -156,9 +156,13 @@ class AuthMiddleware(BaseHTTPMiddleware):
         try:
             claims = decode_token(token, secret)
         except ValueError as exc:
+            logger.exception("JWT validation failed")
             return JSONResponse(
                 status_code=401,
-                content={"error": "unauthorized", "message": str(exc)},
+                content={
+                    "error": "unauthorized",
+                    "message": "Invalid or expired authentication token",
+                },
             )
 
         request.state.auth_user = AuthUser(
