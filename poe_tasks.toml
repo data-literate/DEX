@@ -3,7 +3,7 @@ executor.type = "uv"
 
 # Installation & Setup
 [tool.poe.tasks.install]
-shell = "poetry install --with dev && pre-commit install"
+shell = "uv sync && pre-commit install"
 help = "Install dependencies and pre-commit hooks"
 
 # Development
