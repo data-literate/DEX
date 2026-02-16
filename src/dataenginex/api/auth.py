@@ -155,7 +155,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         token = auth_header[7:]
         try:
             claims = decode_token(token, secret)
-        except ValueError as exc:
+        except ValueError:
             logger.exception("JWT validation failed")
             return JSONResponse(
                 status_code=401,
