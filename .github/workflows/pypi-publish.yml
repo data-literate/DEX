@@ -112,7 +112,8 @@ jobs:
     name: Publish to TestPyPI
     runs-on: ubuntu-latest
     needs: [detect-dataenginex-changes, build-distributions]
-    if: github.event_name == 'release' && needs.detect-dataenginex-changes.outputs.dataenginex_changed == 'true'
+    if: github.event_name == 'release' && needs.detect-dataenginex-changes.outputs.dataenginex_changed == 'true' && vars.TESTPYPI_ENVIRONMENT != ''
+    environment: ${{ vars.TESTPYPI_ENVIRONMENT }}
     permissions:
       id-token: write
 
@@ -132,7 +133,8 @@ jobs:
     name: Promote to PyPI
     runs-on: ubuntu-latest
     needs: [detect-dataenginex-changes, publish-testpypi]
-    if: github.event_name == 'release' && needs.detect-dataenginex-changes.outputs.dataenginex_changed == 'true' && needs.detect-dataenginex-changes.outputs.approved_tag == 'true'
+    if: github.event_name == 'release' && needs.detect-dataenginex-changes.outputs.dataenginex_changed == 'true' && needs.detect-dataenginex-changes.outputs.approved_tag == 'true' && vars.PYPI_ENVIRONMENT != ''
+    environment: ${{ vars.PYPI_ENVIRONMENT }}
     permissions:
       id-token: write
 
