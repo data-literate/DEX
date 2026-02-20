@@ -3,14 +3,13 @@
 import os
 from unittest.mock import patch
 
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-
 from dataenginex.middleware.tracing import (
     configure_tracing,
     get_tracer,
     instrument_fastapi,
 )
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 
 def test_configure_tracing() -> None:

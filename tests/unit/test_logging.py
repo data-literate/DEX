@@ -1,7 +1,6 @@
 """Tests for structured logging configuration."""
 
 import structlog
-
 from dataenginex.middleware.logging_config import (
     APP_NAME,
     APP_VERSION,
