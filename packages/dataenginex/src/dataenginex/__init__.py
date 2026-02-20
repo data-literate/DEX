@@ -12,5 +12,5 @@ from importlib.metadata import PackageNotFoundError, version
 try:
     __version__ = version("dataenginex")
 except PackageNotFoundError:
-    __version__ = "0.3.4"
+    __version__ = "0.3.5"
 
