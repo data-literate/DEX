@@ -4,7 +4,7 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen)](https://github.com/data-literate/DEX)
-[![Version](https://img.shields.io/badge/version-0.3.0-blue)](https://github.com/data-literate/DEX/releases)
+[![Version](https://img.shields.io/badge/version-0.3.4-blue)](https://github.com/data-literate/DEX/releases)
 
 A production-ready data engineering framework with medallion architecture, Airflow orchestration, and enterprise observability. DEX is both a core framework and a mono-repo for sub-projects built on top of it.
 
@@ -39,13 +39,12 @@ docker compose up -d
 
 ```
 DEX/
+├── packages/
+│   ├── dataenginex/          # Core framework package (canonical source)
+│   │   └── packages/dataenginex/src/dataenginex/  #   API utilities, core, middleware
+│
 ├── src/
-│   ├── dataenginex/           # Core framework (installable package)
-│   │   ├── api/               #   FastAPI endpoints, health, errors
-│   │   ├── core/              #   Schemas, validators, medallion architecture
-│   │   └── middleware/        #   Logging, metrics, tracing
-│   │
-│   ├── careerdex/             # AI job matching & recommendations
+│   ├── careerdex/             # AI job matching & recommendations app
 │   │   ├── core/              #   Notifications (Slack)
 │   │   ├── dags/              #   Airflow DAGs
 │   │   ├── models/            #   ML models
@@ -71,6 +70,7 @@ DEX/
 │       └── grafana/           #     Dashboards
 │
 ├── docs/                      # Documentation
+├── packages/                  # Package workspace (dataenginex)
 ├── scripts/                   # Utility scripts
 ├── learning/                  # Learning experiments
 │
@@ -119,35 +119,12 @@ Raw Sources (LinkedIn, Indeed, Glassdoor, APIs)
 
 ## Development
 
-### Common Commands
+See the canonical setup and full command reference in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ```bash
+uv run poe check-all         # Lint + typecheck + tests
 uv run poe dev               # Dev server with hot-reload
-uv run poe test              # Run all tests
-uv run poe test-unit         # Unit tests only
-uv run poe test-cov          # Tests with coverage report
-uv run poe lint              # Lint (ruff)
-uv run poe lint-fix          # Auto-fix + format
-uv run poe format            # Format (ruff)
-uv run poe typing            # Type check (mypy --strict)
-uv run poe clean             # Remove caches & artifacts
-```
-
-### Docker
-
-```bash
-uv run poe docker-build      # Build image
-uv run poe docker-up         # Start stack
-uv run poe docker-down       # Stop stack
-uv run poe docker-logs       # View logs
-```
-
-### Weather Pipeline
-
-```bash
-uv run poe weather-feature   # Feature engineering
-uv run poe weather-train     # Train models
-uv run poe weather-analyze   # Analyze predictions
+uv run poe docker-up         # Start local stack
 ```
 
 ---
@@ -192,4 +169,4 @@ flowchart LR
 
 ---
 
-**v0.3.0** | MIT License
+**Version**: v0.3.4 | **License**: MIT

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 from collections.abc import AsyncIterator, Mapping, Sequence
 from contextlib import asynccontextmanager
@@ -6,12 +8,6 @@ from typing import Any
 import structlog
 import uvicorn
 import yaml
-from fastapi import FastAPI, Request, Response
-from fastapi.exceptions import RequestValidationError
-from fastapi.openapi.utils import get_openapi
-from fastapi.responses import JSONResponse, PlainTextResponse
-from starlette.exceptions import HTTPException as StarletteHTTPException
-
 from dataenginex.api.auth import AuthMiddleware
 from dataenginex.api.errors import APIHTTPException, ServiceUnavailableError
 from dataenginex.api.health import HealthChecker, HealthStatus
@@ -33,16 +29,19 @@ from dataenginex.middleware.metrics import get_metrics
 from dataenginex.middleware.metrics_middleware import PrometheusMetricsMiddleware
 from dataenginex.middleware.request_logging import RequestLoggingMiddleware
 from dataenginex.middleware.tracing import configure_tracing, instrument_fastapi
+from fastapi import FastAPI, Request, Response
+from fastapi.exceptions import RequestValidationError
+from fastapi.openapi.utils import get_openapi
+from fastapi.responses import JSONResponse, PlainTextResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
-# Configure logging on startup
 log_level = os.getenv("LOG_LEVEL", "INFO")
 json_logs = os.getenv("LOG_FORMAT", "json") == "json"
 configure_logging(log_level=log_level, json_logs=json_logs)
 
 logger = structlog.get_logger(__name__)
 
-# Configure tracing
-otlp_endpoint = os.getenv("OTLP_ENDPOINT")  # e.g., "http://localhost:4317"
+otlp_endpoint = os.getenv("OTLP_ENDPOINT")
 enable_console_traces = os.getenv("ENABLE_CONSOLE_TRACES", "false").lower() == "true"
 configure_tracing(
     otlp_endpoint=otlp_endpoint, enable_console_export=enable_console_traces
@@ -51,19 +50,16 @@ configure_tracing(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Application lifespan manager."""
     app.state.startup_complete = False
-    # Startup
     logger.info("application_started", environment=os.getenv("ENVIRONMENT", "dev"))
     app.state.startup_complete = True
     yield
-    # Shutdown
     app.state.startup_complete = False
     logger.info("application_shutdown")
 
 
 app = FastAPI(
-    title="DataEngineX",
+    title="CareerDEX",
     version=APP_VERSION,
     lifespan=lifespan,
     docs_url="/docs",
@@ -71,16 +67,13 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
-# Instrument FastAPI with OpenTelemetry
 instrument_fastapi(app)
 
-# Add middleware (order matters - outer to inner)
-app.add_middleware(RequestLoggingMiddleware)  # Logging
-app.add_middleware(PrometheusMetricsMiddleware)  # Metrics
-app.add_middleware(AuthMiddleware)  # JWT authentication
-app.add_middleware(RateLimitMiddleware)  # Rate limiting
+app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(PrometheusMetricsMiddleware)
+app.add_middleware(AuthMiddleware)
+app.add_middleware(RateLimitMiddleware)
 
-# Register versioned routers
 app.include_router(v1_router)
 
 health_checker = HealthChecker()
@@ -91,10 +84,10 @@ def custom_openapi() -> dict[str, object]:
         return app.openapi_schema
 
     schema = get_openapi(
-        title="DataEngineX",
+        title="CareerDEX",
         version=APP_VERSION,
         description=(
-            "DataEngineX API documentation.\n\n"
+            "CareerDEX API documentation.\n\n"
             "Authentication: This API supports bearer token authentication. "
             "Provide an Authorization header using the format `Bearer <token>` "
             "when auth is enabled."
@@ -194,28 +187,24 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
 
 @app.get("/metrics", tags=["observability"])
 async def metrics() -> Response:
-    """Prometheus metrics endpoint."""
     data, content_type = get_metrics()
     return Response(content=data, media_type=content_type)
 
 
 @app.get("/", response_model=RootResponse, tags=["core"])
 def read_root() -> RootResponse:
-    """Root endpoint returning API info."""
     logger.debug("root_endpoint_called")
-    return RootResponse(message="DataEngineX API", version=APP_VERSION)
+    return RootResponse(message="CareerDEX API", version=APP_VERSION)
 
 
 @app.get("/health", response_model=HealthResponse, tags=["health"])
 def health_check() -> HealthResponse:
-    """Liveness check endpoint."""
     logger.debug("health check")
     return HealthResponse(status="alive")
 
 
 @app.get("/ready", response_model=ReadinessResponse, tags=["health"])
 async def readiness_check() -> ReadinessResponse:
-    """Readiness check endpoint."""
     logger.debug("readiness_check_called")
     components = await health_checker.check_all()
     overall = health_checker.overall_status(components)
@@ -233,14 +222,12 @@ async def readiness_check() -> ReadinessResponse:
 
 @app.get("/startup", response_model=StartupResponse, tags=["health"])
 def startup_check() -> StartupResponse:
-    """Startup probe endpoint."""
     ready = bool(getattr(app.state, "startup_complete", False))
     return StartupResponse(status="started" if ready else "starting")
 
 
 @app.post("/echo", response_model=EchoResponse, tags=["core"])
 def echo_payload(payload: EchoRequest) -> EchoResponse:
-    """Echo endpoint to validate request/response models."""
     return EchoResponse(
         message=payload.message,
         count=payload.count,
@@ -250,7 +237,6 @@ def echo_payload(payload: EchoRequest) -> EchoResponse:
 
 @app.get("/openapi.yaml", tags=["docs"], response_class=PlainTextResponse)
 def openapi_yaml() -> PlainTextResponse:
-    """Export the OpenAPI schema in YAML format."""
     schema = app.openapi()
     return PlainTextResponse(yaml.safe_dump(schema, sort_keys=False))
 

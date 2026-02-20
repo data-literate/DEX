@@ -7,4 +7,10 @@ Submodules:
     middleware – Logging, metrics, tracing, request middleware
 """
 
-__version__ = "0.3.0"
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("dataenginex")
+except PackageNotFoundError:
+    __version__ = "0.3.4"
+

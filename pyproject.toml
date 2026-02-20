@@ -1,8 +1,8 @@
 
 [project]
-name = "DataEngineX"
-version = "0.3.3"
-description = "Core framework for data engineering projects"
+name = "careerdex-app"
+version = "0.3.4"
+description = "CareerDEX application built on the DataEngineX core package"
 authors = [
     {name = "Jay", email = "jayapal.myaka99@gmail.com"}
 ]
@@ -10,20 +10,7 @@ readme = "Readme.md"
 requires-python = ">=3.11"
 license = {file = "LICENSE"}
 dependencies = [
-    "fastapi>=0.128.4",
-    "uvicorn>=0.40.0",
-    "python-dotenv>=1.2.0",
-    "pyyaml>=6.0.2",
-    "structlog>=25.5.0",
-    "python-json-logger>=4.0.0",
-    "prometheus-client>=0.24.0",
-    "opentelemetry-api>=1.39.0",
-    "opentelemetry-sdk>=1.39.0",
-    "opentelemetry-instrumentation-fastapi>=0.60b1",
-    "opentelemetry-exporter-otlp>=1.39.0",
-    "loguru>=0.7.3",
-    "email-validator>=2.0.0",
-    "httpx>=0.28.0",
+    "dataenginex>=0.3.4,<0.4.0",
 ]
 
 [dependency-groups]
@@ -58,23 +45,15 @@ build-backend = "poetry.core.masonry.api"
 package-mode = true
 
 [[tool.poetry.packages]]
-include = "dataenginex"
-from = "src"
-
-[[tool.poetry.packages]]
 include = "careerdex"
 from = "src"
 
-[[tool.poetry.packages]]
-include = "weatherdex"
-from = "src"
-
-[tool.poetry.scripts]
-dex = "dataenginex.api.main:app"
-
 [tool.uv]
 python-preference = "only-managed"
-default-groups = ["dev", "data", "notebook"]
+default-groups = ["dev"]
+
+[tool.uv.sources]
+dataenginex = { path = "packages/dataenginex", editable = true }
 
 [tool.ruff]
 line-length = 100
@@ -107,6 +86,7 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+pythonpath = ["src", "packages/dataenginex/src"]
 filterwarnings = [
     "error",                                          # Treat all warnings as errors by default
     "ignore::DeprecationWarning:websockets\\.legacy",  # uvicorn uses deprecated websockets.legacy API
@@ -115,7 +95,7 @@ filterwarnings = [
 
 [tool.coverage.run]
 branch = true
-source = ["dataenginex", "careerdex", "weatherdex"]
+source = ["dataenginex", "careerdex"]
 
 [tool.coverage.report]
 show_missing = true

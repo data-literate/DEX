@@ -2,7 +2,7 @@
 
 from fastapi.testclient import TestClient
 
-from dataenginex.api.main import app
+from careerdex.api.main import app
 
 client = TestClient(app)
 

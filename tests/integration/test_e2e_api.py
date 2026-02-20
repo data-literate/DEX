@@ -10,7 +10,7 @@ import httpx
 import pytest
 import uvicorn
 
-from dataenginex.api.main import app
+from careerdex.api.main import app
 
 
 def _get_free_port() -> int:
@@ -54,7 +54,7 @@ def test_e2e_root_health_ready() -> None:
         with httpx.Client(timeout=5.0) as client:
             root = client.get(f"{base_url}/")
             assert root.status_code == 200
-            assert root.json().get("message") == "DataEngineX API"
+            assert root.json().get("message") == "CareerDEX API"
 
             health = client.get(f"{base_url}/health")
             assert health.status_code == 200

@@ -323,7 +323,7 @@ See [NOTIFICATIONS_SETUP.md](NOTIFICATIONS_SETUP.md) troubleshooting section.
 
 ## References
 
-- [DataEngineX Framework](../../src/dataenginex/FRAMEWORK.md)
+- [DataEngineX Architecture](../../docs/ARCHITECTURE.md)
 - [Airflow Documentation](https://airflow.apache.org/docs/)
 - [Slack API Reference](https://api.slack.com/messaging)
 - [GitHub API Reference](https://docs.github.com/rest)

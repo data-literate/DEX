@@ -31,4 +31,4 @@ repos:
           - types-requests
         args: ["--config-file=pyproject.toml"]
         pass_filenames: false
-        files: ^src/dataenginex/
+        files: ^packages/dataenginex/src/dataenginex/
