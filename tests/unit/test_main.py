@@ -2,7 +2,7 @@
 
 from fastapi.testclient import TestClient
 
-from dataenginex.api.main import app
+from careerdex.api.main import app
 
 client = TestClient(app)
 
@@ -12,7 +12,7 @@ def test_root() -> None:
     response = client.get("/")
     assert response.status_code == 200
     data = response.json()
-    assert data["message"] == "DataEngineX API"
+    assert data["message"] == "CareerDEX API"
     assert "version" in data
     assert data["version"] == app.version
     # Verify request ID is added by middleware

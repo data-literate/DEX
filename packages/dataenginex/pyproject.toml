@@ -1,0 +1,37 @@
+[project]
+name = "dataenginex"
+version = "0.3.4"
+description = "DataEngineX - Core framework for data engineering projects"
+authors = [
+    {name = "Jay", email = "jayapal.myaka99@gmail.com"}
+]
+readme = "src/dataenginex/README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+dependencies = [
+    "fastapi>=0.128.4",
+    "uvicorn>=0.40.0",
+    "python-dotenv>=1.2.0",
+    "pyyaml>=6.0.2",
+    "structlog>=25.5.0",
+    "python-json-logger>=4.0.0",
+    "prometheus-client>=0.24.0",
+    "opentelemetry-api>=1.39.0",
+    "opentelemetry-sdk>=1.39.0",
+    "opentelemetry-instrumentation-fastapi>=0.60b1",
+    "opentelemetry-exporter-otlp>=1.39.0",
+    "loguru>=0.7.3",
+    "email-validator>=2.0.0",
+    "httpx>=0.28.0",
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = true
+
+[[tool.poetry.packages]]
+include = "dataenginex"
+from = "src"

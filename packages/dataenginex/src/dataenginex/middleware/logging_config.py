@@ -19,9 +19,9 @@ from structlog.types import EventDict, Processor
 try:
     from importlib.metadata import version as get_version
 
-    APP_VERSION = get_version("DataEngineX")
+    APP_VERSION = get_version("dataenginex")
 except Exception:
-    APP_VERSION = "0.3.0"  # Fallback version
+    APP_VERSION = os.getenv("APP_VERSION", "unknown")
 
 APP_NAME = os.getenv("APP_NAME", "dataenginex")
 

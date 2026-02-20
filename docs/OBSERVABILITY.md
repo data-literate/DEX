@@ -557,7 +557,7 @@ spec:
 
 ### Prometheus alert rules (SLO-aligned)
 
-The actual rule definitions live in `infra/prometheus/alerts/dataenginex-alerts.yml`. They expose three alerts—latency, error rate, and saturation—each scoped by `environment` so the thresholds can reflect the traffic patterns for dev, stage, and prod. Every alert annotation links to the [deployment runbook](https://github.com/data-literate/DEX/blob/main/docs/DEPLOY_RUNBOOK.md).
+The actual rule definitions live in `infra/monitoring/alerts/dataenginex-alerts.yml`. They expose three alerts—latency, error rate, and saturation—each scoped by `environment` so the thresholds can reflect the traffic patterns for dev, stage, and prod. Every alert annotation links to the [deployment runbook](https://github.com/data-literate/DEX/blob/main/docs/DEPLOY_RUNBOOK.md).
 
 | Alert | Environment | Threshold | Severity | Receiver |
 |-------|-------------|-----------|----------|----------|
@@ -571,7 +571,7 @@ The actual rule definitions live in `infra/prometheus/alerts/dataenginex-alerts.
 |                             | stage | In-flight > 15 | `warning` | email |
 |                             | dev | In-flight > 10 | `warning` | email |
 
-The production `alertmanager` configuration in `infra/alertmanager/alertmanager.yml` routes all `severity=page` alerts to a Slack webhook (`#dex-alerts`) while `severity=warning` alerts go to the ops email alias. Alerts sharing the same `alertname` and `environment` are deduplicated via inhibit rules so warnings do not trigger when a page is active.
+The production `alertmanager` configuration in `infra/monitoring/alertmanager.yml` routes all `severity=page` alerts to a Slack webhook (`#dex-alerts`) while `severity=warning` alerts go to the ops email alias. Alerts sharing the same `alertname` and `environment` are deduplicated via inhibit rules so warnings do not trigger when a page is active.
 
 ### Reloading Alert Rules
 
@@ -579,12 +579,12 @@ Whenever the alert rules or Alertmanager config changes, reapply the manifests s
 
 1. Reapply the Prometheus rule set managed in GitOps:
 ```bash
-kubectl apply -f infra/prometheus/alerts/dataenginex-alerts.yml
+kubectl apply -f infra/monitoring/alerts/dataenginex-alerts.yml
 kubectl rollout restart deployment/prometheus
 ```
 2. Reconfigure Alertmanager so receivers and runbooks stay up to date:
 ```bash
-kubectl apply -f infra/alertmanager/alertmanager.yml
+kubectl apply -f infra/monitoring/alertmanager.yml
 kubectl rollout restart deployment/alertmanager
 ```
 3. Verify the alerts appear in Alertmanager UI and reference the release runbook described in [`docs/DEPLOY_RUNBOOK.md`](https://github.com/data-literate/DEX/blob/main/docs/DEPLOY_RUNBOOK.md).

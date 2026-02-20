@@ -1,6 +1,6 @@
 # Development Setup Guide
 
-**Version**: v0.3.0 | **Updated**: Feb 15, 2026
+**Version**: v0.3.4 | **Updated**: Feb 20, 2026
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@
 # 1. Clone repo and create feature branch
 git clone https://github.com/data-literate/DEX.git
 cd DEX
-git checkout -b feat/v0.2.0-your-feature dev
+git checkout -b feat/issue-XXX-description dev
 
 # 2. Install & setup
 uv sync
@@ -32,7 +32,7 @@ All tests and linting should pass. You're ready to develop!
 
 ```
 DEX/
-├── src/dataenginex/        # Main framework
+├── packages/dataenginex/src/dataenginex/  # Main framework package
 ├── src/careerdex/          # CareerDEX project
 ├── src/weatherdex/         # Weather reference implementation
 ├── tests/                  # Test suite
@@ -122,10 +122,10 @@ airflow tasks logs careerdex_job_ingestion fetch_linkedin 2024-01-01
 ### Testing
 ```bash
 # Run all tests with coverage
-pytest --cov=src --cov-report=html
+poe test-cov
 
-# Run specific test file
-pytest tests/test_pipelines_careerdex.py -v
+# Run unit tests only
+poe test-unit
 
 # Check code quality
 poe check-all
@@ -138,10 +138,10 @@ tail -f logs/app.log
 
 # Enable debug logging
 export LOG_LEVEL=DEBUG
-python -m src.dataenginex.main
+poe dev
 
 # Use Python debugger
-python -m pdb src/dataenginex/main.py
+python -m pdb src/careerdex/api/main.py
 
 # Prometheus metrics (if running)
 open http://localhost:9090
@@ -153,7 +153,7 @@ open http://localhost:9090
 |-------|----------|
 | Pre-commit hooks fail | `poe format` then retry |
 | Tests fail locally but pass in CI | Check Python version (3.11+), run `uv sync --reinstall` |
-| Import errors | Run `uv sync` and set `export PYTHONPATH="${PYTHONPATH}:$(pwd)/src"` |
+| Import errors | Run `uv sync --reinstall` and restart the shell |
 | Airflow DAG not found | Check `src/careerdex/dags/` folder, restart scheduler |
 
 ## Common Commands
@@ -174,8 +174,8 @@ poe clean              # Remove caches and build artifacts
 ## Resources & Support
 
 - **Code Style**: See [CONTRIBUTING.md](./CONTRIBUTING.md)
-- **Architecture**: See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
-- **ADRs**: See [docs/adr/](./docs/adr/) for architectural decisions
-- **Deployment**: See [docs/DEPLOY_RUNBOOK.md](./docs/DEPLOY_RUNBOOK.md)
+- **Architecture**: See [ARCHITECTURE.md](./ARCHITECTURE.md)
+- **ADRs**: See [adr/](./adr/) for architectural decisions
+- **Deployment**: See [DEPLOY_RUNBOOK.md](./DEPLOY_RUNBOOK.md)
 - **Issues**: [GitHub Issues](https://github.com/data-literate/DEX/issues)
 - **Chat**: #dex-dev Slack channel

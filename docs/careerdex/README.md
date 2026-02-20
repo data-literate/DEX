@@ -6,20 +6,18 @@
 
 CareerDEX is an intelligent job matching platform built on the DEX framework. It combines real-time job ingestion, resume analysis, and ML-powered matching to help job seekers find their perfect role.
 
-**Status**: Development Ready (v0.3.0)  
-**Release Target**: End of February 2026
+**Status**: Active development
 
 ## 📚 Documentation
 
-- **[CareerDEX Complete Guide](../CAREERDEX_V0.3.0_COMPLETE.md)** - Full specification, architecture, and implementation timeline
-- **[Notifications Setup](../../src/careerdex/NOTIFICATIONS_SETUP.md)** - Slack webhook configuration
-- **[Modernization Summary](../../src/careerdex/MODERNIZATION_SUMMARY.md)** - Framework migration notes
+- **[CareerDEX Source README](../../src/careerdex/README.md)** - Full package architecture and implementation details
+- **[CI/CD Pipeline](../CI_CD.md)** - Packaging, release, and promotion flow
 
 ## Implementation
 
 ### Current Status
 
-Phase 1 Foundation (v0.3.1) - In Progress
+Core package structure implemented with phased modules under `src/careerdex/phases/`.
 
 ### Key Components
 
@@ -39,9 +37,9 @@ Phase 1 Foundation (v0.3.1) - In Progress
 
 ## Getting Started
 
-1. Read [DEVELOPMENT.md](../common/DEVELOPMENT.md) to set up local environment
-2. Review [CareerDEX Complete Guide](../CAREERDEX_V0.3.0_COMPLETE.md) for architecture
-3. Check [Notifications Setup](../../src/careerdex/NOTIFICATIONS_SETUP.md) for monitoring
+1. Read [DEVELOPMENT.md](../DEVELOPMENT.md) to set up local environment
+2. Review [CareerDEX Source README](../../src/careerdex/README.md) for architecture
+3. Review package release setup in [packages/README.md](../../packages/README.md)
 
 ## Directory Structure
 

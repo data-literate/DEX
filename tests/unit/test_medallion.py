@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from dataenginex.core.medallion_architecture import (
     BigQueryStorage,
     DataLayer,

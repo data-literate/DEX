@@ -7,16 +7,16 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
-from httpx import ASGITransport, AsyncClient
-
 from dataenginex.api.auth import create_token, decode_token
-from dataenginex.api.main import app
 from dataenginex.api.pagination import (
     decode_cursor,
     encode_cursor,
     paginate,
 )
 from dataenginex.api.rate_limit import RateLimiter
+from httpx import ASGITransport, AsyncClient
+
+from careerdex.api.main import app
 
 # ============================================================================
 # JWT Auth

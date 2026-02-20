@@ -10,7 +10,7 @@ import httpx
 import pytest
 import uvicorn
 
-from dataenginex.api.main import app
+from careerdex.api.main import app
 
 # ---------------------------------------------------------------------------
 # Server fixture

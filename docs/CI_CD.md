@@ -11,6 +11,7 @@
 - [Overview](#overview)
 - [Continuous Integration (CI)](#continuous-integration-ci)
 - [Continuous Deployment (CD)](#continuous-deployment-cd)
+- [PyPI Publishing](#pypi-publishing)
 - [PR Preview Environments](#pr-preview-environments)
 - [Deployment Flow](#deployment-flow)
 - [GitOps with ArgoCD](#gitops-with-argocd)
@@ -160,6 +161,41 @@ trivy image ghcr.io/data-literate/dex:sha-XXXXXXXX
 - CRITICAL: Block deployment (manual review required)
 - HIGH: Alert but allow deployment
 - MEDIUM/LOW: Informational
+
+## PyPI Publishing
+
+**Workflow**: [`.github/workflows/pypi-publish.yml`](../.github/workflows/pypi-publish.yml)
+
+**Trigger**: Push tag matching `v*` (and manual `workflow_dispatch`)
+
+**Release stages**:
+- Build + validate distributions once
+- Publish to TestPyPI first for dry-run verification
+- Promote to PyPI only for approved stable tags (`vMAJOR.MINOR.PATCH`)
+
+**Publish gates**:
+- Compares current tag to previous tag
+- Runs TestPyPI/PyPI flow only when files under `packages/dataenginex/` changed
+- Skips all publishing when no `dataenginex` changes are detected
+- If tag is not stable semver (for example `v1.2.3-rc1`), publishes only to TestPyPI
+
+### Release Commands
+
+Use annotated tags to control TestPyPI vs PyPI promotion:
+
+```bash
+# TestPyPI-only dry run (pre-release tag)
+git tag -a v1.4.0-rc1 -m "dataenginex rc1"
+git push origin v1.4.0-rc1
+
+# Production promotion (stable tag)
+git tag -a v1.4.0 -m "dataenginex v1.4.0"
+git push origin v1.4.0
+```
+
+Behavior:
+- `vMAJOR.MINOR.PATCH-<suffix>` → builds + publishes to TestPyPI only
+- `vMAJOR.MINOR.PATCH` → builds + publishes to TestPyPI, then promotes to PyPI
 
 ## PR Preview Environments
 

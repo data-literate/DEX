@@ -11,11 +11,8 @@ The Weather Pipeline is a complete, working implementation of the DEX framework'
 
 ## 📚 Documentation
 
-- **[START HERE](../../src/weatherdex/START_HERE.md)** - Quick start guide
-- **[Pipeline README](../../src/weatherdex/README.txt)** - Overview and structure  
-- **[ML Implementation Guide](../../src/weatherdex/ML_README.md)** - Model training and integration
-- **[ML Implementation Summary](../../src/weatherdex/ML_IMPLEMENTATION_SUMMARY.txt)** - Execution summary
-- **[Execution Checklist](../../src/weatherdex/EXECUTION_CHECKLIST.md)** - Task tracking
+- **[Weather Source Package](../../src/weatherdex/)** - Core weather modules and notebooks
+- **[CI/CD Pipeline](../CI_CD.md)** - Packaging, release, and promotion flow
 
 ## What You'll Learn
 
@@ -33,16 +30,10 @@ This reference implementation demonstrates:
 ## Quick Start
 
 ```bash
-# See START_HERE.md for complete setup
 cd src/weatherdex
 
-# Run pipeline locally
-airflow dags trigger weather_pipeline
-
-# View results
-ls ~/data/weather/bronze/
-ls ~/data/weather/silver/
-ls ~/data/weather/gold/
+# Explore package modules
+python -c "import weatherdex; print(weatherdex.__all__)"
 ```
 
 ## Key Files
@@ -63,9 +54,9 @@ ls ~/data/weather/gold/
 
 ## Reference Links
 
-- **DEX Framework**: [docs/common/ARCHITECTURE.md](../common/ARCHITECTURE.md)
+- **DEX Framework**: [docs/ARCHITECTURE.md](../ARCHITECTURE.md)
 - **Medallion Architecture**: [docs/adr/0001-medallion-architecture.md](../adr/0001-medallion-architecture.md)
-- **Development Guide**: [docs/common/DEVELOPMENT.md](../common/DEVELOPMENT.md)
+- **Development Guide**: [docs/DEVELOPMENT.md](../DEVELOPMENT.md)
 
 ---
 
