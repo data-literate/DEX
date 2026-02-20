@@ -1,10 +1,15 @@
 name: PyPI Publish
 
 on:
-  push:
-    tags:
-      - "v*"
+  release:
+    types:
+      - published
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to publish (e.g., v0.3.4)"
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -17,6 +22,7 @@ jobs:
       dataenginex_changed: ${{ steps.detect.outputs.dataenginex_changed }}
       previous_tag: ${{ steps.detect.outputs.previous_tag }}
       approved_tag: ${{ steps.detect.outputs.approved_tag }}
+      current_tag: ${{ steps.detect.outputs.current_tag }}
 
     steps:
       - name: Checkout code
@@ -26,11 +32,19 @@ jobs:
 
       - name: Detect changed paths for release tag
         id: detect
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          DISPATCH_TAG: ${{ github.event.inputs.tag }}
         shell: bash
         run: |
           set -euo pipefail
 
-          CURRENT_TAG="${GITHUB_REF_NAME}"
+          CURRENT_TAG="${RELEASE_TAG:-${DISPATCH_TAG:-${GITHUB_REF_NAME:-}}}"
+          if [[ -z "${CURRENT_TAG}" ]]; then
+            CURRENT_TAG="$(git tag --sort=-v:refname | head -n 1 || true)"
+          fi
+
+          echo "current_tag=${CURRENT_TAG}" >> "$GITHUB_OUTPUT"
           PREVIOUS_TAG="$(git tag --sort=-v:refname | grep -Fxv "${CURRENT_TAG}" | head -n 1 || true)"
 
           if [[ "${CURRENT_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -144,5 +158,5 @@ jobs:
           if [[ "${{ needs.detect-dataenginex-changes.outputs.dataenginex_changed }}" == "false" ]]; then
             echo "Skipping TestPyPI/PyPI publish: no changes in packages/dataenginex/ since previous tag ${{ needs.detect-dataenginex-changes.outputs.previous_tag }}."
           elif [[ "${{ needs.detect-dataenginex-changes.outputs.approved_tag }}" == "false" ]]; then
-            echo "Published to TestPyPI only: tag ${{ github.ref_name }} is not an approved stable tag (requires vMAJOR.MINOR.PATCH)."
+            echo "Published to TestPyPI only: tag ${{ needs.detect-dataenginex-changes.outputs.current_tag }} is not an approved stable tag (requires vMAJOR.MINOR.PATCH)."
           fi
