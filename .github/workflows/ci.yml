@@ -76,6 +76,9 @@ jobs:
       - name: Run lint suite
         run: uv run poe lint
 
+      - name: Run import-order check
+        run: uv run poe imports-check
+
       - name: Run type checking
         run: uv run poe typecheck
 

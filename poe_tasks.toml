@@ -33,6 +33,10 @@ help = "Run tests with coverage report (HTML + XML + terminal)"
 shell = "ruff check src/ packages/dataenginex/src/ tests/"
 help = "Run ruff lint on source and test files"
 
+[tool.poe.tasks.imports-check]
+shell = "ruff check --select I src/ packages/dataenginex/src/ tests/"
+help = "Enforce import sorting/formatting (Ruff I rules)"
+
 [tool.poe.tasks.lint-fix]
 shell = "ruff check --fix src/ packages/dataenginex/src/ tests/ && ruff format src/ packages/dataenginex/src/ tests/"
 help = "Auto-fix lint issues and format code"
@@ -55,8 +59,8 @@ cmd = "pre-commit run --all-files"
 help = "Run all pre-commit hooks"
 
 [tool.poe.tasks.check-all]
-shell = "poe lint && poe typecheck && poe test"
-help = "Run lint, typecheck, and tests in sequence"
+shell = "poe imports-check && poe lint && poe typecheck && poe test"
+help = "Run import-order check, lint, typecheck, and tests in sequence"
 
 [tool.poe.tasks.clean]
 shell = "find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; find . -type f -name '*.pyc' -delete 2>/dev/null; rm -rf .pytest_cache .mypy_cache .ruff_cache dist build *.egg-info 2>/dev/null; echo 'Cache and artifacts cleaned'"
