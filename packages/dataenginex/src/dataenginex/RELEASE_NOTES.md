@@ -3,6 +3,16 @@
 This document tracks published package releases for `dataenginex` only.
 Only include changes that modify files under `packages/dataenginex/src/dataenginex/**`.
 
+## v0.3.5 - 2026-02-20
+
+- Released package version `0.3.5`.
+- Tag: `v0.3.5`
+- Release title: `Release v0.3.5`
+- Changes in this release:
+	- Hardened `PyPI Publish` workflow for trusted publishing.
+	- Added release-only publish gating and build-only behavior for manual dispatch.
+	- Switched publish job environment names to repo vars for stricter workflow validation compatibility.
+
 ## v0.3.4 - 2026-02-20
 
 - Released package version `0.3.4`.
