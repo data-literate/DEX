@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.8] - 2026-02-21
+
+### Added
+
+- PySpark local-mode test fixtures in `tests/conftest.py` (session-scoped `spark` session)
+- Sample DataFrame fixtures: `spark_df_jobs`, `spark_df_weather`, `spark_df_empty`
+- `requires_pyspark` skip marker — tests auto-skip when PySpark is not installed
+- `tests/fixtures/sample_data.py` — factory helpers for job, user, and weather records
+- `tests/unit/test_spark_fixtures.py` — validates PySpark fixture behaviour
+
 ## [0.4.6] - 2026-02-21
 
 ### Added
@@ -97,7 +107,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cursor-based pagination utilities
 - Versioned API router (`/api/v1/`)
 
-[Unreleased]: https://github.com/TheDataEngineX/DEX/compare/v0.4.6...HEAD
+[Unreleased]: https://github.com/TheDataEngineX/DEX/compare/v0.4.8...HEAD
+[0.4.8]: https://github.com/TheDataEngineX/DEX/compare/v0.4.6...v0.4.8
 [0.4.6]: https://github.com/TheDataEngineX/DEX/compare/v0.4.5...v0.4.6
 [0.4.5]: https://github.com/TheDataEngineX/DEX/compare/v0.4.3...v0.4.5
 [0.4.3]: https://github.com/TheDataEngineX/DEX/compare/v0.4.1...v0.4.3
