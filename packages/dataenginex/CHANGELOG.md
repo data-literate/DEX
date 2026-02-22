@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.5] - 2026-02-21
+
+### Added
+
+- `StorageBackend` ABC with proper `@abstractmethod` contracts
+- `S3Storage` backend for AWS S3 (requires `boto3`)
+- `GCSStorage` backend for Google Cloud Storage (requires `google-cloud-storage`)
+- Re-exported `StorageBackend` from `dataenginex.lakehouse`
+
+### Changed
+
+- Refactored `StorageBackend` from plain class to proper `ABC` subclass
+- Updated `lakehouse.__init__` to export all 4 storage backends + ABC
+
 ## [0.4.3] - 2026-02-21
 
 ### Added
@@ -66,7 +80,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cursor-based pagination utilities
 - Versioned API router (`/api/v1/`)
 
-[Unreleased]: https://github.com/TheDataEngineX/DEX/compare/v0.4.3...HEAD
+[Unreleased]: https://github.com/TheDataEngineX/DEX/compare/v0.4.5...HEAD
+[0.4.5]: https://github.com/TheDataEngineX/DEX/compare/v0.4.3...v0.4.5
 [0.4.3]: https://github.com/TheDataEngineX/DEX/compare/v0.4.1...v0.4.3
 [0.4.1]: https://github.com/TheDataEngineX/DEX/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/TheDataEngineX/DEX/compare/v0.3.5...v0.4.0

@@ -3,19 +3,31 @@
 Public API::
 
     from dataenginex.lakehouse import (
-        ParquetStorage, JsonStorage,
+        # Storage backends
+        StorageBackend,
+        ParquetStorage, JsonStorage, S3Storage, GCSStorage,
+        # Catalog
         CatalogEntry, DataCatalog,
+        # Partitioning
         PartitionStrategy, DatePartitioner, HashPartitioner,
     )
 """
 
 from __future__ import annotations
 
+from dataenginex.core.medallion_architecture import StorageBackend
+
 from .catalog import CatalogEntry, DataCatalog
 from .partitioning import DatePartitioner, HashPartitioner, PartitionStrategy
-from .storage import JsonStorage, ParquetStorage
+from .storage import GCSStorage, JsonStorage, ParquetStorage, S3Storage
 
 __all__ = [
+    # Storage backends (ABC + implementations)
+    "StorageBackend",
+    "GCSStorage",
+    "JsonStorage",
+    "ParquetStorage",
+    "S3Storage",
     # Catalog
     "CatalogEntry",
     "DataCatalog",
@@ -23,7 +35,4 @@ __all__ = [
     "DatePartitioner",
     "HashPartitioner",
     "PartitionStrategy",
-    # Storage
-    "JsonStorage",
-    "ParquetStorage",
 ]

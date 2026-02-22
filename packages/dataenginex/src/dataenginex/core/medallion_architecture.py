@@ -18,6 +18,7 @@ Classes:
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
@@ -124,20 +125,39 @@ class MedallionArchitecture:
         return [cls.BRONZE_CONFIG, cls.SILVER_CONFIG, cls.GOLD_CONFIG]
 
 
-class StorageBackend:
-    """Abstract storage backend interface."""
-    
+class StorageBackend(ABC):
+    """Abstract storage backend interface.
+
+    All lakehouse storage implementations must subclass this and provide
+    concrete ``write``, ``read``, and ``delete`` methods.  The interface
+    accepts a ``StorageFormat`` hint so backends can choose serialisation.
+
+    Built-in implementations:
+        - ``LocalParquetStorage`` — local Parquet files (this module)
+        - ``BigQueryStorage`` — Google BigQuery tables (this module)
+        - ``JsonStorage`` — JSON files (``dataenginex.lakehouse.storage``)
+        - ``ParquetStorage`` — pyarrow-backed Parquet (``dataenginex.lakehouse.storage``)
+        - ``S3Storage`` — AWS S3 object storage (``dataenginex.lakehouse.storage``)
+        - ``GCSStorage`` — Google Cloud Storage (``dataenginex.lakehouse.storage``)
+    """
+
+    @abstractmethod
     def write(self, data: Any, path: str, format: StorageFormat) -> bool:
-        """Write data to storage."""
-        raise NotImplementedError
-    
+        """Write *data* to *path* in the given format.
+
+        Returns ``True`` on success, ``False`` on failure.
+        """
+        ...
+
+    @abstractmethod
     def read(self, path: str, format: StorageFormat) -> Any:
-        """Read data from storage."""
-        raise NotImplementedError
-    
+        """Read data from *path*.  Returns ``None`` on failure."""
+        ...
+
+    @abstractmethod
     def delete(self, path: str) -> bool:
-        """Delete data from storage."""
-        raise NotImplementedError
+        """Delete the resource at *path*.  Returns ``True`` on success."""
+        ...
 
 
 class LocalParquetStorage(StorageBackend):
