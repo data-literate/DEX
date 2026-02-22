@@ -1,0 +1,57 @@
+# Changelog
+
+All notable changes to `dataenginex` will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.4.1] - 2026-02-21
+
+### Added
+
+- CHANGELOG.md with Keep a Changelog format
+- Release workflow extracts changelog notes for GitHub Releases automatically
+
+### Changed
+
+- `release.yml` now reads `packages/dataenginex/CHANGELOG.md` for release notes
+
+## [0.4.0] - 2026-02-21
+
+### Added
+
+- Stable `__all__` exports in every subpackage `__init__.py`
+- `from __future__ import annotations` in all public modules
+- Comprehensive module-level docstrings with usage examples
+- New public API exports: `ComponentHealth`, `AuthMiddleware`, `AuthUser`,
+  `create_token`, `decode_token`, `BadRequestError`, `NotFoundError`,
+  `PaginationMeta`, `RateLimiter`, `RateLimitMiddleware`,
+  `ConnectorStatus`, `FetchResult`, `ColumnProfile`, `get_logger`, `get_tracer`
+
+### Changed
+
+- Reorganized `__all__` in all subpackages for logical grouping
+- Updated package version to 0.4.0
+
+## [0.3.5] - 2026-02-13
+
+### Added
+
+- Production hardening: structured logging, Prometheus/OTel, health probes
+- Data connectors: `RestConnector`, `FileConnector` with async interface
+- Schema registry with versioned schema management
+- Data profiler with automated dataset statistics
+- Lakehouse catalog, partitioning, and storage backends
+- ML framework: trainer, model registry, drift detection, serving
+- Warehouse transforms and persistent lineage tracking
+- JWT authentication middleware
+- Rate limiting middleware
+- Cursor-based pagination utilities
+- Versioned API router (`/api/v1/`)
+
+[Unreleased]: https://github.com/TheDataEngineX/DEX/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/TheDataEngineX/DEX/compare/v0.4.0...v0.4.1
+[0.4.0]: https://github.com/TheDataEngineX/DEX/compare/v0.3.5...v0.4.0
+[0.3.5]: https://github.com/TheDataEngineX/DEX/releases/tag/v0.3.5

@@ -60,6 +60,26 @@ jobs:
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
           echo "Extracted version: $VERSION"
 
+      - name: Extract changelog notes
+        id: changelog
+        run: |
+          CHANGELOG="packages/dataenginex/CHANGELOG.md"
+          if [[ -f "$CHANGELOG" ]]; then
+            # Extract the section for this version (between two ## headers)
+            NOTES=$(awk "/^## \\[${{ steps.version.outputs.version }}\\]/{found=1; next} /^## \\[/{if(found) exit} found" "$CHANGELOG")
+            if [[ -z "$NOTES" ]]; then
+              NOTES="Version ${{ steps.version.outputs.version }} — see CHANGELOG.md for details."
+            fi
+          else
+            NOTES="Version ${{ steps.version.outputs.version }} — see RELEASE_NOTES.md for details."
+          fi
+          # Write multiline output
+          {
+            echo "notes<<CHANGELOG_EOF"
+            echo "$NOTES"
+            echo "CHANGELOG_EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Check if tag already exists
         id: check_tag
         run: |
@@ -91,7 +111,7 @@ jobs:
           gh release create "${{ steps.version.outputs.tag }}" \
             --target main \
             --title "Release ${{ steps.version.outputs.tag }}" \
-            --notes "Version ${{ steps.version.outputs.version }} - See RELEASE_NOTES.md for details" \
+            --notes "${{ steps.changelog.outputs.notes }}" \
             --draft=false
 
       - name: Notify Release Success
