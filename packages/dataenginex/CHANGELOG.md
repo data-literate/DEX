@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.6] - 2026-02-21
+
+### Added
+
+- `QualityGate` — orchestrates quality checks at medallion layer transitions
+- `QualityStore` — in-memory store accumulating per-layer quality metrics
+- `QualityResult` — immutable dataclass capturing evaluation outcomes
+- `QualityDimension` — StrEnum for named quality dimensions
+- `/api/v1/data/quality/{layer}` endpoint for per-layer quality history
+- `set_quality_store()` / `get_quality_store()` for wiring quality at app startup
+- New exports in `dataenginex.core` and `dataenginex.api`
+
+### Changed
+
+- `/api/v1/data/quality` now returns live metrics from `QualityStore` (was placeholder zeros)
+- Wired `DataProfiler`, `DataQualityChecks`, and `QualityScorer` into `QualityGate` pipeline
+
 ## [0.4.5] - 2026-02-21
 
 ### Added
@@ -80,7 +97,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cursor-based pagination utilities
 - Versioned API router (`/api/v1/`)
 
-[Unreleased]: https://github.com/TheDataEngineX/DEX/compare/v0.4.5...HEAD
+[Unreleased]: https://github.com/TheDataEngineX/DEX/compare/v0.4.6...HEAD
+[0.4.6]: https://github.com/TheDataEngineX/DEX/compare/v0.4.5...v0.4.6
 [0.4.5]: https://github.com/TheDataEngineX/DEX/compare/v0.4.3...v0.4.5
 [0.4.3]: https://github.com/TheDataEngineX/DEX/compare/v0.4.1...v0.4.3
 [0.4.1]: https://github.com/TheDataEngineX/DEX/compare/v0.4.0...v0.4.1

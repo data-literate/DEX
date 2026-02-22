@@ -1,4 +1,4 @@
-"""Core framework — schemas, validators, medallion architecture, pipeline config.
+"""Core framework — schemas, validators, medallion architecture, pipeline config, quality.
 
 Public API::
 
@@ -7,6 +7,8 @@ Public API::
         MedallionArchitecture, DataLayer, StorageFormat, LayerConfiguration,
         # Pipeline
         PipelineConfig, PipelineMetrics,
+        # Quality
+        QualityGate, QualityStore, QualityResult, QualityDimension,
         # Schemas
         JobPosting, JobSourceEnum, UserProfile,
         ErrorDetail, ErrorResponse, RootResponse, HealthResponse,
@@ -26,6 +28,7 @@ from .medallion_architecture import (
     StorageFormat,
 )
 from .pipeline_config import PipelineConfig, PipelineMetrics
+from .quality import QualityDimension, QualityGate, QualityResult, QualityStore
 from .schemas import (
     DataQualityReport,
     ErrorDetail,
@@ -54,6 +57,11 @@ __all__ = [
     # Pipeline
     "PipelineConfig",
     "PipelineMetrics",
+    # Quality gate
+    "QualityDimension",
+    "QualityGate",
+    "QualityResult",
+    "QualityStore",
     # Schemas
     "DataQualityReport",
     "ErrorDetail",
