@@ -3,7 +3,16 @@ Data Quality Validators (Issue #33 - Data Quality Framework)
 
 This module provides validation and data quality checking utilities for DEX
 using Pydantic validators and Great Expectations.
+
+Classes:
+    SchemaValidator: Validates records against Pydantic schemas.
+    DataQualityChecks: Multi-dimensional data quality checks.
+    DataHash: Content hashing for deduplication.
+    QualityScorer: Computes quality scores for records.
+    ValidationReport: Aggregates validation results.
 """
+
+from __future__ import annotations
 
 import hashlib
 from collections.abc import Mapping

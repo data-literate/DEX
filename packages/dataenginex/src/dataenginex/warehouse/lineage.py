@@ -19,7 +19,24 @@ from loguru import logger
 
 @dataclass
 class LineageEvent:
-    """A single lineage event describing a data operation."""
+    """A single lineage event describing a data operation.
+
+    Attributes:
+        event_id: Auto-generated unique identifier (12-char hex).
+        parent_id: ID of the upstream event that produced the input.
+        operation: Type of operation (``"ingest"``, ``"transform"``, ``"enrich"``, ``"export"``).
+        layer: Medallion layer (``"bronze"``, ``"silver"``, ``"gold"``).
+        source: Where data came from.
+        destination: Where data was written.
+        input_count: Number of input records.
+        output_count: Number of output records.
+        error_count: Number of records that errored.
+        quality_score: Quality score of the output (0.0–1.0).
+        pipeline_name: Name of the owning pipeline.
+        step_name: Name of the transform step.
+        metadata: Free-form context dict.
+        timestamp: When the event occurred.
+    """
 
     event_id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
     parent_id: str | None = None

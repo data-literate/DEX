@@ -20,7 +20,18 @@ from loguru import logger
 
 @dataclass
 class TransformResult:
-    """Outcome of running a pipeline over a batch of records."""
+    """Outcome of running a pipeline over a batch of records.
+
+    Attributes:
+        input_count: Number of records fed into the pipeline.
+        output_count: Number of records that passed all transform steps.
+        dropped_count: Records dropped during transformation.
+        error_count: Records that caused transform errors.
+        duration_ms: Total pipeline execution time in milliseconds.
+        records: Transformed output records.
+        step_metrics: Per-step metrics (input/output/dropped/duration).
+        completed_at: Timestamp of pipeline completion.
+    """
 
     input_count: int
     output_count: int

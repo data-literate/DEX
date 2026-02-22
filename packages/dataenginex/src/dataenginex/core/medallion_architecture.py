@@ -3,7 +3,20 @@ Medallion Architecture Implementation (Issue #35 - Medallion Architecture)
 
 Implements the Bronze → Silver → Gold data architecture for DEX ecosystem
 with support for local Parquet storage and BigQuery cloud integration.
+
+Classes:
+    StorageFormat: Supported storage format enumeration.
+    DataLayer: Medallion architecture layer enumeration (bronze/silver/gold).
+    LayerConfiguration: Configuration dataclass for a single medallion layer.
+    MedallionArchitecture: Manages three-layer medallion architecture configs.
+    StorageBackend: Abstract storage backend interface.
+    LocalParquetStorage: Local Parquet file storage.
+    BigQueryStorage: BigQuery cloud storage.
+    DualStorage: Dual local + cloud storage strategy.
+    DataLineage: In-memory data lineage tracker through medallion layers.
 """
+
+from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum

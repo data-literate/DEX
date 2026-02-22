@@ -19,7 +19,17 @@ from loguru import logger
 
 @dataclass
 class SchemaVersion:
-    """An immutable snapshot of a schema at a particular version."""
+    """An immutable snapshot of a schema at a particular version.
+
+    Attributes:
+        name: Schema identifier (e.g. ``"job_posting"``).
+        version: Semver string (e.g. ``"1.2.0"``).
+        fields: Mapping of field names to type descriptions.
+        required_fields: Fields that must be present in every record.
+        description: Human-readable summary of the schema.
+        created_at: When this version was registered.
+        metadata: Extra context dict.
+    """
 
     name: str
     version: str  # semver string, e.g. "1.2.0"

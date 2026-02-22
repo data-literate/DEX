@@ -1,4 +1,15 @@
-"""OpenTelemetry tracing configuration for DataEngineX."""
+"""OpenTelemetry tracing configuration for DataEngineX.
+
+Provides functions to configure distributed tracing with OTLP export
+and instrument FastAPI applications.
+
+Functions:
+    configure_tracing: Set up ``TracerProvider`` with OTLP/console exporters.
+    instrument_fastapi: Auto-instrument a FastAPI app with OpenTelemetry.
+    get_tracer: Obtain a ``Tracer`` by name.
+"""
+
+from __future__ import annotations
 
 import os
 

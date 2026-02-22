@@ -17,7 +17,14 @@ from loguru import logger
 
 @dataclass
 class PredictionRequest:
-    """Input to the serving layer."""
+    """Input to the serving layer.
+
+    Attributes:
+        model_name: Name of the model to invoke.
+        version: Model version (``None`` resolves to the production version).
+        features: List of feature dicts — each dict is one sample.
+        request_id: Caller-provided request ID for tracing.
+    """
 
     model_name: str
     version: str | None = None  # None → use production model
@@ -27,7 +34,16 @@ class PredictionRequest:
 
 @dataclass
 class PredictionResponse:
-    """Output from the serving layer."""
+    """Output from the serving layer.
+
+    Attributes:
+        model_name: Name of the model that produced predictions.
+        version: Version of the model used.
+        predictions: List of prediction values.
+        latency_ms: Inference latency in milliseconds.
+        request_id: Echoed request ID for tracing.
+        served_at: Timestamp of the prediction.
+    """
 
     model_name: str
     version: str

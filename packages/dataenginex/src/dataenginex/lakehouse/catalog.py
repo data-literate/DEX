@@ -19,7 +19,23 @@ from loguru import logger
 
 @dataclass
 class CatalogEntry:
-    """Metadata about a single dataset in the lakehouse."""
+    """Metadata about a single dataset in the lakehouse.
+
+    Attributes:
+        name: Unique dataset name.
+        layer: Medallion layer (``"bronze"``, ``"silver"``, ``"gold"``).
+        format: Storage format (``"parquet"``, ``"json"``, ``"delta"``).
+        location: File path or table reference.
+        record_count: Approximate number of records.
+        schema_fields: List of column/field names.
+        description: Human-readable dataset description.
+        owner: Team or user responsible for the dataset.
+        tags: Arbitrary labels for discovery.
+        created_at: When the dataset was first registered.
+        updated_at: When the entry was last updated.
+        metadata: Free-form context dict.
+        version: Auto-incremented version counter.
+    """
 
     name: str
     layer: str  # "bronze", "silver", "gold"

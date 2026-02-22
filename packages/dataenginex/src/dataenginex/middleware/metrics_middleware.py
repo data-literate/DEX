@@ -1,4 +1,11 @@
-"""Middleware for Prometheus metrics collection."""
+"""Middleware for Prometheus metrics collection.
+
+Provides ``PrometheusMetricsMiddleware`` that automatically records
+request counts, durations, in-flight gauges, and exception counters
+for every HTTP request (except ``/metrics`` itself).
+"""
+
+from __future__ import annotations
 
 import time
 from collections.abc import Callable

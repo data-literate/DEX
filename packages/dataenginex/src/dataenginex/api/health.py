@@ -22,6 +22,15 @@ class HealthStatus(StrEnum):
 
 @dataclass(frozen=True)
 class ComponentHealth:
+    """Health status of a single dependency component.
+
+    Attributes:
+        name: Component identifier (e.g. ``"database"``, ``"cache"``).
+        status: Current health status.
+        message: Optional human-readable message.
+        duration_ms: Time taken for the health check in milliseconds.
+    """
+
     name: str
     status: HealthStatus
     message: str | None = None

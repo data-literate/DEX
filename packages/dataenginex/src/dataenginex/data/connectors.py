@@ -38,7 +38,16 @@ class ConnectorStatus(StrEnum):
 
 @dataclass
 class FetchResult:
-    """Outcome of a single ``fetch`` invocation."""
+    """Outcome of a single ``fetch`` invocation.
+
+    Attributes:
+        records: Retrieved data records.
+        record_count: Number of records returned.
+        source: Name of the data source.
+        fetched_at: Timestamp of the fetch.
+        duration_ms: Fetch duration in milliseconds.
+        errors: Error messages (empty on success).
+    """
 
     records: list[dict[str, Any]]
     record_count: int

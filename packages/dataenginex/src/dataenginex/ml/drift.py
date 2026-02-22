@@ -16,7 +16,20 @@ from typing import Any
 
 @dataclass
 class DriftReport:
-    """Outcome of a drift check."""
+    """Outcome of a drift check for a single feature.
+
+    Attributes:
+        feature_name: Name of the feature that was checked.
+        psi: Population Stability Index value.
+        drift_detected: Whether drift exceeds the configured threshold.
+        severity: Drift severity — ``"none"``, ``"moderate"``, or ``"severe"``.
+        reference_mean: Mean of the reference distribution.
+        current_mean: Mean of the current distribution.
+        reference_std: Standard deviation of reference distribution.
+        current_std: Standard deviation of current distribution.
+        details: Extra context (bins, threshold, etc.).
+        checked_at: Timestamp of the drift check.
+    """
 
     feature_name: str
     psi: float  # Population Stability Index

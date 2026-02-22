@@ -4,7 +4,18 @@ Uses **loguru** as the primary logging backend, integrated with **structlog**
 for structured context in the FastAPI application.  All stdlib ``logging``
 output is intercepted and routed through loguru so that every log line—
 regardless of origin—gets the same formatting and sink configuration.
+
+Functions:
+    configure_logging: Configure loguru + structlog sinks.
+    get_logger: Obtain a configured ``structlog.BoundLogger``.
+    add_app_context: Structlog processor adding app name and version.
+
+Constants:
+    APP_VERSION: Current application version.
+    APP_NAME: Application name (from ``$APP_NAME`` or ``"dataenginex"``).
 """
+
+from __future__ import annotations
 
 import logging
 import os

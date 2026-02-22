@@ -1,0 +1,52 @@
+site_name: DataEngineX (DEX)
+site_description: DataEngineX documentation
+site_url: https://docs.thedataenginex.com
+repo_url: https://github.com/TheDataEngineX/DEX
+repo_name: TheDataEngineX/DEX
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: blue grey
+      accent: teal
+  features:
+    - content.code.copy
+    - navigation.sections
+    - search.highlight
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [packages/dataenginex/src]
+          options:
+            show_source: true
+            show_root_heading: true
+            heading_level: 2
+            members_order: source
+            docstring_style: google
+
+nav:
+  - Home: index.md
+  - Docs Hub: README.md
+  - Development: DEVELOPMENT.md
+  - Contributing: CONTRIBUTING.md
+  - Architecture: ARCHITECTURE.md
+  - CI/CD: CI_CD.md
+  - Deployment Runbook: DEPLOY_RUNBOOK.md
+  - Observability: OBSERVABILITY.md
+  - SDLC: SDLC.md
+  - API Reference:
+      - Overview: api-reference/index.md
+      - api: api-reference/api.md
+      - core: api-reference/core.md
+      - data: api-reference/data.md
+      - lakehouse: api-reference/lakehouse.md
+      - middleware: api-reference/middleware.md
+      - ml: api-reference/ml.md
+      - warehouse: api-reference/warehouse.md
+
+docs_dir: docs
+site_dir: site

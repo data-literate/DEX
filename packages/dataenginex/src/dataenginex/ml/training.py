@@ -22,7 +22,17 @@ from loguru import logger
 
 @dataclass
 class TrainingResult:
-    """Outcome of a model training run."""
+    """Outcome of a model training run.
+
+    Attributes:
+        model_name: Name of the trained model.
+        version: Semantic version of this training run.
+        metrics: Training metrics (e.g. ``{"train_score": 0.95}``).
+        parameters: Hyper-parameters used for training.
+        duration_seconds: Wall-clock training time.
+        artifact_path: Path where the model artifact is saved.
+        trained_at: Timestamp of training completion.
+    """
 
     model_name: str
     version: str

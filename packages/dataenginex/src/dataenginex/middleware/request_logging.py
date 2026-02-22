@@ -1,4 +1,11 @@
-"""FastAPI middleware for request tracking and logging."""
+"""FastAPI middleware for request tracking and logging.
+
+Provides ``RequestLoggingMiddleware`` that generates a unique
+``X-Request-ID`` for each request, binds structured context via
+``structlog.contextvars``, and logs request start/completion events.
+"""
+
+from __future__ import annotations
 
 import time
 import uuid

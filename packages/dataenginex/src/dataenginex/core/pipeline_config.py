@@ -4,8 +4,13 @@ DEX Pipeline Orchestration (Issue #34 - Pipeline Orchestration)
 This module defines pipeline configuration for data pipeline orchestration,
 including the CareerDEX job ingestion pipeline with 3-hour cycles (via
 Apache Airflow).
+
+Classes:
+    PipelineConfig: Static configuration for DEX data pipelines.
+    PipelineMetrics: Prometheus metric definitions for pipeline monitoring.
 """
 
+from __future__ import annotations
 
 
 class PipelineConfig:
