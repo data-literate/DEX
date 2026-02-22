@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.10] - 2026-02-21
+
+### Added
+
+- `examples/` directory with 4 runnable quickstart scripts
+- `01_hello_pipeline.py` — profiler, schema validation, medallion config
+- `02_api_quickstart.py` — FastAPI app with health, v1 router, metrics
+- `03_quality_gate.py` — QualityGate evaluations against layer thresholds
+- `04_ml_training.py` — SklearnTrainer, ModelRegistry, DriftDetector demo
+- `examples/README.md` with table of examples and run instructions
+
 ## [0.4.8] - 2026-02-21
 
 ### Added
@@ -107,7 +118,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cursor-based pagination utilities
 - Versioned API router (`/api/v1/`)
 
-[Unreleased]: https://github.com/TheDataEngineX/DEX/compare/v0.4.8...HEAD
+[Unreleased]: https://github.com/TheDataEngineX/DEX/compare/v0.4.10...HEAD
+[0.4.10]: https://github.com/TheDataEngineX/DEX/compare/v0.4.8...v0.4.10
 [0.4.8]: https://github.com/TheDataEngineX/DEX/compare/v0.4.6...v0.4.8
 [0.4.6]: https://github.com/TheDataEngineX/DEX/compare/v0.4.5...v0.4.6
 [0.4.5]: https://github.com/TheDataEngineX/DEX/compare/v0.4.3...v0.4.5
