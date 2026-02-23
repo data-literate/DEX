@@ -25,7 +25,8 @@ jobs:
       packages: write
 
     outputs:
-      image_tag: ${{ steps.meta.outputs.tags }}
+      image_tag: ${{ steps.vars.outputs.image_tag }}
+      image_digest: ${{ steps.build.outputs.digest }}
       short_sha: ${{ steps.vars.outputs.short_sha }}
 
     steps:
@@ -75,7 +76,10 @@ jobs:
         run: |
           SHORT_SHA=$(git rev-parse --short=8 HEAD)
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
-          echo "image_tag=sha-$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "image_tag=${REGISTRY}/${IMAGE_NAME}:sha-${SHORT_SHA}" >> $GITHUB_OUTPUT
+        env:
+          REGISTRY: ${{ env.REGISTRY }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
 
       - name: Docker metadata
         id: meta
@@ -87,6 +91,7 @@ jobs:
             type=raw,value=latest,enable=${{ github.event.workflow_run.head_branch == 'main' }}
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -112,7 +117,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ needs.build-and-push.outputs.short_sha }}
+          image-ref: ${{ needs.build-and-push.outputs.image_tag }}
           format: 'sarif'
           output: 'trivy-results.sarif'
 
