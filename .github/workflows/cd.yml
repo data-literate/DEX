@@ -75,11 +75,11 @@ jobs:
         id: vars
         run: |
           SHORT_SHA=$(git rev-parse --short=8 HEAD)
-          # Convert GitHub org/owner to lowercase for Docker reference compliance
+          # Lowercase GitHub owner for Docker compliance
           OWNER_LOWER=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
-          # Construct full image tag using lowercase owner
-          echo "image_tag=${REGISTRY}/${OWNER_LOWER}/dex:${SHORT_SHA}" >> $GITHUB_OUTPUT
+          echo "owner_lower=${OWNER_LOWER}" >> $GITHUB_OUTPUT
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "image_tag=${REGISTRY}/${OWNER_LOWER}/dex:${SHORT_SHA}" >> $GITHUB_OUTPUT
         env:
           REGISTRY: ${{ env.REGISTRY }}
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
@@ -88,7 +88,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ steps.vars.outputs.owner_lower }}/dex
           tags: |
             type=raw,value=${{ steps.vars.outputs.short_sha }}
             type=raw,value=latest,enable=${{ github.event.workflow_run.head_branch == 'main' }}
@@ -100,8 +100,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.short_sha }}
+            ${{ env.REGISTRY }}/${{ steps.vars.outputs.owner_lower }}/dex:latest
+            ${{ env.REGISTRY }}/${{ steps.vars.outputs.owner_lower }}/dex:${{ steps.vars.outputs.short_sha }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
