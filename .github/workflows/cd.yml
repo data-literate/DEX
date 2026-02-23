@@ -116,6 +116,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Pull and list image from GHCR
+        run: |
+          echo "Pulling image: ${{ needs.build-and-push.outputs.image_tag }}"
+          docker pull ${{ needs.build-and-push.outputs.image_tag }}
+          docker images | grep dex
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.28.0
         with:
