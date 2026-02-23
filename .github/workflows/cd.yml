@@ -11,8 +11,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  # Force lowercase to comply with Docker image reference spec
-  IMAGE_NAME: thedataenginex/dex
+  IMAGE_NAME: ${{ github.repository_owner }}/dex
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
 jobs:
@@ -76,8 +75,11 @@ jobs:
         id: vars
         run: |
           SHORT_SHA=$(git rev-parse --short=8 HEAD)
+          # Convert GitHub org/owner to lowercase for Docker reference compliance
+          OWNER_LOWER=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          # Construct full image tag using lowercase owner
+          echo "image_tag=${REGISTRY}/${OWNER_LOWER}/dex:${SHORT_SHA}" >> $GITHUB_OUTPUT
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
-          echo "image_tag=${REGISTRY}/${IMAGE_NAME}:${SHORT_SHA}" >> $GITHUB_OUTPUT
         env:
           REGISTRY: ${{ env.REGISTRY }}
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
