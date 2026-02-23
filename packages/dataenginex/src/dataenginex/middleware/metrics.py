@@ -1,4 +1,19 @@
-"""Prometheus metrics configuration for DataEngineX."""
+"""Prometheus metrics configuration for DataEngineX.
+
+Provides pre-configured Prometheus counters, histograms, and gauges
+for HTTP request monitoring.
+
+Functions:
+    get_metrics: Generate Prometheus metrics in text format.
+
+Metrics:
+    http_requests_total: Total HTTP requests by method/endpoint/status.
+    http_request_duration_seconds: Request duration histogram.
+    http_requests_in_flight: Gauge of in-progress requests.
+    http_exceptions_total: Exception counter by exception type.
+"""
+
+from __future__ import annotations
 
 from prometheus_client import (
     CONTENT_TYPE_LATEST,

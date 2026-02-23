@@ -16,6 +16,7 @@ from careerdex.api.main import app
 # Server fixture
 # ---------------------------------------------------------------------------
 
+
 def _get_free_port() -> int:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.bind(("127.0.0.1", 0))
@@ -49,6 +50,7 @@ def live_server() -> tuple[str, uvicorn.Server, threading.Thread]:
 # ---------------------------------------------------------------------------
 # Middleware integration tests
 # ---------------------------------------------------------------------------
+
 
 class TestMiddleware:
     """Verify middleware behaviour through the real HTTP stack."""
@@ -87,6 +89,7 @@ class TestMiddleware:
 # ---------------------------------------------------------------------------
 # Error-path integration tests
 # ---------------------------------------------------------------------------
+
 
 class TestErrorHandling:
     """Validate error responses conform to the ErrorResponse schema."""
@@ -133,12 +136,11 @@ class TestErrorHandling:
 # API contract tests
 # ---------------------------------------------------------------------------
 
+
 class TestAPIContracts:
     """Verify response shapes match documented schemas."""
 
-    def test_root_contract(
-        self, live_server: tuple[str, uvicorn.Server, threading.Thread]
-    ) -> None:
+    def test_root_contract(self, live_server: tuple[str, uvicorn.Server, threading.Thread]) -> None:
         base, *_ = live_server
         with httpx.Client(timeout=5.0) as client:
             resp = client.get(f"{base}/")
@@ -181,9 +183,7 @@ class TestAPIContracts:
         else:
             assert resp.status_code == 503
 
-    def test_echo_contract(
-        self, live_server: tuple[str, uvicorn.Server, threading.Thread]
-    ) -> None:
+    def test_echo_contract(self, live_server: tuple[str, uvicorn.Server, threading.Thread]) -> None:
         base, *_ = live_server
         with httpx.Client(timeout=5.0) as client:
             resp = client.post(

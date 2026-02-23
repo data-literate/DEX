@@ -1,7 +1,6 @@
 name: Task/Chore
 description: Non-feature work (refactoring, maintenance, documentation, etc.)
 title: "[Task]: "
-labels: ["documentation"]
 body:
   - type: markdown
     attributes:
@@ -54,6 +53,20 @@ body:
         - [ ] Step 3
     validations:
       required: false
+
+  - type: dropdown
+    id: maintenance_kind
+    attributes:
+      label: Maintainability Focus
+      description: Which cleanup goal is primary?
+      options:
+        - Remove duplication (DRY)
+        - Remove outdated docs/references
+        - Remove dead/unused code
+        - Improve extension points/modularity
+        - Improve CI/release hygiene
+    validations:
+      required: true
 
   - type: dropdown
     id: priority

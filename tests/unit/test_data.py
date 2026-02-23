@@ -185,10 +185,13 @@ class TestSchemaRegistry:
     def test_get_version(self) -> None:
         reg = SchemaRegistry()
         reg.register(SchemaVersion(name="jobs", version="1.0.0", fields={"id": "str"}))
-        reg.register(SchemaVersion(
-            name="jobs", version="2.0.0",
-            fields={"id": "str", "title": "str"},
-        ))
+        reg.register(
+            SchemaVersion(
+                name="jobs",
+                version="2.0.0",
+                fields={"id": "str", "title": "str"},
+            )
+        )
         v = reg.get_version("jobs", "1.0.0")
         assert v is not None
         assert v.version == "1.0.0"

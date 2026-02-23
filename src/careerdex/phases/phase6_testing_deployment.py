@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class IntegrationTests:
     """Integration tests for CareerDEX."""
-    
+
     @staticmethod
     def test_end_to_end_pipeline() -> tuple[bool, dict[str, Any]]:
         logger.info("Running end-to-end pipeline test...")
@@ -30,7 +30,7 @@ class IntegrationTests:
 
 class PerformanceTests:
     """Performance and load testing."""
-    
+
     @staticmethod
     def test_api_latency(endpoint: str, requests: int = 100) -> dict[str, Any]:
         logger.info(f"Testing latency for {endpoint}")
@@ -44,11 +44,11 @@ class PerformanceTests:
 
 class Documentation:
     """Documentation generation."""
-    
+
     @staticmethod
     def generate_api_docs() -> dict[str, Any]:
         return {"format": "OpenAPI 3.0", "endpoints": 20}
-    
+
     @staticmethod
     def generate_deployment_guide() -> dict[str, Any]:
         return {"format": "Markdown", "sections": 8}
@@ -56,7 +56,7 @@ class Documentation:
 
 class MonitoringSetup:
     """Monitoring and alerting configuration."""
-    
+
     @staticmethod
     def setup_prometheus_metrics() -> dict[str, Any]:
         return {
@@ -66,7 +66,7 @@ class MonitoringSetup:
                 "careerdex_api_request_duration_seconds",
             ]
         }
-    
+
     @staticmethod
     def setup_alerts() -> dict[str, Any]:
         return {"alerts": 4}
@@ -74,7 +74,7 @@ class MonitoringSetup:
 
 class GCPDeployment:
     """GCP Cloud deployment."""
-    
+
     @staticmethod
     def configure_cloud_run() -> dict[str, Any]:
         return {
@@ -82,7 +82,7 @@ class GCPDeployment:
             "region": "us-central1",
             "memory": "2Gi",
         }
-    
+
     @staticmethod
     def configure_bigquery() -> dict[str, Any]:
         return {"datasets": 3}
@@ -90,29 +90,29 @@ class GCPDeployment:
 
 class Phase6TestingDeployment:
     """Phase 6: Testing & Deployment"""
-    
+
     def __init__(self):
         self.integration_tests = IntegrationTests()
         self.performance_tests = PerformanceTests()
         self.documentation = Documentation()
         self.monitoring = MonitoringSetup()
         self.gcp_deployment = GCPDeployment()
-    
+
     def run_all_tests(self) -> dict[str, Any]:
         logger.info("PHASE 6: RUNNING COMPREHENSIVE TEST SUITE")
-        
+
         pipeline_ok, results = self.integration_tests.test_end_to_end_pipeline()
         logger.info(f"End-to-end pipeline: {'✓ PASS' if pipeline_ok else '✗ FAIL'}")
-        
+
         return {
             "timestamp": datetime.utcnow().isoformat(),
             "tests": results,
         }
-    
+
     def bootstrap(self) -> dict[str, Any]:
         logger.info("CAREERDEX V0.3.0 - PHASE 6 BOOTSTRAP")
         logger.info("Testing & Deployment")
-        
+
         return {
             "phase": "Phase 6 - Testing & Deployment",
             "status": "complete",

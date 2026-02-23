@@ -16,7 +16,7 @@ DEX is a unified framework that bridges **Data Engineering, Data Warehousing, Ma
 - dex-api (FastAPI feature/prediction APIs)
 - dex-ops (Terraform + Kubernetes + GitOps)
 
-See [Readme.md](../Readme.md) for the full philosophy and roadmap context.
+See [README.md](../README.md) for the full philosophy and roadmap context.
 
 ## Current State (v0.3.0 - Production Hardening ✅)
 
@@ -119,7 +119,7 @@ src/
 └── weatherdex/           # Weather ML pipeline (reference implementation)
     ├── core/             # Pipeline core
     ├── ml/               # ML models
-    └── notebooks/        # Databricks notebooks
+   └── notebooks/        # Notebook-based experimentation assets
 ```
 
 ### Service Extraction Criteria
@@ -156,7 +156,7 @@ src/
 - **Observability**: Prometheus, Grafana, Loki, OpenTelemetry
 - **Database**: PostgreSQL (OLTP)
 - **Cache**: Redis
-- **Object Storage**: MinIO / S3
+- **Object Storage**: MinIO (default) / S3-compatible adapters
 - **Secrets**: Sealed Secrets
 
 ### Data & ML Stack (v0.3.0+)

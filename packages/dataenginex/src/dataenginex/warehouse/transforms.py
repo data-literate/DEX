@@ -20,7 +20,18 @@ from loguru import logger
 
 @dataclass
 class TransformResult:
-    """Outcome of running a pipeline over a batch of records."""
+    """Outcome of running a pipeline over a batch of records.
+
+    Attributes:
+        input_count: Number of records fed into the pipeline.
+        output_count: Number of records that passed all transform steps.
+        dropped_count: Records dropped during transformation.
+        error_count: Records that caused transform errors.
+        duration_ms: Total pipeline execution time in milliseconds.
+        records: Transformed output records.
+        step_metrics: Per-step metrics (input/output/dropped/duration).
+        completed_at: Timestamp of pipeline completion.
+    """
 
     input_count: int
     output_count: int
@@ -39,6 +50,7 @@ class TransformResult:
 # ---------------------------------------------------------------------------
 # Single transform
 # ---------------------------------------------------------------------------
+
 
 class Transform(ABC):
     """Base class for a single data transform step.
@@ -63,6 +75,7 @@ class Transform(ABC):
 # ---------------------------------------------------------------------------
 # Built-in transforms
 # ---------------------------------------------------------------------------
+
 
 class RenameFieldsTransform(Transform):
     """Rename keys in a record according to a mapping."""
@@ -146,6 +159,7 @@ class FilterTransform(Transform):
 # Pipeline
 # ---------------------------------------------------------------------------
 
+
 class TransformPipeline:
     """Execute an ordered chain of ``Transform`` steps over a batch.
 
@@ -182,17 +196,21 @@ class TransformPipeline:
                         output.append(result)
                 except Exception as exc:
                     logger.warning(
-                        "Transform %s failed on record: %s", step.name, exc,
+                        "Transform %s failed on record: %s",
+                        step.name,
+                        exc,
                     )
 
             step_duration = (time.perf_counter() - step_start) * 1000
-            step_metrics.append({
-                "step": step.name,
-                "input_count": before_count,
-                "output_count": len(output),
-                "dropped": before_count - len(output),
-                "duration_ms": round(step_duration, 2),
-            })
+            step_metrics.append(
+                {
+                    "step": step.name,
+                    "input_count": before_count,
+                    "output_count": len(output),
+                    "dropped": before_count - len(output),
+                    "duration_ms": round(step_duration, 2),
+                }
+            )
             current = output
 
         total_duration = (time.perf_counter() - start) * 1000

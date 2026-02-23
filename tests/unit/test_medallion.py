@@ -18,6 +18,7 @@ from dataenginex.core.medallion_architecture import (
 # LayerConfiguration
 # ---------------------------------------------------------------------------
 
+
 class TestLayerConfiguration:
     def test_valid_construction(self) -> None:
         cfg = LayerConfiguration(
@@ -67,6 +68,7 @@ class TestLayerConfiguration:
 # MedallionArchitecture
 # ---------------------------------------------------------------------------
 
+
 class TestMedallionArchitecture:
     def test_get_bronze_config(self) -> None:
         cfg = MedallionArchitecture.get_layer_config(DataLayer.BRONZE)
@@ -94,6 +96,7 @@ class TestMedallionArchitecture:
 # LocalParquetStorage
 # ---------------------------------------------------------------------------
 
+
 class TestLocalParquetStorage:
     def test_write_success(self) -> None:
         storage = LocalParquetStorage("data")
@@ -117,6 +120,7 @@ class TestLocalParquetStorage:
 # BigQueryStorage
 # ---------------------------------------------------------------------------
 
+
 class TestBigQueryStorage:
     def test_write_success(self) -> None:
         storage = BigQueryStorage("my-project")
@@ -139,6 +143,7 @@ class TestBigQueryStorage:
 # ---------------------------------------------------------------------------
 # DualStorage
 # ---------------------------------------------------------------------------
+
 
 class TestDualStorage:
     def test_local_only_write_bronze(self) -> None:
@@ -172,6 +177,7 @@ class TestDualStorage:
 # ---------------------------------------------------------------------------
 # DataLineage
 # ---------------------------------------------------------------------------
+
 
 class TestDataLineage:
     def test_record_bronze(self) -> None:

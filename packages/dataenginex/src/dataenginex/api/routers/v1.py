@@ -12,8 +12,24 @@ from typing import Any
 from fastapi import APIRouter
 
 from dataenginex.api.pagination import PaginatedResponse, paginate
+from dataenginex.core.quality import QualityStore
 
 router = APIRouter(prefix="/api/v1", tags=["v1"])
+
+# Module-level quality store — shared across requests.
+# Populate via ``set_quality_store()`` from application startup.
+_quality_store: QualityStore = QualityStore()
+
+
+def set_quality_store(store: QualityStore) -> None:
+    """Replace the module-level quality store (call at app startup)."""
+    global _quality_store  # noqa: PLW0603
+    _quality_store = store
+
+
+def get_quality_store() -> QualityStore:
+    """Return the active quality store."""
+    return _quality_store
 
 
 # ---------------------------------------------------------------------------
@@ -35,28 +51,28 @@ def list_data_sources(cursor: str | None = None, limit: int = 20) -> PaginatedRe
 
 @router.get("/data/quality")
 def data_quality_summary() -> dict[str, Any]:
-    """Return a summary of data quality metrics.
+    """Return a summary of data quality metrics from the quality store.
 
-    .. note::
-        Scores are **placeholder values** until the quality-tracking
-        subsystem is wired in.  See Issue backlog for live metrics epic.
+    Returns live metrics when a ``QualityStore`` has been populated via
+    ``QualityGate.evaluate()``.  Falls back to zeros when no evaluations
+    have been recorded yet.
     """
-    # TODO(#future): Replace with live metrics from DataProfiler / quality store
+    return _quality_store.summary()
+
+
+@router.get("/data/quality/{layer}")
+def data_quality_layer(layer: str, limit: int = 10) -> dict[str, Any]:
+    """Return quality history for a specific medallion layer.
+
+    Args:
+        layer: One of ``bronze``, ``silver``, ``gold``.
+        limit: Maximum number of history entries to return.
+    """
+    latest = _quality_store.latest(layer)
     return {
-        "overall_score": 0.0,
-        "dimensions": {
-            "completeness": 0.0,
-            "accuracy": 0.0,
-            "consistency": 0.0,
-            "timeliness": 0.0,
-            "uniqueness": 0.0,
-        },
-        "layer_scores": {
-            "bronze": 0.0,
-            "silver": 0.0,
-            "gold": 0.0,
-        },
-        "_note": "Placeholder — connect quality store for live data",
+        "layer": layer,
+        "latest": latest.to_dict() if latest else None,
+        "history": _quality_store.history(layer, limit=limit),
     }
 
 

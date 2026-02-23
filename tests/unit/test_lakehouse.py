@@ -79,8 +79,10 @@ class TestDataCatalog:
     def test_register_and_get(self) -> None:
         cat = DataCatalog()
         entry = CatalogEntry(
-            name="jobs", layer="bronze",
-            format="json", location="/data/bronze/jobs",
+            name="jobs",
+            layer="bronze",
+            format="json",
+            location="/data/bronze/jobs",
         )
         cat.register(entry)
         got = cat.get("jobs")
@@ -105,14 +107,24 @@ class TestDataCatalog:
 
     def test_search_by_tags(self) -> None:
         cat = DataCatalog()
-        cat.register(CatalogEntry(
-            name="a", layer="bronze", format="json",
-            location="x", tags=["jobs", "raw"],
-        ))
-        cat.register(CatalogEntry(
-            name="b", layer="bronze", format="json",
-            location="y", tags=["users"],
-        ))
+        cat.register(
+            CatalogEntry(
+                name="a",
+                layer="bronze",
+                format="json",
+                location="x",
+                tags=["jobs", "raw"],
+            )
+        )
+        cat.register(
+            CatalogEntry(
+                name="b",
+                layer="bronze",
+                format="json",
+                location="y",
+                tags=["users"],
+            )
+        )
         results = cat.search(tags=["jobs"])
         assert len(results) == 1
 

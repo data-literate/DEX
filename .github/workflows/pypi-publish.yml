@@ -1,3 +1,9 @@
+# DataEngineX PyPI Publishing
+# Triggered by GitHub release from release-dataenginex.yml (tag: dataenginex-vX.Y.Z).
+# Detects if packages/dataenginex/ actually changed since previous dataenginex tag, then publishes.
+# Stages: detect changes → build distributions → TestPyPI → PyPI (if stable tag vX.Y.Z)
+# See docs/CI_CD.md for release flow.
+
 name: PyPI Publish
 
 on:
@@ -7,12 +13,15 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to publish (e.g., v0.3.4)"
+        description: "Tag to publish (e.g., v0.3.5)"
         required: false
         type: string
 
 permissions:
   contents: read
+
+env:
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
 jobs:
   detect-dataenginex-changes:
@@ -78,6 +87,31 @@ jobs:
     if: needs.detect-dataenginex-changes.outputs.dataenginex_changed == 'true'
 
     steps:
+      - name: Notify Package Build Start
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (!process.env.SLACK_WEBHOOK) return;
+            try {
+              await fetch(process.env.SLACK_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  text: '📤 Package Publishing Pipeline Started',
+                  blocks: [{
+                    type: 'section',
+                    text: {
+                      type: 'mrkdwn',
+                      text: `*📤 DataEngineX Publishing Started*\n*Tag:* ${process.env.TAG}\n*Building distributions for TestPyPI & PyPI*`
+                    }
+                  }]
+                })
+              });
+            } catch (e) { console.log('Slack notification failed'); }
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          TAG: ${{ needs.detect-dataenginex-changes.outputs.current_tag }}
+
       - name: Checkout code
         uses: actions/checkout@v6
 
@@ -148,6 +182,33 @@ jobs:
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
 
+      - name: Notify PyPI Publish Success
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (!process.env.SLACK_WEBHOOK) return;
+            try {
+              await fetch(process.env.SLACK_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  text: '🎉 Package Published to PyPI',
+                  blocks: [{
+                    type: 'section',
+                    text: {
+                      type: 'mrkdwn',
+                      text: `*🎉 DataEngineX Published to PyPI*\n*Version:* ${process.env.VERSION}\n*Tag:* ${process.env.TAG}\n*Release:* <https://pypi.org/project/dataenginex|View on PyPI>`
+                    }
+                  }]
+                })
+              });
+            } catch (e) { console.log('Slack notification failed'); }
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          VERSION: ${{ needs.detect-dataenginex-changes.outputs.current_tag }}
+          TAG: ${{ needs.detect-dataenginex-changes.outputs.current_tag }}
+
   skip-publish:
     name: Skip PyPI Publish
     runs-on: ubuntu-latest
@@ -155,6 +216,50 @@ jobs:
     if: always() && (github.event_name != 'release' || needs.detect-dataenginex-changes.outputs.dataenginex_changed == 'false' || needs.detect-dataenginex-changes.outputs.approved_tag == 'false')
 
     steps:
+      - name: Notify Publish Skipped
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (!process.env.SLACK_WEBHOOK) return;
+            const eventName = process.env.EVENT_NAME;
+            const dataenginexChanged = process.env.DEX_CHANGED;
+            const approvedTag = process.env.APPROVED_TAG;
+            const currentTag = process.env.CURRENT_TAG;
+            const previousTag = process.env.PREVIOUS_TAG;
+            
+            let reason = '';
+            if (eventName !== 'release') {
+              reason = 'Build validation only (no release event)';
+            } else if (dataenginexChanged === 'false') {
+              reason = `No changes in packages/dataenginex/ since ${previousTag}`;
+            } else if (approvedTag === 'false') {
+              reason = `Tag ${currentTag} is not stable (requires vMAJOR.MINOR.PATCH)`;
+            }
+
+            try {
+              await fetch(process.env.SLACK_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  text: '⏭️ Package Publishing Skipped',
+                  blocks: [{
+                    type: 'section',
+                    text: {
+                      type: 'mrkdwn',
+                      text: `*⏭️ PyPI Publishing Skipped*\n${reason}\n*Tag:* ${currentTag}`
+                    }
+                  }]
+                })
+              });
+            } catch (e) { console.log('Slack notification failed'); }
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          EVENT_NAME: ${{ github.event_name }}
+          DEX_CHANGED: ${{ needs.detect-dataenginex-changes.outputs.dataenginex_changed }}
+          APPROVED_TAG: ${{ needs.detect-dataenginex-changes.outputs.approved_tag }}
+          CURRENT_TAG: ${{ needs.detect-dataenginex-changes.outputs.current_tag }}
+          PREVIOUS_TAG: ${{ needs.detect-dataenginex-changes.outputs.previous_tag }}
+
       - name: Skip publish
         run: |
           if [[ "${{ github.event_name }}" != "release" ]]; then

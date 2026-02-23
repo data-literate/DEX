@@ -30,6 +30,6 @@ print(__version__)
 
 ## Source and Docs
 
-- Repository: https://github.com/data-literate/DEX
+- Repository: https://github.com/TheDataEngineX/DEX
 - CI/CD guide: `docs/CI_CD.md`
 - Release notes: `packages/dataenginex/src/dataenginex/RELEASE_NOTES.md`

@@ -22,6 +22,15 @@ class HealthStatus(StrEnum):
 
 @dataclass(frozen=True)
 class ComponentHealth:
+    """Health status of a single dependency component.
+
+    Attributes:
+        name: Component identifier (e.g. ``"database"``, ``"cache"``).
+        status: Current health status.
+        message: Optional human-readable message.
+        duration_ms: Time taken for the health check in milliseconds.
+    """
+
     name: str
     status: HealthStatus
     message: str | None = None
@@ -129,5 +138,5 @@ class HealthChecker:
                 asyncio.open_connection(host, port), timeout=self.timeout_seconds
             )
             return True, "reachable"
-        except (TimeoutError, OSError) as exc:
+        except (TimeoutError, ConnectionRefusedError, OSError) as exc:
             return False, f"error={exc.__class__.__name__}"

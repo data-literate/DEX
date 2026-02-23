@@ -3,8 +3,22 @@ Medallion Architecture Implementation (Issue #35 - Medallion Architecture)
 
 Implements the Bronze → Silver → Gold data architecture for DEX ecosystem
 with support for local Parquet storage and BigQuery cloud integration.
+
+Classes:
+    StorageFormat: Supported storage format enumeration.
+    DataLayer: Medallion architecture layer enumeration (bronze/silver/gold).
+    LayerConfiguration: Configuration dataclass for a single medallion layer.
+    MedallionArchitecture: Manages three-layer medallion architecture configs.
+    StorageBackend: Abstract storage backend interface.
+    LocalParquetStorage: Local Parquet file storage.
+    BigQueryStorage: BigQuery cloud storage.
+    DualStorage: Dual local + cloud storage strategy.
+    DataLineage: In-memory data lineage tracker through medallion layers.
 """
 
+from __future__ import annotations
+
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
@@ -14,6 +28,7 @@ from loguru import logger
 
 class StorageFormat(StrEnum):
     """Supported storage formats"""
+
     PARQUET = "parquet"
     DELTA = "delta"
     ICEBERG = "iceberg"
@@ -22,6 +37,7 @@ class StorageFormat(StrEnum):
 
 class DataLayer(StrEnum):
     """Medallion architecture layers"""
+
     BRONZE = "bronze"
     SILVER = "silver"
     GOLD = "gold"
@@ -30,7 +46,7 @@ class DataLayer(StrEnum):
 @dataclass
 class LayerConfiguration:
     """Configuration for a medallion layer."""
-    
+
     layer_name: str
     description: str
     purpose: str
@@ -41,7 +57,7 @@ class LayerConfiguration:
     schema_validation: bool
     quality_threshold: float
     compression: str = "snappy"
-    
+
     def __post_init__(self) -> None:
         """Validate configuration."""
         if self.quality_threshold < 0 or self.quality_threshold > 1:
@@ -50,7 +66,7 @@ class LayerConfiguration:
 
 class MedallionArchitecture:
     """Manages the three-layer medallion architecture for DEX."""
-    
+
     # Bronze Layer Configuration
     BRONZE_CONFIG = LayerConfiguration(
         layer_name=DataLayer.BRONZE.value,
@@ -64,7 +80,7 @@ class MedallionArchitecture:
         quality_threshold=0.0,  # No quality threshold for raw data
         compression="snappy",
     )
-    
+
     # Silver Layer Configuration
     SILVER_CONFIG = LayerConfiguration(
         layer_name=DataLayer.SILVER.value,
@@ -78,7 +94,7 @@ class MedallionArchitecture:
         quality_threshold=0.75,  # >= 75% quality score
         compression="snappy",
     )
-    
+
     # Gold Layer Configuration
     GOLD_CONFIG = LayerConfiguration(
         layer_name=DataLayer.GOLD.value,
@@ -92,11 +108,9 @@ class MedallionArchitecture:
         quality_threshold=0.90,  # >= 90% quality score
         compression="snappy",
     )
-    
+
     @classmethod
-    def get_layer_config(
-        cls, layer: DataLayer
-    ) -> LayerConfiguration | None:
+    def get_layer_config(cls, layer: DataLayer) -> LayerConfiguration | None:
         """Get configuration for a specific layer."""
         configs = {
             DataLayer.BRONZE: cls.BRONZE_CONFIG,
@@ -104,36 +118,55 @@ class MedallionArchitecture:
             DataLayer.GOLD: cls.GOLD_CONFIG,
         }
         return configs.get(layer)
-    
+
     @classmethod
     def get_all_layers(cls) -> list[LayerConfiguration]:
         """Get configurations for all layers in order."""
         return [cls.BRONZE_CONFIG, cls.SILVER_CONFIG, cls.GOLD_CONFIG]
 
 
-class StorageBackend:
-    """Abstract storage backend interface."""
-    
+class StorageBackend(ABC):
+    """Abstract storage backend interface.
+
+    All lakehouse storage implementations must subclass this and provide
+    concrete ``write``, ``read``, and ``delete`` methods.  The interface
+    accepts a ``StorageFormat`` hint so backends can choose serialisation.
+
+    Built-in implementations:
+        - ``LocalParquetStorage`` — local Parquet files (this module)
+        - ``BigQueryStorage`` — Google BigQuery tables (this module)
+        - ``JsonStorage`` — JSON files (``dataenginex.lakehouse.storage``)
+        - ``ParquetStorage`` — pyarrow-backed Parquet (``dataenginex.lakehouse.storage``)
+        - ``S3Storage`` — AWS S3 object storage (``dataenginex.lakehouse.storage``)
+        - ``GCSStorage`` — Google Cloud Storage (``dataenginex.lakehouse.storage``)
+    """
+
+    @abstractmethod
     def write(self, data: Any, path: str, format: StorageFormat) -> bool:
-        """Write data to storage."""
-        raise NotImplementedError
-    
+        """Write *data* to *path* in the given format.
+
+        Returns ``True`` on success, ``False`` on failure.
+        """
+        ...
+
+    @abstractmethod
     def read(self, path: str, format: StorageFormat) -> Any:
-        """Read data from storage."""
-        raise NotImplementedError
-    
+        """Read data from *path*.  Returns ``None`` on failure."""
+        ...
+
+    @abstractmethod
     def delete(self, path: str) -> bool:
-        """Delete data from storage."""
-        raise NotImplementedError
+        """Delete the resource at *path*.  Returns ``True`` on success."""
+        ...
 
 
 class LocalParquetStorage(StorageBackend):
     """Local Parquet file storage implementation."""
-    
+
     def __init__(self, base_path: str = "data"):
         self.base_path = base_path
         logger.info(f"Initialized local Parquet storage at {base_path}")
-    
+
     def write(
         self,
         data: Any,
@@ -142,22 +175,19 @@ class LocalParquetStorage(StorageBackend):
     ) -> bool:
         """
         Write data to local Parquet file.
-        
+
         Args:
             data: Data to write (dict, list, or dataframe)
             path: Relative path from base_path
             format: Storage format (must be PARQUET for this backend)
-            
+
         Returns:
             True if successful, False otherwise
         """
         if format != StorageFormat.PARQUET:
-            logger.error(
-                f"LocalParquetStorage only supports PARQUET format, "
-                f"got {format}"
-            )
+            logger.error(f"LocalParquetStorage only supports PARQUET format, got {format}")
             return False
-        
+
         try:
             full_path = f"{self.base_path}/{path}"
             logger.info(f"Writing data to {full_path}")
@@ -167,15 +197,15 @@ class LocalParquetStorage(StorageBackend):
         except Exception as e:
             logger.error(f"Failed to write to {path}: {e}")
             return False
-    
+
     def read(self, path: str, format: StorageFormat = StorageFormat.PARQUET) -> Any:
         """
         Read data from local Parquet file.
-        
+
         Args:
             path: Relative path from base_path
             format: Storage format
-            
+
         Returns:
             Data read from file, or None if failed
         """
@@ -188,7 +218,7 @@ class LocalParquetStorage(StorageBackend):
         except Exception as e:
             logger.error(f"Failed to read from {path}: {e}")
             return None
-    
+
     def delete(self, path: str) -> bool:
         """Delete Parquet file."""
         try:
@@ -203,12 +233,12 @@ class LocalParquetStorage(StorageBackend):
 
 class BigQueryStorage(StorageBackend):
     """BigQuery cloud storage implementation."""
-    
+
     def __init__(self, project_id: str, location: str = "US"):
         self.project_id = project_id
         self.location = location
         logger.info(f"Initialized BigQuery storage for project {project_id}")
-    
+
     def write(
         self,
         data: Any,
@@ -217,21 +247,21 @@ class BigQueryStorage(StorageBackend):
     ) -> bool:
         """
         Write data to BigQuery table.
-        
+
         Path format: "dataset.table"
-        
+
         Args:
             data: Data to write (dataframe or dict records)
             path: BigQuery path as "dataset.table"
             format: Storage format
-            
+
         Returns:
             True if successful, False otherwise
         """
         if format != StorageFormat.BIGQUERY:
             logger.error(f"BigQueryStorage should use BIGQUERY format, got {format}")
             return False
-        
+
         try:
             logger.info(f"Writing data to BigQuery {path}")
             # Implementation: Use google.cloud.bigquery to write
@@ -240,15 +270,15 @@ class BigQueryStorage(StorageBackend):
         except Exception as e:
             logger.error(f"Failed to write to BigQuery {path}: {e}")
             return False
-    
+
     def read(self, path: str, format: StorageFormat = StorageFormat.BIGQUERY) -> Any:
         """
         Read data from BigQuery table.
-        
+
         Args:
             path: BigQuery path as "dataset.table"
             format: Storage format
-            
+
         Returns:
             Data read from table, or None if failed
         """
@@ -262,7 +292,7 @@ class BigQueryStorage(StorageBackend):
         except Exception as e:
             logger.error(f"Failed to read from BigQuery {path}: {e}")
             return None
-    
+
     def delete(self, path: str) -> bool:
         """Delete BigQuery table."""
         try:
@@ -278,24 +308,27 @@ class BigQueryStorage(StorageBackend):
 class DualStorage:
     """
     Manages dual storage strategy: local Parquet + BigQuery.
-    
+
     Pattern:
     - Development/Testing: Write to local Parquet
     - Production/Cloud: Write to both local (backup) and BigQuery (primary)
     """
-    
-    def __init__(self, local_base_path: str = "data", 
-                 bigquery_project: str | None = None,
-                 enable_bigquery: bool = False):
+
+    def __init__(
+        self,
+        local_base_path: str = "data",
+        bigquery_project: str | None = None,
+        enable_bigquery: bool = False,
+    ):
         self.local_storage = LocalParquetStorage(local_base_path)
         self.bigquery_storage = None
-        
+
         if enable_bigquery and bigquery_project:
             self.bigquery_storage = BigQueryStorage(bigquery_project)
             logger.info("Dual storage enabled: Local Parquet + BigQuery")
         else:
             logger.info("Storage mode: Local Parquet only")
-    
+
     def _write_layer(self, layer: str, data: Any, key: str, timestamp: str) -> bool:
         """
         Write data to a medallion layer.
@@ -313,10 +346,7 @@ class DualStorage:
         success = self.local_storage.write(data, local_path)
 
         if self.bigquery_storage and success:
-            bq_path = (
-                f"careerdex_{layer}."
-                f"{key}_{timestamp.replace('-', '_').replace(':', '_')}"
-            )
+            bq_path = f"careerdex_{layer}.{key}_{timestamp.replace('-', '_').replace(':', '_')}"
             self.bigquery_storage.write(data, bq_path)
 
         return success
@@ -360,14 +390,11 @@ class DualStorage:
 
 class DataLineage:
     """Tracks data lineage through the medallion layers."""
-    
+
     def __init__(self) -> None:
         self.lineage: dict[str, dict[str, Any]] = {}
-    
-    def record_bronze_ingestion(self, 
-                               source: str,
-                               record_count: int,
-                               timestamp: str) -> str:
+
+    def record_bronze_ingestion(self, source: str, record_count: int, timestamp: str) -> str:
         """Record data entry into Bronze layer."""
         lineage_id = f"bronze_{source}_{timestamp}"
         self.lineage[lineage_id] = {
@@ -378,11 +405,10 @@ class DataLineage:
             "status": "raw",
         }
         return lineage_id
-    
-    def record_silver_transformation(self,
-                                    lineage_id: str,
-                                    processed_count: int,
-                                    quality_score: float) -> str:
+
+    def record_silver_transformation(
+        self, lineage_id: str, processed_count: int, quality_score: float
+    ) -> str:
         """Record data transformation in Silver layer."""
         silver_id = f"{lineage_id}_silver"
         self.lineage[silver_id] = {
@@ -393,11 +419,10 @@ class DataLineage:
             "status": "cleaned",
         }
         return silver_id
-    
-    def record_gold_enrichment(self,
-                              lineage_id: str,
-                              enriched_count: int,
-                              embedding_model: str) -> str:
+
+    def record_gold_enrichment(
+        self, lineage_id: str, enriched_count: int, embedding_model: str
+    ) -> str:
         """Record data enrichment in Gold layer."""
         gold_id = f"{lineage_id}_gold"
         self.lineage[gold_id] = {
@@ -408,7 +433,7 @@ class DataLineage:
             "status": "enriched",
         }
         return gold_id
-    
+
     def get_lineage(self, lineage_id: str) -> dict[str, Any] | None:
         """Get lineage information for a record."""
         return self.lineage.get(lineage_id)

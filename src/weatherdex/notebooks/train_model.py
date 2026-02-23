@@ -133,7 +133,7 @@ logger.info("\n=== MODEL PERFORMANCE ===")
 logger.info(f"RMSE (Root Mean Squared Error): {rmse:.4f}°C")
 logger.info(f"MAE (Mean Absolute Error):      {mae:.4f}°C")
 logger.info(f"R² (Coefficient of Determination): {r2:.4f}")
-logger.info(f"Model explains {r2*100:.2f}% of variance")
+logger.info(f"Model explains {r2 * 100:.2f}% of variance")
 
 # COMMAND ----------
 

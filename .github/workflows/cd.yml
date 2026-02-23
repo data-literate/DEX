@@ -40,12 +40,12 @@ jobs:
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  text: '🚀 CD Pipeline Started - Docker Build',
+                  text: '� Continuous Delivery - Docker Build Started',
                   blocks: [{
                     type: 'section',
                     text: {
                       type: 'mrkdwn',
-                      text: `*🚀 CD Pipeline Started*\n*Branch:* ${process.env.BRANCH}`
+                      text: `*🐳 CD Pipeline Started*\n*Building Docker Image & Deploying*\n*Branch:* ${process.env.BRANCH}`
                     }
                   }]
                 })
@@ -139,27 +139,27 @@ jobs:
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  text: '✅ CD Pipeline Completed Successfully',
+                  text: '✅ Deployment Succeeded',
                   blocks: [
                     {
                       type: 'section',
                       text: {
                         type: 'mrkdwn',
-                        text: `*✅ CD Pipeline Completed*`
+                        text: `*✅ Continuous Delivery Completed*\n*Docker Image Built & Deployed to Kubernetes*`
                       }
                     },
                     {
                       type: 'section',
                       fields: [
                         { type: 'mrkdwn', text: `*Image:*\n${process.env.TAG}` },
-                        { type: 'mrkdwn', text: `*SHA:*\n\`${process.env.SHA}\`` },
+                        { type: 'mrkdwn', text: `*Commit:*\n\`${process.env.SHA?.substring(0, 8)}\`` },
                         { type: 'mrkdwn', text: `*Branch:*\n${process.env.BRANCH}` },
                         { type: 'mrkdwn', text: `*Run:*\n<${process.env.URL}|View Details>` }
                       ]
                     },
                     {
                       type: 'context',
-                      elements: [{ type: 'mrkdwn', text: `🐳 Image pushed to GHCR • Security scan passed` }]
+                      elements: [{ type: 'mrkdwn', text: `🐳 Image pushed to GHCR • Security scan passed • Deployed via GitOps` }]
                     }
                   ]
                 })

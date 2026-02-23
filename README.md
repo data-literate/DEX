@@ -1,10 +1,10 @@
 # DataEngineX (DEX)
 
-[![CI/CD](https://github.com/data-literate/DEX/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/data-literate/DEX/actions/workflows/ci.yml)
+[![CI/CD](https://github.com/TheDataEngineX/DEX/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/TheDataEngineX/DEX/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen)](https://github.com/data-literate/DEX)
-[![Version](https://img.shields.io/badge/version-0.3.4-blue)](https://github.com/data-literate/DEX/releases)
+[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen)](https://github.com/TheDataEngineX/DEX)
+[![Version](https://img.shields.io/badge/version-0.3.5-blue)](https://github.com/TheDataEngineX/DEX/releases)
 
 A production-ready data engineering framework with medallion architecture, Airflow orchestration, and enterprise observability. DEX is both a core framework and a mono-repo for sub-projects built on top of it.
 
@@ -13,7 +13,7 @@ A production-ready data engineering framework with medallion architecture, Airfl
 ## Quick Start
 
 ```bash
-git clone https://github.com/data-literate/DEX && cd DEX
+git clone https://github.com/TheDataEngineX/DEX && cd DEX
 uv lock && uv sync          # Install dependencies
 uv run poe dev               # Run dev server → http://localhost:8000
 uv run poe test              # Run tests
@@ -108,7 +108,7 @@ Raw Sources (LinkedIn, Indeed, Glassdoor, APIs)
 | Web Framework    | FastAPI + Uvicorn                               |
 | Orchestration    | Apache Airflow                                  |
 | ML               | PySpark                                         |
-| Code Quality     | Ruff, Black, mypy (strict)                      |
+| Code Quality     | Ruff, mypy (strict)                             |
 | Testing          | pytest + coverage                               |
 | Observability    | Prometheus, Grafana, Jaeger (OpenTelemetry)     |
 | Containers       | Docker + docker compose                         |
@@ -137,7 +137,12 @@ uv run poe docker-up         # Start local stack
 | [Architecture](docs/ARCHITECTURE.md)              | System design            |
 | [Development](docs/DEVELOPMENT.md)                | Local setup              |
 | [Contributing](docs/CONTRIBUTING.md)              | Code style, PR process   |
+| [Contribution Guide](CONTRIBUTING.md)             | Root contributor entry   |
+| [Code of Conduct](CODE_OF_CONDUCT.md)             | Community standards      |
+| [Governance & Legal](GOVERNANCE.md)               | Governance model         |
 | [CI/CD Pipeline](docs/CI_CD.md)                   | Automation workflows     |
+| [Security Policy](SECURITY.md)                    | Vulnerability reporting  |
+| [Support Guide](SUPPORT.md)                       | Help & support channels  |
 | [Deployment Runbook](docs/DEPLOY_RUNBOOK.md)      | Deploy & rollback        |
 | [Observability](docs/OBSERVABILITY.md)            | Metrics, logs, traces    |
 | [Local K8s Setup](docs/LOCAL_K8S_SETUP.md)        | Test ArgoCD locally      |
@@ -169,4 +174,27 @@ flowchart LR
 
 ---
 
-**Version**: v0.3.4 | **License**: MIT
+## Quick Audit Prompt
+
+Audit this repository for deprecated, duplicated, or unnecessary code and documentation.
+Apply Up to Date System design, documentation.
+Apply DRY principles, remove outdated references, and ensure future‑proof, cloud‑agnostic design.
+Recommend only low‑cost, open‑source, maintainable solutions.
+Base all feedback strictly on the current repo structure.
+
+
+Generate a PyPI‑ready Markdown long_description for the next release of DEX.
+Follow PyPI best practices, keep it concise.
+
+---
+
+## License and Brand Use
+
+- DEX source code is open and free to use under the [MIT License](LICENSE).
+- If you distribute forks, keep attribution and license notices intact.
+- The project name/identity is protected by policy: see [Trademark Policy](TRADEMARK_POLICY.md).
+- Please do not publish modified forks as if they are the official DataEngineX/DEX project.
+
+---
+
+**Version**: v0.3.5 | **License**: MIT

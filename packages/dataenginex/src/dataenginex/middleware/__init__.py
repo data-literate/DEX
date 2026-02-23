@@ -1,19 +1,35 @@
-"""
-Middleware - logging, metrics, tracing, and request handling.
+"""Middleware — logging, metrics, tracing, and request handling.
+
+Public API::
+
+    from dataenginex.middleware import (
+        configure_logging, get_logger, APP_VERSION,
+        get_metrics, PrometheusMetricsMiddleware,
+        RequestLoggingMiddleware,
+        configure_tracing, instrument_fastapi, get_tracer,
+    )
 """
 
-from .logging_config import APP_VERSION, configure_logging  # noqa: F401
-from .metrics import get_metrics  # noqa: F401
-from .metrics_middleware import PrometheusMetricsMiddleware  # noqa: F401
-from .request_logging import RequestLoggingMiddleware  # noqa: F401
-from .tracing import configure_tracing, instrument_fastapi  # noqa: F401
+from __future__ import annotations
+
+from .logging_config import APP_VERSION, configure_logging, get_logger
+from .metrics import get_metrics
+from .metrics_middleware import PrometheusMetricsMiddleware
+from .request_logging import RequestLoggingMiddleware
+from .tracing import configure_tracing, get_tracer, instrument_fastapi
 
 __all__ = [
-    "configure_logging",
+    # Logging
     "APP_VERSION",
-    "get_metrics",
+    "configure_logging",
+    "get_logger",
+    # Metrics
     "PrometheusMetricsMiddleware",
+    "get_metrics",
+    # Request logging
     "RequestLoggingMiddleware",
+    # Tracing
     "configure_tracing",
+    "get_tracer",
     "instrument_fastapi",
 ]

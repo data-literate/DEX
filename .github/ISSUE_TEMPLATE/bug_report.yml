@@ -70,6 +70,34 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: provider_context
+    attributes:
+      label: Cloud/Provider Context
+      description: Where does this bug occur?
+      options:
+        - Local only
+        - Cloud-agnostic path
+        - AWS-specific path
+        - GCP-specific path
+        - Azure-specific path
+        - Unsure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: cost_impact
+    attributes:
+      label: Cost Impact
+      description: Does this bug increase runtime or infra cost?
+      options:
+        - No noticeable cost impact
+        - Minor cost impact
+        - Major cost impact
+        - Unknown
+    validations:
+      required: false
+
   - type: textarea
     id: additional
     attributes:

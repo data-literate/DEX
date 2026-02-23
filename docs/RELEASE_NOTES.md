@@ -7,7 +7,7 @@
 - **Docs/tests**: `tests/test_main.py` and `tests/test_metrics.py` cover the new endpoints and metrics labels, and the documentation now explains how to validate the new alerts and APIs.
 
 ## Verification checklist
-1. `uv run poe lint` – fast pass of Ruff/Black/mypy (already green).
+1. `uv run poe lint` – fast pass of Ruff/mypy checks (already green).
 2. `./.venv/bin/pytest -v` – 31 tests including the new endpoints now pass.
 3. `docker compose build` – confirms the multi-stage Dockerfile still builds the image after these changes.
 

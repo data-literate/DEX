@@ -11,7 +11,7 @@ replicas:
     count: 2
 
 images:
-  - name: data-literate/dex
+  - name: thedataenginex/dex
     # Tag set by ApplicationSet template (sha-XXXXX)
 
 patches:
