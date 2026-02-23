@@ -72,8 +72,13 @@ class TestHealthChecker:
     @pytest.mark.asyncio
     async def test_check_all_returns_three(self, checker: HealthChecker) -> None:
         with patch.dict(os.environ, {}, clear=True):
-            for key in ("DEX_DB_HOST", "DEX_DB_PORT", "DEX_CACHE_HOST",
-                        "DEX_CACHE_PORT", "DEX_EXTERNAL_API_URL"):
+            for key in (
+                "DEX_DB_HOST",
+                "DEX_DB_PORT",
+                "DEX_CACHE_HOST",
+                "DEX_CACHE_PORT",
+                "DEX_EXTERNAL_API_URL",
+            ):
                 os.environ.pop(key, None)
             components = await checker.check_all()
         assert len(components) == 3

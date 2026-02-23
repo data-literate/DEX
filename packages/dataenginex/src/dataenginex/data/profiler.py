@@ -162,9 +162,7 @@ class DataProfiler:
 
         # Determine dominant type
         dtype = DataProfiler._infer_dtype(non_null)
-        counter: Counter[Any] = Counter(
-            str(v) for v in non_null
-        )
+        counter: Counter[Any] = Counter(str(v) for v in non_null)
         top_values = counter.most_common(5)
         unique_count = len(counter)
 

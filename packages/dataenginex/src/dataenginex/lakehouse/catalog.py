@@ -85,7 +85,9 @@ class DataCatalog:
         self._entries[entry.name] = entry
         logger.info(
             "Catalog registered: %s (layer=%s, v%d)",
-            entry.name, entry.layer, entry.version,
+            entry.name,
+            entry.layer,
+            entry.version,
         )
         self._save()
         return entry

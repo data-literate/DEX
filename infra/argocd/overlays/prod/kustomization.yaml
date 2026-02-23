@@ -16,8 +16,8 @@ replicas:
     count: 3                # Higher replica count for production traffic
 
 images:
-  - name: data-literate/dex
-    newName: ghcr.io/data-literate/dex
+  - name: thedataenginex/dex
+    newName: ghcr.io/thedataenginex/dex
     newTag: sha-03216e24    # Same SHA promoted from stage
 
 patches:

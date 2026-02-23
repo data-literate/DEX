@@ -81,7 +81,5 @@ df = spark.createDataFrame(weather_records)
 # Write to a temporary Delta table that persists for this job
 df.write.mode("overwrite").option("mergeSchema", "true").saveAsTable("weather_raw_temp")
 
-logger.info(
-    f"Extracted {len(weather_records)} weather records to weather_raw_temp table"
-)
+logger.info(f"Extracted {len(weather_records)} weather records to weather_raw_temp table")
 display(df)  # noqa: F821

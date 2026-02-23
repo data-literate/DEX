@@ -37,6 +37,7 @@ except ImportError:
 # JSON storage (always available)
 # ---------------------------------------------------------------------------
 
+
 class JsonStorage(StorageBackend):
     """Simple JSON-file storage for development and testing.
 
@@ -100,6 +101,7 @@ class JsonStorage(StorageBackend):
 # Parquet storage (requires pyarrow)
 # ---------------------------------------------------------------------------
 
+
 class ParquetStorage(StorageBackend):
     """Parquet file storage backed by *pyarrow*.
 
@@ -114,9 +116,7 @@ class ParquetStorage(StorageBackend):
         if _HAS_PYARROW:
             logger.info("ParquetStorage initialised at %s (pyarrow available)", self.base_path)
         else:
-            logger.warning(
-                "pyarrow not installed — ParquetStorage will use JSON fallback"
-            )
+            logger.warning("pyarrow not installed — ParquetStorage will use JSON fallback")
             self._fallback = JsonStorage(str(self.base_path))
 
     def write(
@@ -344,7 +344,9 @@ class GCSStorage(StorageBackend):
             blob.upload_from_string(body, content_type="application/json")
             logger.info(
                 "Wrote %d records to gs://%s/%s",
-                len(records), self.bucket_name, blob.name,
+                len(records),
+                self.bucket_name,
+                blob.name,
             )
             return True
         except Exception as exc:

@@ -173,7 +173,7 @@ cat infra/argocd/overlays/dev/kustomization.yaml
 
 # Should contain:
 # images:
-#   - name: data-literate/dex
+#   - name: thedataenginex/dex
 #     newTag: sha-XXXXXXXX
 ```
 
@@ -205,7 +205,7 @@ gh auth login
 gh auth status
 
 # Check repository permissions
-gh repo view data-literate/DEX
+gh repo view TheDataEngineX/DEX
 
 # Manual PR creation
 git push origin promote-stage-sha-abc12345

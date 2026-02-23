@@ -84,9 +84,7 @@ logger.info("Creating rolling window features...")
 
 for window_size in [3, 6, 12]:
     window_spec = (
-        Window.partitionBy("city")
-        .orderBy("timestamp_unix")
-        .rangeBetween(-(window_size - 1), 0)
+        Window.partitionBy("city").orderBy("timestamp_unix").rangeBetween(-(window_size - 1), 0)
     )
 
     # Temperature rolling stats
@@ -156,9 +154,7 @@ logger.info(f"✓ {df.count()} feature records saved to {feature_table}")
 
 # Show feature statistics
 logger.info("Feature Summary:")
-df.select(
-    "temperature", "humidity", "pressure", "wind_speed", "cloudiness"
-).describe().display()
+df.select("temperature", "humidity", "pressure", "wind_speed", "cloudiness").describe().display()
 
 # COMMAND ----------
 

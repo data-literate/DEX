@@ -1,20 +1,20 @@
 # Development Setup Guide
 
-**Version**: v0.3.4 | **Updated**: Feb 20, 2026
+**Version**: v0.3.5 | **Updated**: Feb 21, 2026
 
 ## Prerequisites
 
 - Python 3.11+
 - Git
 - uv (package manager)
-- GCP credentials (staging/prod only)
+- Cloud credentials only if testing optional cloud adapters (staging/prod)
 - Docker (optional)
 
 ## Quick Start
 
 ```bash
 # 1. Clone repo and create feature branch
-git clone https://github.com/data-literate/DEX.git
+git clone https://github.com/TheDataEngineX/DEX.git
 cd DEX
 git checkout -b feat/issue-XXX-description dev
 
@@ -23,7 +23,7 @@ uv sync
 pre-commit install
 
 # 3. Verify setup
-poe check-all
+uv run poe check-all
 ```
 
 All tests and linting should pass. You're ready to develop!
@@ -55,9 +55,9 @@ git checkout -b feat/issue-XXX-description dev
 # Add tests in tests/
 
 # 3. Format & validate
-poe lint
-poe typecheck
-poe test
+uv run poe lint
+uv run poe typecheck
+uv run poe test
 
 # 4. Commit (pre-commit hooks run automatically)
 git commit -m "feat(#XXX): description"
@@ -91,7 +91,10 @@ mkdir -p ~/data/careerdex/{bronze,silver,gold}
 mkdir -p ~/data/weather/{bronze,silver,gold}
 ```
 
-### BigQuery (GCP)
+### Optional Cloud Warehouse Adapter (Example: BigQuery)
+
+Use this only when validating the cloud warehouse path; local development can run entirely on path-based storage.
+
 ```bash
 export GCP_PROJECT=your-dex-project
 bq mk --dataset careerdex_bronze
@@ -122,13 +125,13 @@ airflow tasks logs careerdex_job_ingestion fetch_linkedin 2024-01-01
 ### Testing
 ```bash
 # Run all tests with coverage
-poe test-cov
+uv run poe test-cov
 
 # Run unit tests only
-poe test-unit
+uv run poe test-unit
 
 # Check code quality
-poe check-all
+uv run poe check-all
 ```
 
 ### Monitoring & Debugging
@@ -138,7 +141,7 @@ tail -f logs/app.log
 
 # Enable debug logging
 export LOG_LEVEL=DEBUG
-poe dev
+uv run poe dev
 
 # Use Python debugger
 python -m pdb src/careerdex/api/main.py
@@ -151,7 +154,7 @@ open http://localhost:9090
 
 | Issue | Solution |
 |-------|----------|
-| Pre-commit hooks fail | `poe format` then retry |
+| Pre-commit hooks fail | `uv run poe lint-fix` then retry |
 | Tests fail locally but pass in CI | Check Python version (3.11+), run `uv sync --reinstall` |
 | Import errors | Run `uv sync --reinstall` and restart the shell |
 | Airflow DAG not found | Check `src/careerdex/dags/` folder, restart scheduler |
@@ -159,16 +162,16 @@ open http://localhost:9090
 ## Common Commands
 
 ```bash
-poe check-all          # Run lint + typecheck + tests in sequence
-poe lint               # Ruff lint check
-poe lint-fix           # Auto-fix lint + format
-poe typecheck          # mypy strict type checking
-poe test               # Run all tests
-poe test-cov           # Tests with coverage report
-poe security           # pip-audit vulnerability scan
-poe pre-commit         # Run all pre-commit hooks
-poe dev                # Run dev server (localhost:8000)
-poe clean              # Remove caches and build artifacts
+uv run poe check-all          # Run lint + typecheck + tests in sequence
+uv run poe lint               # Ruff lint check
+uv run poe lint-fix           # Auto-fix lint + format
+uv run poe typecheck          # mypy strict type checking
+uv run poe test               # Run all tests
+uv run poe test-cov           # Tests with coverage report
+uv run poe security           # pip-audit vulnerability scan
+uv run poe pre-commit         # Run all pre-commit hooks
+uv run poe dev                # Run dev server (localhost:8000)
+uv run poe clean              # Remove caches and build artifacts
 ```
 
 ## Resources & Support
@@ -177,5 +180,5 @@ poe clean              # Remove caches and build artifacts
 - **Architecture**: See [ARCHITECTURE.md](./ARCHITECTURE.md)
 - **ADRs**: See [adr/](./adr/) for architectural decisions
 - **Deployment**: See [DEPLOY_RUNBOOK.md](./DEPLOY_RUNBOOK.md)
-- **Issues**: [GitHub Issues](https://github.com/data-literate/DEX/issues)
+- **Issues**: [GitHub Issues](https://github.com/TheDataEngineX/DEX/issues)
 - **Chat**: #dex-dev Slack channel

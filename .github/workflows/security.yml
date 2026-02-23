@@ -1,3 +1,7 @@
+# Security Scans
+# Runs Semgrep (OWASP rules) and CodeQL (static analysis) on push/PR.
+# Results appear in GitHub Security tab.
+
 name: Security Scans
 
 on:

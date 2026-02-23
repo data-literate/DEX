@@ -15,7 +15,7 @@ spec:
 
   # Git source — points at the base Kustomization
   source:
-    repoURL: https://github.com/data-literate/DEX
+    repoURL: https://github.com/TheDataEngineX/DEX
     targetRevision: main
     path: infra/argocd/base
 
@@ -73,7 +73,7 @@ spec:
     spec:
       project: dex-project
       source:
-        repoURL: https://github.com/data-literate/DEX
+        repoURL: https://github.com/TheDataEngineX/DEX
         targetRevision: "{{branch}}"
         path: "infra/argocd/overlays/{{environment}}"
       destination:
@@ -104,7 +104,7 @@ spec:
   generators:
     - pullRequest:
         github:
-          owner: data-literate
+          owner: TheDataEngineX
           repo: DEX
           labels:
             - preview  # Only PRs with 'preview' label get an env
@@ -121,13 +121,13 @@ spec:
       project: dex-project
       
       source:
-        repoURL: https://github.com/data-literate/DEX
+        repoURL: https://github.com/TheDataEngineX/DEX
         targetRevision: '{{head_sha}}'  # Deploy exact PR commit
         path: infra/argocd/overlays/preview
         
         kustomize:
           images:
-            - data-literate/dex:sha-{{head_short_sha}}  # Use PR's image
+            - thedataenginex/dex:sha-{{head_short_sha}}  # Use PR's image
       
       destination:
         server: https://kubernetes.default.svc
@@ -158,7 +158,7 @@ spec:
   description: DEX - DataEngineX Project
   
   sourceRepos:
-    - 'https://github.com/data-literate/DEX'  # Same repo for code + config (co-located; split later if needed)
+    - 'https://github.com/TheDataEngineX/DEX'  # Same repo for code + config (co-located; split later if needed)
   
   destinations:
     - namespace: 'dex-*'

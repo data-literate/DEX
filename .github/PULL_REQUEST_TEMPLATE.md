@@ -4,6 +4,12 @@
 
 **Related Issue**: Closes #XXX
 
+## Keep / Change / Remove
+
+- **Keep**:
+- **Change**:
+- **Remove**:
+
 ## Type of Change
 
 - [ ] Bug fix (non-breaking change which fixes an issue)
@@ -22,14 +28,24 @@
 
 - [ ] Unit tests added/updated
 - [ ] Integration tests added/updated
-- [ ] Tests pass locally (`pytest`)
+- [ ] Tests pass locally (`uv run poe test`)
 - [ ] Coverage maintained/improved (target: 80%+)
+
+## Architecture Impact
+
+- [ ] Cloud-neutral by default (no hard dependency on a single provider)
+- [ ] Cost-aware default path (works locally or free/open-source tier)
+- [ ] Extension points documented for future adapters/plugins
+
+## Deprecation / Migration
+
+- [ ] No deprecation impact
+- [ ] If behavior changed, deprecation/migration notes were added to docs/release notes
 
 ## Checklist
 
-- [ ] Code follows style guidelines (`poe format` ✓)
-- [ ] Linting passes (`poe lint` ✓)
-- [ ] Type checking passes (`poe typecheck` ✓)
+- [ ] Linting passes (`uv run poe lint` ✓)
+- [ ] Type checking passes (`uv run poe typecheck` ✓)
 - [ ] Documentation updated (if applicable)
 - [ ] Pre-commit hooks pass
 

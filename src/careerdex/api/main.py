@@ -43,9 +43,7 @@ logger = structlog.get_logger(__name__)
 
 otlp_endpoint = os.getenv("OTLP_ENDPOINT")
 enable_console_traces = os.getenv("ENABLE_CONSOLE_TRACES", "false").lower() == "true"
-configure_tracing(
-    otlp_endpoint=otlp_endpoint, enable_console_export=enable_console_traces
-)
+configure_tracing(otlp_endpoint=otlp_endpoint, enable_console_export=enable_console_traces)
 
 
 @asynccontextmanager
@@ -157,9 +155,7 @@ async def validation_exception_handler(
 
 
 @app.exception_handler(StarletteHTTPException)
-async def http_exception_handler(
-    request: Request, exc: StarletteHTTPException
-) -> JSONResponse:
+async def http_exception_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
     code = "http_error"
     details = None
     if isinstance(exc, APIHTTPException):
@@ -214,8 +210,7 @@ async def readiness_check() -> ReadinessResponse:
     return ReadinessResponse(
         status=status,
         components=[
-            ComponentStatus.model_validate(component.to_dict())
-            for component in components
+            ComponentStatus.model_validate(component.to_dict()) for component in components
         ],
     )
 

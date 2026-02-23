@@ -15,8 +15,8 @@ replicas:
     count: 2                # Same as prod minimum
 
 images:
-  - name: data-literate/dex
-    newName: ghcr.io/data-literate/dex
+  - name: thedataenginex/dex
+    newName: ghcr.io/thedataenginex/dex
     newTag: sha-03216e24    # Promote to prod after stage validation
 
 patches:

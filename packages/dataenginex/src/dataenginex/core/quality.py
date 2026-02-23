@@ -110,10 +110,10 @@ class QualityStore:
             self._history[layer] = []
         self._history[layer].append(result)
         logger.info(
-            "Quality result recorded layer=%s score=%.4f passed=%s",
-            layer,
-            result.quality_score,
-            result.passed,
+            "Quality result recorded",
+            layer=layer,
+            score=round(result.quality_score, 4),
+            passed=result.passed,
         )
 
     def latest(self, layer: str) -> QualityResult | None:
@@ -294,12 +294,12 @@ class QualityGate:
             self._store.record(result)
 
         logger.info(
-            "Quality gate layer=%s score=%.4f threshold=%.2f passed=%s records=%d",
-            layer.value,
-            overall,
-            threshold,
-            passed,
-            total,
+            "Quality gate evaluated",
+            layer=layer.value,
+            score=round(overall, 4),
+            threshold=threshold,
+            passed=passed,
+            records=total,
         )
 
         return result

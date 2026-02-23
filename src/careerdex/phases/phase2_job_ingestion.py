@@ -33,21 +33,21 @@ logger = logging.getLogger(__name__)
 
 class JobSourceConnector:
     """Abstract base class for job source connectors."""
-    
+
     def __init__(self, source: JobSourceEnum):
         self.source = source
         self.fetch_count = 0
         self.error_count = 0
-    
+
     def fetch(self, **kwargs) -> tuple[list[dict[str, Any]], list[str]]:
         """
         Fetch jobs from source.
-        
+
         Returns:
             Tuple of (jobs, errors)
         """
         raise NotImplementedError
-    
+
     def normalize(self, raw_job: dict[str, Any]) -> dict[str, Any]:
         """Normalize raw job data to standard schema."""
         raise NotImplementedError
@@ -55,30 +55,30 @@ class JobSourceConnector:
 
 class LinkedInConnector(JobSourceConnector):
     """Fetches jobs from LinkedIn API."""
-    
+
     def __init__(self, api_key: str = None):
         super().__init__(JobSourceEnum.LINKEDIN)
         self.api_key = api_key
         self.api_endpoint = "https://api.linkedin.com/v2/jobs"
         self.batch_size = 100
         self.target_jobs_per_cycle = 1250
-    
+
     def fetch(self, keywords: list[str] = None, **kwargs) -> tuple[list[dict[str, Any]], list[str]]:
         """
         Fetch jobs from LinkedIn API.
-        
+
         Args:
             keywords: Job search keywords
             **kwargs: Additional API parameters
-            
+
         Returns:
             Tuple of (jobs_list, error_list)
         """
         logger.info(f"LinkedIn: Fetching ~{self.target_jobs_per_cycle} jobs...")
-        
+
         jobs = []
         errors = []
-        
+
         try:
             # Placeholder implementation
             # Real implementation would:
@@ -86,19 +86,19 @@ class LinkedInConnector(JobSourceConnector):
             # 2. Extract job_id, title, company, description, salary, location, etc.
             # 3. Handle rate limiting (4,800 requests/24h)
             # 4. Normalize to standard schema
-            
+
             logger.info(f"LinkedIn: Fetched {len(jobs)} jobs")
             self.fetch_count += len(jobs)
-            
+
             return jobs, errors
-            
+
         except Exception as e:
             error_msg = f"LinkedIn fetch failed: {e}"
             logger.error(error_msg)
             self.error_count += 1
             errors.append(error_msg)
             return [], errors
-    
+
     def normalize(self, raw_job: dict[str, Any]) -> dict[str, Any]:
         """Normalize LinkedIn job data."""
         return {
@@ -118,29 +118,29 @@ class LinkedInConnector(JobSourceConnector):
 
 class IndeedConnector(JobSourceConnector):
     """Scrapes jobs from Indeed."""
-    
+
     def __init__(self):
         super().__init__(JobSourceEnum.INDEED)
         self.base_url = "https://www.indeed.com"
         self.batch_size = 50
         self.target_jobs_per_cycle = 6250
-    
+
     def fetch(self, keywords: list[str] = None, **kwargs) -> tuple[list[dict[str, Any]], list[str]]:
         """
         Fetch jobs from Indeed through web scraping.
-        
+
         Args:
             keywords: Job search keywords
             **kwargs: Additional parameters (location, job_type, etc.)
-            
+
         Returns:
             Tuple of (jobs_list, error_list)
         """
         logger.info(f"Indeed: Fetching ~{self.target_jobs_per_cycle} jobs...")
-        
+
         jobs = []
         errors = []
-        
+
         try:
             # Placeholder implementation
             # Real implementation would:
@@ -150,19 +150,19 @@ class IndeedConnector(JobSourceConnector):
             # 4. Extract job card details
             # 5. Handle rate limiting and delays
             # 6. Normalize to standard schema
-            
+
             logger.info(f"Indeed: Fetched {len(jobs)} jobs")
             self.fetch_count += len(jobs)
-            
+
             return jobs, errors
-            
+
         except Exception as e:
             error_msg = f"Indeed fetch failed: {e}"
             logger.error(error_msg)
             self.error_count += 1
             errors.append(error_msg)
             return [], errors
-    
+
     def normalize(self, raw_job: dict[str, Any]) -> dict[str, Any]:
         """Normalize Indeed job data."""
         return {
@@ -182,25 +182,25 @@ class IndeedConnector(JobSourceConnector):
 
 class GlassdoorConnector(JobSourceConnector):
     """Scrapes jobs from Glassdoor."""
-    
+
     def __init__(self):
         super().__init__(JobSourceEnum.GLASSDOOR)
         self.base_url = "https://www.glassdoor.com"
         self.batch_size = 50
         self.target_jobs_per_cycle = 2500
-    
+
     def fetch(self, keywords: list[str] = None, **kwargs) -> tuple[list[dict[str, Any]], list[str]]:
         """
         Fetch jobs from Glassdoor through web scraping.
-        
+
         Returns:
             Tuple of (jobs_list, error_list)
         """
         logger.info(f"Glassdoor: Fetching ~{self.target_jobs_per_cycle} jobs...")
-        
+
         jobs = []
         errors = []
-        
+
         try:
             # Placeholder implementation
             # Real implementation would:
@@ -210,19 +210,19 @@ class GlassdoorConnector(JobSourceConnector):
             # 4. Paginate through results
             # 5. Implement smart retries and delays
             # 6. Normalize to standard schema
-            
+
             logger.info(f"Glassdoor: Fetched {len(jobs)} jobs")
             self.fetch_count += len(jobs)
-            
+
             return jobs, errors
-            
+
         except Exception as e:
             error_msg = f"Glassdoor fetch failed: {e}"
             logger.error(error_msg)
             self.error_count += 1
             errors.append(error_msg)
             return [], errors
-    
+
     def normalize(self, raw_job: dict[str, Any]) -> dict[str, Any]:
         """Normalize Glassdoor job data."""
         return {
@@ -242,7 +242,7 @@ class GlassdoorConnector(JobSourceConnector):
 
 class CompanyCareerPagesConnector(JobSourceConnector):
     """Scrapes jobs from company career pages."""
-    
+
     # Major ATS platforms and their job listing endpoints
     ATS_PLATFORMS = {
         "greenhouse": {
@@ -258,7 +258,7 @@ class CompanyCareerPagesConnector(JobSourceConnector):
             "job_list_selector": "[data-job-id]",
         },
     }
-    
+
     # Top 500+ companies with career pages
     TOP_COMPANIES = [
         "google.com/careers",
@@ -270,22 +270,22 @@ class CompanyCareerPagesConnector(JobSourceConnector):
         "Tesla.com/careers",
         # ... 493+ more companies
     ]
-    
+
     def __init__(self):
         super().__init__(JobSourceEnum.COMPANY_CAREER_PAGES)
         self.target_jobs_per_cycle = 3750
         self.companies_to_scrape = self.TOP_COMPANIES
-    
+
     def fetch(self, **kwargs) -> tuple[list[dict[str, Any]], list[str]]:
         """
         Fetch jobs from company career pages.
-        
+
         Strategy:
         1. Detect ATS platform (Greenhouse, Lever, Workday)
         2. Use platform-specific selectors/APIs
         3. Extract job postings
         4. Normalize to standard schema
-        
+
         Returns:
             Tuple of (jobs_list, error_list)
         """
@@ -296,7 +296,7 @@ class CompanyCareerPagesConnector(JobSourceConnector):
 
         jobs = []
         errors = []
-        
+
         try:
             # Placeholder implementation
             # Real implementation would:
@@ -309,19 +309,19 @@ class CompanyCareerPagesConnector(JobSourceConnector):
             # 4. Workday: /wday/en-US/jobs
             # 5. Handle pagination
             # 6. Normalize to standard schema
-            
+
             logger.info(f"Company Career Pages: Fetched {len(jobs)} jobs")
             self.fetch_count += len(jobs)
-            
+
             return jobs, errors
-            
+
         except Exception as e:
             error_msg = f"Company career pages fetch failed: {e}"
             logger.error(error_msg)
             self.error_count += 1
             errors.append(error_msg)
             return [], errors
-    
+
     def normalize(self, raw_job: dict[str, Any]) -> dict[str, Any]:
         """Normalize company career page job data."""
         return {
@@ -341,15 +341,15 @@ class CompanyCareerPagesConnector(JobSourceConnector):
 
 class DeduplicationEngine:
     """Detects and marks duplicate jobs across multiple sources."""
-    
+
     def __init__(self):
         self.seen_hashes: dict[str, str] = {}  # hash -> job_id mapping
         self.duplicate_groups: dict[str, list[str]] = {}  # group_id -> [job_ids]
-    
+
     def check_duplicate(self, job: dict[str, Any]) -> tuple[bool, str | None]:
         """
         Check if job is a duplicate.
-        
+
         Returns:
             Tuple of (is_duplicate, dedup_group_id)
         """
@@ -359,12 +359,12 @@ class DeduplicationEngine:
             job.get("company_name"),
             job.get("job_title"),
         )
-        
+
         if job_hash in self.seen_hashes:
             return True, self.seen_hashes[job_hash]
-        
+
         return False, None
-    
+
     def register_job(self, job: dict[str, Any]) -> str:
         """Register job and assign deduplication group."""
         job_hash = DataHash.generate_job_hash(
@@ -373,25 +373,25 @@ class DeduplicationEngine:
             job.get("company_name"),
             job.get("job_title"),
         )
-        
+
         # Create group ID if not exists
         if job_hash not in self.seen_hashes:
             group_id = f"dedup_{job_hash[:16]}"
             self.seen_hashes[job_hash] = group_id
             self.duplicate_groups[group_id] = []
-        
+
         group_id = self.seen_hashes[job_hash]
         job_id = job.get("source_job_id")
-        
+
         if job_id not in self.duplicate_groups[group_id]:
             self.duplicate_groups[group_id].append(job_id)
-        
+
         return group_id
 
 
 class JobIngestionPipeline:
     """Orchestrates job ingestion from all sources."""
-    
+
     def __init__(self, storage: DualStorage = None):
         self.storage = storage or DualStorage()
         self.connectors = {
@@ -408,58 +408,58 @@ class JobIngestionPipeline:
             "total_duplicates": 0,
             "errors": [],
         }
-    
+
     def run_cycle(self) -> dict[str, Any]:
         """
         Execute a complete 3-hour ingestion cycle.
-        
+
         Returns:
             Cycle statistics and results
         """
         logger.info("=" * 70)
         logger.info(f"PHASE 2: JOB INGESTION CYCLE - {self.execution_id}")
         logger.info("=" * 70)
-        
+
         cycle_start = datetime.utcnow()
         all_jobs = []
-        
+
         # Fetch from all sources
         for source, connector in self.connectors.items():
             logger.info(f"\nFetching from {source.value}...")
             jobs, errors = connector.fetch()
-            
+
             all_jobs.extend(jobs)
             self.stats["total_fetched"] += len(jobs)
-            
+
             if errors:
                 self.stats["errors"].extend(errors)
-            
+
             logger.info(f"  Status: {len(jobs)} jobs, {len(errors)} errors")
-        
+
         # Deduplication pass
         logger.info("\nRunning deduplication...")
         for job in all_jobs:
             is_dup, group_id = self.dedup_engine.check_duplicate(job)
-            
+
             if is_dup:
                 self.stats["total_duplicates"] += 1
                 job["dex_dedup_id"] = group_id
             else:
                 group_id = self.dedup_engine.register_job(job)
                 job["dex_dedup_id"] = group_id
-            
+
             # Calculate quality score
             job["quality_score"] = QualityScorer.score_job_posting(job)
             self.stats["total_ingested"] += 1
-        
+
         # Store to Bronze layer
         logger.info(f"\nStoring {len(all_jobs)} jobs to Bronze layer...")
         timestamp = datetime.utcnow().isoformat()
         self.storage.write_bronze(all_jobs, "jobs", timestamp)
-        
+
         cycle_end = datetime.utcnow()
         cycle_duration = (cycle_end - cycle_start).total_seconds()
-        
+
         results = {
             "execution_id": self.execution_id,
             "cycle_start": cycle_start.isoformat(),
@@ -468,7 +468,7 @@ class JobIngestionPipeline:
             "statistics": self.stats,
             "deduplication_groups": len(self.dedup_engine.duplicate_groups),
         }
-        
+
         logger.info("")
         logger.info("=" * 70)
         logger.info("CYCLE RESULTS")
@@ -477,10 +477,8 @@ class JobIngestionPipeline:
         logger.info(f"Total ingested: {self.stats['total_ingested']:,}")
         logger.info(f"Total duplicates: {self.stats['total_duplicates']:,}")
         duration_min = cycle_duration / 60
-        logger.info(
-            f"Cycle duration: {cycle_duration:.1f}s ({duration_min:.1f}min)"
-        )
+        logger.info(f"Cycle duration: {cycle_duration:.1f}s ({duration_min:.1f}min)")
         logger.info(f"Errors: {len(self.stats['errors'])}")
         logger.info("=" * 70)
-        
+
         return results

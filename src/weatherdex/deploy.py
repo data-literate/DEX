@@ -7,9 +7,7 @@ import logging
 import subprocess
 from pathlib import Path
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -178,9 +176,7 @@ class WeatherPipelineDeployer:
 
 def main() -> None:
     """Main entry point for deployment script."""
-    parser = argparse.ArgumentParser(
-        description="Deploy weather pipeline to Databricks"
-    )
+    parser = argparse.ArgumentParser(description="Deploy weather pipeline to Databricks")
     parser.add_argument(
         "--job-id",
         help="Job ID to update (if not provided, creates new job)",

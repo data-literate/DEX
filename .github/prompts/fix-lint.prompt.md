@@ -7,10 +7,10 @@ Fix all lint, type-checking, and formatting errors in the project.
 
 ## Steps
 
-1. Run `poe lint` — fix all ruff errors (rules: E, F, I, B, UP, SIM, C90)
-2. Run `poe format` — apply ruff formatting (line length 100)
-3. Run `poe typecheck` — fix mypy strict errors in `packages/dataenginex/src/dataenginex/`
-4. Run `poe check-all` — confirm everything passes together
+1. Run `uv run poe lint` — fix all ruff errors (rules: E, F, I, B, UP, SIM, C90)
+2. Run `uv run poe lint-fix` — apply Ruff auto-fixes/formatting (line length 100)
+3. Run `uv run poe typecheck` — fix mypy strict errors in `packages/dataenginex/src/dataenginex/`
+4. Run `uv run poe check-all` — confirm everything passes together
 
 ## Common fixes
 

@@ -29,7 +29,7 @@ Core package structure implemented with phased modules under `src/careerdex/phas
 
 ## Quick Links
 
-- **GitHub Issues**: [CareerDEX Issues](https://github.com/data-literate/DEX/issues?q=label%3Acareerdex)
+- **GitHub Issues**: [CareerDEX Issues](https://github.com/TheDataEngineX/DEX/issues?q=label%3Acareerdex)
 - **Main Issues**:
   - Issues #65-71: Development phases
   - Issue #64: Main epic tracking

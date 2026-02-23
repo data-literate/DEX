@@ -21,17 +21,16 @@ Use semantic commit format:
 
 - Follow [PEP 8](https://www.python.org/dev/peps/pep-0008/)
 - Use type hints
-- Max line length: 88 characters (Black)
+- Max line length: 100 characters (Ruff)
 - Add docstrings to public functions
 
 ## Before Submitting PR
 
 1. Run all checks locally:
    ```bash
-   poe format      # Auto-format code
-   poe lint        # Lint check
-   poe typecheck   # Type checking
-   pytest          # Run tests
+   uv run poe lint        # Ruff lint check
+   uv run poe typecheck   # Type checking
+   uv run poe test        # Run tests
    ```
 
 2. Tests must pass with 80%+ coverage for new code
@@ -52,7 +51,7 @@ Use semantic commit format:
 
 - Add unit tests for new code
 - Test error scenarios
-- Target 80%+ coverage: `pytest --cov=src`
+- Target 80%+ coverage: `uv run poe test-cov`
 
 ## Documentation
 
@@ -60,6 +59,13 @@ Use semantic commit format:
 - Add docstrings for functions
 - Create ADR for architectural decisions
 - Link related documentation
+
+## Attribution and Naming
+
+- This project is open source under MIT; keep license and attribution notices in redistributions.
+- Forks are welcome, but should use a distinct public name when redistributed as a separate project.
+- Do not present a fork as the official DataEngineX/DEX project.
+- See [Trademark Policy](../TRADEMARK_POLICY.md) for brand-usage details.
 
 ## Code Reviews
 
@@ -71,12 +77,11 @@ Use semantic commit format:
 ## Useful Commands
 
 ```bash
-poe format          # Auto-format code
-poe lint            # Linting
-poe typecheck       # Type checking
-pytest              # Run tests
-pytest --cov=src    # Coverage report
-poe check-all       # Run all checks
+uv run poe lint        # Linting
+uv run poe typecheck   # Type checking
+uv run poe test        # Run tests
+uv run poe test-cov    # Coverage report
+uv run poe check-all   # Run all checks
 ```
 
 ## Issue Labels
@@ -91,7 +96,7 @@ poe check-all       # Run all checks
 ## Questions?
 
 - Check [DEVELOPMENT.md](./DEVELOPMENT.md)
-- Review [Architecture docs](./docs/ARCHITECTURE.md)
+- Review [Architecture docs](./ARCHITECTURE.md)
 - Create a GitHub issue
 - Join #dex-dev Slack channel
 

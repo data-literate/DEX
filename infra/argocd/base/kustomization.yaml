@@ -19,6 +19,6 @@ resources:
 
 # Default container image — overlays override newTag with commit SHA
 images:
-  - name: data-literate/dex
-    newName: data-literate/dex
+  - name: thedataenginex/dex
+    newName: thedataenginex/dex
     newTag: v1.0.0

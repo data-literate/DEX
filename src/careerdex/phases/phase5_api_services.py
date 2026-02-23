@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class APIResponse:
     """Standardized API response format."""
-    
+
     @staticmethod
     def success(data: Any, message: str = "Success") -> dict[str, Any]:
         return {
@@ -22,7 +22,7 @@ class APIResponse:
             "data": data,
             "timestamp": datetime.utcnow().isoformat(),
         }
-    
+
     @staticmethod
     def error(error_code: str, message: str, details: Any = None) -> dict[str, Any]:
         return {
@@ -64,7 +64,7 @@ class UserProfileAPI:
 
 class Phase5APIServices:
     """Phase 5: API Services implementation."""
-    
+
     def __init__(self):
         self.job_search = JobSearchAPI()
         self.matching = JobMatchingAPI()
@@ -78,7 +78,7 @@ class Phase5APIServices:
             "GET /api/v1/insights/market",
             "GET /api/v1/profiles/{user_id}",
         ]
-    
+
     def bootstrap(self) -> dict[str, Any]:
         logger.info("PHASE 5: API SERVICES - BOOTSTRAP")
         logger.info(f"✓ {len(self.endpoints)} API endpoints configured")

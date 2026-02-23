@@ -105,8 +105,7 @@ class ModelServer:
         model = self._loaded.get(key)
         if model is None:
             raise RuntimeError(
-                f"Model {request.model_name} v{version} not loaded — "
-                "call load_model() first"
+                f"Model {request.model_name} v{version} not loaded — call load_model() first"
             )
 
         # Convert features to the format the model expects

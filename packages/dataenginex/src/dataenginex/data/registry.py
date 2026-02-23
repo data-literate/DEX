@@ -84,9 +84,7 @@ class SchemaRegistry:
         versions = self._schemas.setdefault(schema.name, [])
         existing = {v.version for v in versions}
         if schema.version in existing:
-            raise ValueError(
-                f"Schema {schema.name!r} version {schema.version} already registered"
-            )
+            raise ValueError(f"Schema {schema.name!r} version {schema.version} already registered")
         versions.append(schema)
         logger.info("Registered schema %s v%s", schema.name, schema.version)
         self._save()
@@ -121,9 +119,7 @@ class SchemaRegistry:
 
         If *version* is ``None`` the latest version is used.
         """
-        schema = (
-            self.get_version(name, version) if version else self.get_latest(name)
-        )
+        schema = self.get_version(name, version) if version else self.get_latest(name)
         if schema is None:
             return False, [f"Schema {name!r} (version={version}) not found"]
         return schema.validate_record(record)

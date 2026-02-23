@@ -557,13 +557,13 @@ spec:
 
 ### Prometheus alert rules (SLO-aligned)
 
-The actual rule definitions live in `infra/monitoring/alerts/dataenginex-alerts.yml`. They expose three alerts—latency, error rate, and saturation—each scoped by `environment` so the thresholds can reflect the traffic patterns for dev, stage, and prod. Every alert annotation links to the [deployment runbook](https://github.com/data-literate/DEX/blob/main/docs/DEPLOY_RUNBOOK.md).
+The actual rule definitions live in `infra/monitoring/alerts/dataenginex-alerts.yml`. They expose three alerts—latency, error rate, and saturation—each scoped by `environment` so the thresholds can reflect the traffic patterns for dev, stage, and prod. Every alert annotation links to the [deployment runbook](https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md).
 
 | Alert | Environment | Threshold | Severity | Receiver |
 |-------|-------------|-----------|----------|----------|
 | `DataEngineXLatencyHigh` | prod | P95 latency > 0.75s (5m window) | `page` | critical slack (#dex-alerts) |
 |                         | stage | P95 latency > 1.0s | `page` | same |
-|                         | dev | P95 latency > 1.5s | `warning` | email (alerts@dataenginex.io) <!-- TODO: domain not yet purchased --> |
+|                         | dev | P95 latency > 1.5s | `warning` | email (ops alias) |
 | `DataEngineXErrorRateHigh` | prod | 5xx fraction > 1% | `page` | critical slack |
 |                         | stage | 5xx fraction > 3% | `page` | critical slack |
 |                         | dev | 5xx fraction > 5% | `warning` | email |
@@ -587,7 +587,7 @@ kubectl rollout restart deployment/prometheus
 kubectl apply -f infra/monitoring/alertmanager.yml
 kubectl rollout restart deployment/alertmanager
 ```
-3. Verify the alerts appear in Alertmanager UI and reference the release runbook described in [`docs/DEPLOY_RUNBOOK.md`](https://github.com/data-literate/DEX/blob/main/docs/DEPLOY_RUNBOOK.md).
+3. Verify the alerts appear in Alertmanager UI and reference the release runbook described in [`docs/DEPLOY_RUNBOOK.md`](https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md).
 
 If you manage the stack via ArgoCD, push the changes to the kustomize overlay and let ArgoCD sync the deployments automatically rather than running the commands above manually.
 

@@ -16,11 +16,7 @@ careerdex/
 │
 ├── models/                        # ML Model implementations
 │   ├── __init__.py
-│   ├── job_matcher.py             # (To be created)
-│   ├── salary_predictor.py        # (To be created)
-│   ├── skill_gap_analyzer.py      # (To be created)
-│   ├── career_path_recommender.py # (To be created)
-│   └── churn_predictor.py         # (To be created)
+│   └── ...                        # Model modules evolve over project phases
 │
 ├── config/
 │   └── job_config.json            # Job ingestion configuration
@@ -68,7 +64,7 @@ Gold Layer (Business-ready data)
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
 | Orchestration | Apache Airflow | DAG scheduling & monitoring |
-| Data Storage | Parquet + BigQuery | Local + Cloud storage |
+| Data Storage | Parquet + optional warehouse adapters | Local-first + optional cloud storage |
 | Embeddings | HuggingFace (all-MiniLM-L6-v2) | 768-dim semantic vectors |
 | Vector DB | Pinecone | Semantic similarity search |
 | ML Models | scikit-learn + TensorFlow | 5 classification/regression models |
@@ -186,11 +182,10 @@ Five models for comprehensive job market analysis:
 ### 1. Install Dependencies
 
 ```bash
-pip install apache-airflow loguru requests
-pip install sentence-transformers pinecone
-pip install scikit-learn tensorflow
-pip install fastapi uvicorn
+uv sync --group dev --group data
 ```
+
+Optional ML/vector packages can be installed as needed for experiments.
 
 ### 2. Configure Notifications
 

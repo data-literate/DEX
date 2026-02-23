@@ -1,9 +1,8 @@
-# Release Automation for DataEngineX
+# DataEngineX Release Automation
 # Triggered when packages/dataenginex/pyproject.toml version changes.
-# Extracts version from dataenginex package, creates git tag and GitHub release.
-# This automatically triggers pypi-publish.yml to publish to PyPI.
+# Creates git tag + GitHub release, which triggers pypi-publish.yml.
 
-name: Release
+name: Release DataEngineX
 
 on:
   push:
@@ -20,8 +19,8 @@ env:
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
 jobs:
-  release:
-    name: Version-Based Release
+  release-dataenginex:
+    name: Release DataEngineX Package
     runs-on: ubuntu-latest
     if: github.event.repository.default_branch == github.ref_name
 
@@ -37,12 +36,12 @@ jobs:
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  text: '🎉 Release Process Started',
+                  text: '💎 DataEngineX Core Package Release Started',
                   blocks: [{
                     type: 'section',
                     text: {
                       type: 'mrkdwn',
-                      text: `*🎉 Release Process Started*\n*Branch:* main`
+                      text: `*💎 DataEngineX Release Process Started*\n*Core Package Library for PyPI*\n*Branch:* main`
                     }
                   }]
                 })
@@ -57,28 +56,26 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract version from packages/dataenginex/pyproject.toml
+      - name: Extract DataEngineX version
         id: version
         run: |
           VERSION=$(grep -m 1 "^version = " packages/dataenginex/pyproject.toml | sed 's/version = "//;s/".*//')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=dataenginex-v$VERSION" >> $GITHUB_OUTPUT
           echo "Extracted DataEngineX version: $VERSION"
 
-      - name: Extract changelog notes
+      - name: Extract DataEngineX changelog notes
         id: changelog
         run: |
           CHANGELOG="packages/dataenginex/CHANGELOG.md"
           if [[ -f "$CHANGELOG" ]]; then
-            # Extract the section for this version (between two ## headers)
             NOTES=$(awk "/^## \\[${{ steps.version.outputs.version }}\\]/{found=1; next} /^## \\[/{if(found) exit} found" "$CHANGELOG")
             if [[ -z "$NOTES" ]]; then
-              NOTES="Version ${{ steps.version.outputs.version }} — see CHANGELOG.md for details."
+              NOTES="DataEngineX v${{ steps.version.outputs.version }} — see CHANGELOG.md for details."
             fi
           else
-            NOTES="Version ${{ steps.version.outputs.version }} — see RELEASE_NOTES.md for details."
+            NOTES="DataEngineX v${{ steps.version.outputs.version }} — see RELEASE_NOTES.md for details."
           fi
-          # Write multiline output
           {
             echo "notes<<CHANGELOG_EOF"
             echo "$NOTES"
@@ -88,12 +85,12 @@ jobs:
       - name: Check if tag already exists
         id: check_tag
         run: |
-          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+          if git rev-parse "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
             echo "tag_exists=true" >> $GITHUB_OUTPUT
-            echo "Tag v${{ steps.version.outputs.version }} already exists"
+            echo "Tag ${{ steps.version.outputs.tag }} already exists"
           else
             echo "tag_exists=false" >> $GITHUB_OUTPUT
-            echo "Tag v${{ steps.version.outputs.version }} is new"
+            echo "Tag ${{ steps.version.outputs.tag }} is new"
           fi
 
       - name: Configure git
@@ -105,7 +102,7 @@ jobs:
       - name: Create git tag
         if: steps.check_tag.outputs.tag_exists == 'false'
         run: |
-          git tag -a "${{ steps.version.outputs.tag }}" -m "Release ${{ steps.version.outputs.tag }}"
+          git tag -a "${{ steps.version.outputs.tag }}" -m "Release DataEngineX ${{ steps.version.outputs.tag }}"
           git push origin "${{ steps.version.outputs.tag }}"
 
       - name: Create GitHub Release
@@ -115,7 +112,7 @@ jobs:
         run: |
           gh release create "${{ steps.version.outputs.tag }}" \
             --target main \
-            --title "Release ${{ steps.version.outputs.tag }}" \
+            --title "DataEngineX ${{ steps.version.outputs.tag }}" \
             --notes "${{ steps.changelog.outputs.notes }}" \
             --draft=false
 
@@ -130,12 +127,12 @@ jobs:
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  text: '✅ Release Created Successfully',
+                  text: '✅ DataEngineX Core Package Released',
                   blocks: [{
                     type: 'section',
                     text: {
                       type: 'mrkdwn',
-                      text: `*✅ Release Created*\n*Version:* ${process.env.VERSION}\n*Tag:* ${process.env.TAG}\n*Release:* <${process.env.URL}|View Release>`
+                      text: `*✅ DataEngineX Release Created*\n*Core Package Library*\n*Version:* ${process.env.VERSION}\n*Tag:* ${process.env.TAG}\n*Release:* <${process.env.URL}|View Release>`
                     }
                   }]
                 })
@@ -158,19 +155,19 @@ jobs:
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  text: '❌ Release Process Failed',
+                  text: '❌ DataEngineX Release Failed',
                   blocks: [
                     {
                       type: 'section',
                       text: {
                         type: 'mrkdwn',
-                        text: `*❌ Release Process Failed*`
+                        text: `*❌ DataEngineX Release Failed*`
                       }
                     },
                     {
                       type: 'section',
                       fields: [
-                        { type: 'mrkdwn', text: `*Workflow:*\nRelease` },
+                        { type: 'mrkdwn', text: `*Workflow:*\nDataEngineX Release` },
                         { type: 'mrkdwn', text: `*Branch:*\nmain` },
                         { type: 'mrkdwn', text: `*Commit:*\n\`${process.env.SHA?.substring(0, 8)}\`` },
                         { type: 'mrkdwn', text: `*Triggered by:*\n${process.env.ACTOR}` },
@@ -179,7 +176,7 @@ jobs:
                     },
                     {
                       type: 'context',
-                      elements: [{ type: 'mrkdwn', text: `🏷️ Release tag creation or GitHub Release failed — check logs` }]
+                      elements: [{ type: 'mrkdwn', text: `🏷️ DataEngineX release tag creation failed — check logs` }]
                     }
                   ]
                 })

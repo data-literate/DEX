@@ -138,5 +138,5 @@ class HealthChecker:
                 asyncio.open_connection(host, port), timeout=self.timeout_seconds
             )
             return True, "reachable"
-        except (TimeoutError, OSError) as exc:
+        except (TimeoutError, ConnectionRefusedError, OSError) as exc:
             return False, f"error={exc.__class__.__name__}"

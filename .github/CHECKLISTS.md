@@ -11,7 +11,7 @@ Quick reference checklists for common tasks. **Reference actual code patterns in
 - [ ] No hardcoded secrets, passwords, or API keys
 - [ ] Tests written for new functionality (80%+ coverage target)
 - [ ] Docstrings on public functions/classes
-- [ ] Ran `poe format` and `poe lint` locally
+- [ ] Ran `uv run poe lint-fix` and `uv run poe lint` locally
 - [ ] No bare `except:` clauses
 - [ ] Specific exception types caught and logged
 
@@ -138,7 +138,7 @@ Quick reference checklists for common tasks. **Reference actual code patterns in
 
 **See examples:**
 - Docstrings → Any file in [src/](../src/)
-- README patterns → [Readme.md](../Readme.md)
+- README patterns → [README.md](../README.md)
 - Architecture → [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md)
 
 ---

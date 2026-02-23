@@ -15,12 +15,12 @@ from __future__ import annotations
 
 class PipelineConfig:
     """Configuration for DEX data pipelines."""
-    
+
     # Pipeline execution constants
     EXECUTION_SCHEDULE = "0 */3 * * *"  # Every 3 hours (00:00, 03:00, 06:00, etc.)
     EXPECTED_CYCLE_TIME_MINUTES = 45  # Expected runtime: 45 minutes per cycle
     TIMEOUT_MINUTES = 120  # Kill pipeline if running >2 hours
-    
+
     # Job ingestion sources and target volumes
     CAREERDEX_JOB_SOURCES = {
         "linkedin": {
@@ -52,13 +52,13 @@ class PipelineConfig:
             "timeout_seconds": 1500,
         },
     }
-    
+
     # Total expected jobs per cycle: 13,750 posts
     EXPECTED_JOBS_PER_CYCLE: int = 13750  # 1250 + 6250 + 2500 + 3750
-    
+
     # Total expected jobs in system (live): ~110K per day = 1M+ rolling window
     EXPECTED_JOBS_TOTAL: int = 110000  # 10000 + 50000 + 20000 + 30000
-    
+
     # Layer configurations live in medallion_architecture.py (MedallionArchitecture class).
     # Use MedallionArchitecture.BRONZE_CONFIG / SILVER_CONFIG / GOLD_CONFIG for the
     # canonical Layer definitions to avoid duplication.
@@ -66,7 +66,7 @@ class PipelineConfig:
 
 class PipelineMetrics:
     """Metrics tracking for pipeline monitoring."""
-    
+
     METRICS = {
         "jobs_fetched": {
             "description": "Total jobs fetched from all sources",
@@ -113,4 +113,3 @@ class PipelineMetrics:
             "target_max": 2,  # Max 2% loss acceptable
         },
     }
-

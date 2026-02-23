@@ -1,6 +1,6 @@
 # Code owners: adjust to your organization/team
-/.github/ @data-literate/infra-team
-/infra/ @data-literate/infra-team
-/src/ @data-literate/backend-team
-/src/careerdex/ @data-literate/data-team
-/src/weatherdex/ @data-literate/data-team
+/.github/ @TheDataEngineX/infra-team
+/infra/ @TheDataEngineX/infra-team
+/src/ @TheDataEngineX/backend-team
+/src/careerdex/ @TheDataEngineX/data-team
+/src/weatherdex/ @TheDataEngineX/data-team

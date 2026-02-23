@@ -45,9 +45,7 @@ class PrometheusMetricsMiddleware(BaseHTTPMiddleware):
             status = response.status_code
 
             # Record request metrics
-            http_requests_total.labels(
-                method=method, endpoint=path, status=status
-            ).inc()
+            http_requests_total.labels(method=method, endpoint=path, status=status).inc()
 
             return cast(Response, response)
 
@@ -60,9 +58,7 @@ class PrometheusMetricsMiddleware(BaseHTTPMiddleware):
         finally:
             # Record duration
             duration = time.time() - start_time
-            http_request_duration_seconds.labels(method=method, endpoint=path).observe(
-                duration
-            )
+            http_request_duration_seconds.labels(method=method, endpoint=path).observe(duration)
 
             # Decrement in-flight counter
             http_requests_in_flight.dec()

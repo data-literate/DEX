@@ -15,8 +15,8 @@ replicas:
     count: 2                # 2 pods for basic availability
 
 images:
-  - name: data-literate/dex
-    newName: ghcr.io/data-literate/dex
+  - name: thedataenginex/dex
+    newName: ghcr.io/thedataenginex/dex
     newTag: sha-51c0cc9c    # Pinned to specific commit SHA
 
 patches:

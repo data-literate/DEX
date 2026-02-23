@@ -18,9 +18,7 @@ from dataenginex.ml.training import SklearnTrainer, TrainingResult
 
 class TestTrainingResult:
     def test_to_dict(self) -> None:
-        r = TrainingResult(
-            model_name="test", version="1.0.0", metrics={"acc": 0.95}
-        )
+        r = TrainingResult(model_name="test", version="1.0.0", metrics={"acc": 0.95})
         d = r.to_dict()
         assert d["model_name"] == "test"
         assert d["metrics"]["acc"] == 0.95
@@ -187,9 +185,7 @@ class TestDriftDetector:
         assert len(reports) == 2
 
     def test_to_dict(self) -> None:
-        report = DriftReport(
-            feature_name="x", psi=0.05, drift_detected=False, severity="none"
-        )
+        report = DriftReport(feature_name="x", psi=0.05, drift_detected=False, severity="none")
         d = report.to_dict()
         assert d["feature_name"] == "x"
 
@@ -218,9 +214,7 @@ class TestModelServer:
 
     def test_predict_not_loaded_raises(self) -> None:
         server = ModelServer()
-        req = PredictionRequest(
-            model_name="nope", version="1.0.0", features=[{"a": 1}]
-        )
+        req = PredictionRequest(model_name="nope", version="1.0.0", features=[{"a": 1}])
         with pytest.raises(RuntimeError, match="not loaded"):
             server.predict(req)
 

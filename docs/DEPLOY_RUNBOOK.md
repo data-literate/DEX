@@ -36,7 +36,7 @@ graph LR
 ## Pre-Deploy Checklist
 
 - CI is green on the target branch (`dev` or `main`).
-- Image exists in registry: `ghcr.io/data-literate/dex:sha-XXXXXXXX`.
+- Image exists in registry: `ghcr.io/thedataenginex/dex:sha-XXXXXXXX`.
 - No open critical alerts in monitoring.
 - For production release, approval recorded in PR.
 

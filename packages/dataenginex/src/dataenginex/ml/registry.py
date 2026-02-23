@@ -90,7 +90,9 @@ class ModelRegistry:
         versions[artifact.version] = artifact
         logger.info(
             "Registered model %s v%s (stage=%s)",
-            artifact.name, artifact.version, artifact.stage.value,
+            artifact.name,
+            artifact.version,
+            artifact.stage.value,
         )
         self._save()
         return artifact
