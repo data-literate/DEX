@@ -11,7 +11,7 @@ This module contains the core implementations for CareerDEX, including:
 from .notifier import GitHubStatusNotifier, PipelineNotifier, SlackNotifier
 
 __all__ = [
-    'SlackNotifier',
-    'GitHubStatusNotifier', 
-    'PipelineNotifier',
+    "SlackNotifier",
+    "GitHubStatusNotifier",
+    "PipelineNotifier",
 ]

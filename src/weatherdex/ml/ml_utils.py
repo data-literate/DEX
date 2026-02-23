@@ -57,12 +57,8 @@ class WeatherFeatureEngineer:
         )
 
         df = df.withColumn("hour", hour(from_unixtime(col("timestamp_unix"))))
-        df = df.withColumn(
-            "day_of_week", dayofweek(from_unixtime(col("timestamp_unix")))
-        )
-        df = df.withColumn(
-            "day_of_year", dayofyear(from_unixtime(col("timestamp_unix")))
-        )
+        df = df.withColumn("day_of_week", dayofweek(from_unixtime(col("timestamp_unix"))))
+        df = df.withColumn("day_of_year", dayofyear(from_unixtime(col("timestamp_unix"))))
         df = df.withColumn("month", month(from_unixtime(col("timestamp_unix"))))
 
         return df
@@ -160,9 +156,7 @@ class WeatherFeatureEngineer:
 
         return df, scaler_model
 
-    def prepare_training_data(
-        self, df: DataFrame, target: str = "temperature"
-    ) -> DataFrame:
+    def prepare_training_data(self, df: DataFrame, target: str = "temperature") -> DataFrame:
         """Prepare complete training dataset with all features."""
         logger.info("Creating time features...")
         df = self.create_time_features(df)
@@ -248,9 +242,7 @@ class WeatherModelTrainer:
 
         # Evaluate
         predictions = model.transform(test_df)
-        evaluator = RegressionEvaluator(
-            labelCol="temperature", predictionCol="prediction"
-        )
+        evaluator = RegressionEvaluator(labelCol="temperature", predictionCol="prediction")
 
         rmse = evaluator.evaluate(predictions, {evaluator.metricName: "rmse"})
         r2 = evaluator.evaluate(predictions, {evaluator.metricName: "r2"})

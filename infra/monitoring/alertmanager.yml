@@ -2,8 +2,7 @@
 # Alertmanager — Routing & Notification Configuration
 # Routes fired alerts to email (warnings) or Slack (pages).
 #
-# TODO: Purchase dataenginex.io domain and update email addresses.
-#       Until then the email addresses below are placeholders.
+# Primary notification emails use thedataenginex.com domain.
 # ---------------------------------------------------------------
 global:
   resolve_timeout: 5m            # Auto-resolve after 5 min of silence
@@ -33,8 +32,8 @@ route:
 receivers:
   - name: default-email
     email_configs:
-      - to: alerts@dataenginex.io     # TODO: placeholder — domain not yet purchased
-        from: ops@dataenginex.io      # TODO: placeholder — domain not yet purchased
+      - to: alerts@thedataenginex.com
+        from: ops@thedataenginex.com
         send_resolved: true
         html: "<p>Alert: {{ .CommonAnnotations.summary }}</p>"
   - name: critical-slack

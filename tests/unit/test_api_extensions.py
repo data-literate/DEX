@@ -178,6 +178,18 @@ class TestV1Router:
             assert resp.status_code == 200
             body = resp.json()
             assert "overall_score" in body
+            assert "dimensions" in body
+            assert "layer_scores" in body
+
+    async def test_data_quality_layer(self) -> None:
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.get("/api/v1/data/quality/bronze")
+            assert resp.status_code == 200
+            body = resp.json()
+            assert body["layer"] == "bronze"
+            assert "latest" in body
+            assert "history" in body
 
     async def test_warehouse_layers(self) -> None:
         transport = ASGITransport(app=app)

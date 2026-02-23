@@ -1,22 +1,33 @@
-"""
-dex-data — Data connectors, profiling, and schema registry (Epic #37).
+"""Data connectors, profiling, and schema registry.
 
-Provides:
-    - Abstract ``DataConnector`` interface and concrete REST/file connectors
-    - ``DataProfiler`` for automated dataset statistics
-    - ``SchemaRegistry`` for versioned schema management
+Public API::
+
+    from dataenginex.data import (
+        DataConnector, RestConnector, FileConnector,
+        ConnectorStatus, FetchResult,
+        DataProfiler, ProfileReport, ColumnProfile,
+        SchemaRegistry, SchemaVersion,
+    )
 """
 
-from .connectors import DataConnector, FileConnector, RestConnector
-from .profiler import DataProfiler, ProfileReport
+from __future__ import annotations
+
+from .connectors import ConnectorStatus, DataConnector, FetchResult, FileConnector, RestConnector
+from .profiler import ColumnProfile, DataProfiler, ProfileReport
 from .registry import SchemaRegistry, SchemaVersion
 
 __all__ = [
+    # Connectors
+    "ConnectorStatus",
     "DataConnector",
+    "FetchResult",
     "FileConnector",
-    "ProfileReport",
-    "DataProfiler",
     "RestConnector",
+    # Profiler
+    "ColumnProfile",
+    "DataProfiler",
+    "ProfileReport",
+    # Schema registry
     "SchemaRegistry",
     "SchemaVersion",
 ]

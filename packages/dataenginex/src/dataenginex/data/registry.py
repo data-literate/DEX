@@ -19,7 +19,17 @@ from loguru import logger
 
 @dataclass
 class SchemaVersion:
-    """An immutable snapshot of a schema at a particular version."""
+    """An immutable snapshot of a schema at a particular version.
+
+    Attributes:
+        name: Schema identifier (e.g. ``"job_posting"``).
+        version: Semver string (e.g. ``"1.2.0"``).
+        fields: Mapping of field names to type descriptions.
+        required_fields: Fields that must be present in every record.
+        description: Human-readable summary of the schema.
+        created_at: When this version was registered.
+        metadata: Extra context dict.
+    """
 
     name: str
     version: str  # semver string, e.g. "1.2.0"
@@ -74,9 +84,7 @@ class SchemaRegistry:
         versions = self._schemas.setdefault(schema.name, [])
         existing = {v.version for v in versions}
         if schema.version in existing:
-            raise ValueError(
-                f"Schema {schema.name!r} version {schema.version} already registered"
-            )
+            raise ValueError(f"Schema {schema.name!r} version {schema.version} already registered")
         versions.append(schema)
         logger.info("Registered schema %s v%s", schema.name, schema.version)
         self._save()
@@ -111,9 +119,7 @@ class SchemaRegistry:
 
         If *version* is ``None`` the latest version is used.
         """
-        schema = (
-            self.get_version(name, version) if version else self.get_latest(name)
-        )
+        schema = self.get_version(name, version) if version else self.get_latest(name)
         if schema is None:
             return False, [f"Schema {name!r} (version={version}) not found"]
         return schema.validate_record(record)

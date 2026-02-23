@@ -83,18 +83,14 @@ def test_metrics_middleware_tracks_exceptions() -> None:
     client = TestClient(app)
 
     # Get initial exception count
-    initial_exceptions = http_exceptions_total.labels(
-        exception_type="ValueError"
-    )._value.get()
+    initial_exceptions = http_exceptions_total.labels(exception_type="ValueError")._value.get()
 
     # Make request that raises exception
     with contextlib.suppress(ValueError):
         client.get("/error")
 
     # Check exception was tracked
-    final_exceptions = http_exceptions_total.labels(
-        exception_type="ValueError"
-    )._value.get()
+    final_exceptions = http_exceptions_total.labels(exception_type="ValueError")._value.get()
     assert final_exceptions > initial_exceptions
 
 

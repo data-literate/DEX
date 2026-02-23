@@ -12,7 +12,6 @@ graph TB
         PR[Pull Request]
         PushDev[Push to dev]
         PushMain[Push to main]
-        Label[PR + preview label]
     end
     
     subgraph "CI Workflows"
@@ -22,7 +21,12 @@ graph TB
     
     subgraph "CD Workflows"
         CD[cd.yml<br/>Build & Deploy]
-        Preview[pr-preview.yaml<br/>Preview Env]
+    end
+    
+    subgraph "Release Workflows"
+        RelDEX[release-dataenginex.yml<br/>DataEngineX Release]
+        RelCDEX[release-careerdex.yml<br/>CareerDEX Release]
+        PyPI[pypi-publish.yml<br/>PyPI Publishing]
     end
     
     subgraph "Outputs"
@@ -30,7 +34,7 @@ graph TB
         DevK8s[dex-dev]
         StageK8s[dex-stage]
         ProdK8s[dex-prod]
-        PreviewK8s[dex-pr-###]
+        PyPIReg[PyPI Registry]
     end
     
     PR --> CI
@@ -42,25 +46,28 @@ graph TB
     PushDev --> CD
     PushMain --> CD
     
-    Label --> Preview
+    PushMain --> RelDEX
+    PushMain --> RelCDEX
+    RelDEX --> PyPI
     
     CD --> GHCR
     CD -->|dev branch| DevK8s
     CD -->|main branch| StageK8s
     CD -->|main branch| ProdK8s
     
-    Preview --> GHCR
-    Preview --> PreviewK8s
+    PyPI --> PyPIReg
     
     style CI fill:#e1f5ff
     style Security fill:#e1f5ff
     style CD fill:#fff3cd
-    style Preview fill:#fff3cd
+    style RelDEX fill:#f8f5ff
+    style RelCDEX fill:#f8f5ff
+    style PyPI fill:#f8f5ff
     style GHCR fill:#d4edda
     style DevK8s fill:#d4edda
     style StageK8s fill:#d4edda
     style ProdK8s fill:#d4edda
-    style PreviewK8s fill:#d4edda
+    style PyPIReg fill:#d4edda
 ```
 
 ## Workflows
@@ -69,7 +76,7 @@ graph TB
 **Triggers**: Push to `main`/`dev`, Pull Requests
 
 **Jobs**:
-- **lint-and-test**: Runs ruff, black, mypy, pytest with coverage
+- **lint-and-test**: Runs Ruff, import checks, mypy, and pytest with coverage
 
 **Required for merge**: ✅ All checks must pass
 
@@ -80,27 +87,10 @@ graph TB
 
 **Jobs**:
 1. **build-and-push**: Builds Docker image with SHA tag → ghcr.io
-2. **update-dev-manifest**: Updates dev kustomization (dev branch only)
-3. **update-stage-prod-manifest**: Updates stage/prod kustomization (main branch only)
-4. **security-scan**: Runs Trivy vulnerability scanner
+2. **security-scan**: Runs Trivy vulnerability scanner
+3. **notify-deployment**: Posts deployment status notifications
 
 **Image Tags**: `sha-XXXXXXXX` (immutable), `latest` (main only)
-
----
-
-### `pr-preview.yaml` - PR Preview Environments
-**Triggers**: PR with `preview` label
-
-**Jobs**:
-1. **check-preview-label**: Verifies preview label exists
-2. **build-preview**: Builds image and comments on PR
-
-**Usage**:
-```bash
-gh pr edit <pr-number> --add-label preview
-```
-
-**Namespace**: `dex-pr-###` (auto-created by ArgoCD)
 
 ---
 
@@ -117,12 +107,11 @@ gh pr edit <pr-number> --add-label preview
 
 ## Image Registry
 
-**Registry**: `ghcr.io/data-literate/dex`
+**Registry**: `ghcr.io/thedataenginex/dex`
 
 **Image Tags**:
 - `sha-XXXXXXXX` - Immutable SHA tag (8 characters)
 - `latest` - Latest main branch build
-- `pr-###` - PR-specific preview builds
 
 ---
 
@@ -149,14 +138,14 @@ sequenceDiagram
     K8s-->>Dev: ✓ Deployed
 ```
 
-### Dev Deployment (Automatic)
+### Dev/Main Image Build (Automatic)
 ```
-PR merged to dev → CI passes → CD builds image → CD updates dev/kustomization.yaml → ArgoCD syncs dex-dev
+PR merged to dev/main → CI passes → CD builds and pushes image → security scan runs
 ```
 
-### Stage/Prod Deployment (Automatic)
+### Stage/Prod Deployment
 ```
-PR merged to main → CI passes → CD builds image → CD updates stage+prod/kustomization.yaml → ArgoCD syncs
+Use GitOps promotion flow documented in infra/runbooks; manifest updates are not currently automated in cd.yml.
 ```
 
 ### Manual Promotion (Alternative)
@@ -178,9 +167,6 @@ gh run list --workflow ci.yml
 
 # View logs
 gh run view <run-id> --log
-
-# Enable preview environment
-gh pr edit <pr-number> --add-label preview
 
 # Monitor ArgoCD deployment
 argocd app get dex-dev
@@ -241,7 +227,7 @@ uv run poe test
 ### Image Not Deploying
 - Check kustomization.yaml updated: `git log infra/argocd/overlays/dev/kustomization.yaml`
 - Verify ArgoCD sync: `argocd app get dex-dev`
-- Check image exists: `docker pull ghcr.io/data-literate/dex:sha-XXXXXXXX`
+- Check image exists: `docker pull ghcr.io/thedataenginex/dex:sha-XXXXXXXX`
 
 ---
 

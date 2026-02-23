@@ -19,7 +19,7 @@ RUN apt-get update \
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Copy dependency manifest and source tree
-COPY pyproject.toml uv.lock Readme.md LICENSE ./
+COPY pyproject.toml uv.lock README.md LICENSE ./
 COPY src/ src/
 COPY packages/dataenginex/ packages/dataenginex/
 

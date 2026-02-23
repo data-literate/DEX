@@ -1,3 +1,8 @@
+# Release Automation for DataEngineX
+# Triggered when packages/dataenginex/pyproject.toml version changes.
+# Extracts version from dataenginex package, creates git tag and GitHub release.
+# This automatically triggers pypi-publish.yml to publish to PyPI.
+
 name: Release
 
 on:
@@ -5,7 +10,7 @@ on:
     branches:
       - main
     paths:
-      - 'pyproject.toml'
+      - 'packages/dataenginex/pyproject.toml'
 
 permissions:
   contents: write
@@ -52,13 +57,33 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract version from pyproject.toml
+      - name: Extract version from packages/dataenginex/pyproject.toml
         id: version
         run: |
-          VERSION=$(grep -m 1 "^version = " pyproject.toml | sed 's/version = "//;s/".*//')
+          VERSION=$(grep -m 1 "^version = " packages/dataenginex/pyproject.toml | sed 's/version = "//;s/".*//')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
-          echo "Extracted version: $VERSION"
+          echo "Extracted DataEngineX version: $VERSION"
+
+      - name: Extract changelog notes
+        id: changelog
+        run: |
+          CHANGELOG="packages/dataenginex/CHANGELOG.md"
+          if [[ -f "$CHANGELOG" ]]; then
+            # Extract the section for this version (between two ## headers)
+            NOTES=$(awk "/^## \\[${{ steps.version.outputs.version }}\\]/{found=1; next} /^## \\[/{if(found) exit} found" "$CHANGELOG")
+            if [[ -z "$NOTES" ]]; then
+              NOTES="Version ${{ steps.version.outputs.version }} — see CHANGELOG.md for details."
+            fi
+          else
+            NOTES="Version ${{ steps.version.outputs.version }} — see RELEASE_NOTES.md for details."
+          fi
+          # Write multiline output
+          {
+            echo "notes<<CHANGELOG_EOF"
+            echo "$NOTES"
+            echo "CHANGELOG_EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Check if tag already exists
         id: check_tag
@@ -91,7 +116,7 @@ jobs:
           gh release create "${{ steps.version.outputs.tag }}" \
             --target main \
             --title "Release ${{ steps.version.outputs.tag }}" \
-            --notes "Version ${{ steps.version.outputs.version }} - See RELEASE_NOTES.md for details" \
+            --notes "${{ steps.changelog.outputs.notes }}" \
             --draft=false
 
       - name: Notify Release Success

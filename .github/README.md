@@ -2,7 +2,7 @@
 
 Welcome! This directory contains code review standards for the DataEngineX project.
 
-## 📚 Two Files, That's It
+## 📚 Core Guidance
 
 **[copilot-instructions.md](copilot-instructions.md)** — Universal Principles
 - Applies to all code, all languages
@@ -18,6 +18,11 @@ Welcome! This directory contains code review standards for the DataEngineX proje
 
 **[PULL_REQUEST_TEMPLATE.md](PULL_REQUEST_TEMPLATE.md)** — PR Format
 - Use when creating pull requests
+
+**[MAINTAINER_PLAYBOOK.md](MAINTAINER_PLAYBOOK.md)** — Sustainability & Governance
+- Keep/Change/Remove audit standard
+- Cloud-neutral and cost-aware contribution expectations
+- Issue triage, label strategy, and deprecation policy
 
 ---
 
@@ -119,9 +124,10 @@ Standards improve when based on experience, not preference.
 
 ## That's It
 
-Two files:
+Core files:
 - **Principles** → [copilot-instructions.md](copilot-instructions.md)
 - **Checklists** → [CHECKLISTS.md](CHECKLISTS.md)
+- **Maintainer governance** → [MAINTAINER_PLAYBOOK.md](MAINTAINER_PLAYBOOK.md)
 - **Examples** → [src/](../src/) and [tests/](../tests/)
 
 Questions? Ask the team or open an issue.

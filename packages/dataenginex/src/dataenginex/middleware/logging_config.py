@@ -4,7 +4,18 @@ Uses **loguru** as the primary logging backend, integrated with **structlog**
 for structured context in the FastAPI application.  All stdlib ``logging``
 output is intercepted and routed through loguru so that every log line—
 regardless of origin—gets the same formatting and sink configuration.
+
+Functions:
+    configure_logging: Configure loguru + structlog sinks.
+    get_logger: Obtain a configured ``structlog.BoundLogger``.
+    add_app_context: Structlog processor adding app name and version.
+
+Constants:
+    APP_VERSION: Current application version.
+    APP_NAME: Application name (from ``$APP_NAME`` or ``"dataenginex"``).
 """
+
+from __future__ import annotations
 
 import logging
 import os
@@ -52,9 +63,7 @@ class _InterceptHandler(logging.Handler):
             frame = frame.f_back
             depth += 1
 
-        _loguru_logger.opt(depth=depth, exception=record.exc_info).log(
-            level, record.getMessage()
-        )
+        _loguru_logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
 
 
 def add_app_context(logger: Any, method_name: str, event_dict: EventDict) -> EventDict:
@@ -116,9 +125,7 @@ def configure_logging(log_level: str = "INFO", json_logs: bool = True) -> None:
 
     structlog.configure(
         processors=processors,
-        wrapper_class=structlog.make_filtering_bound_logger(
-            getattr(logging, log_level.upper())
-        ),
+        wrapper_class=structlog.make_filtering_bound_logger(getattr(logging, log_level.upper())),
         context_class=dict,
         logger_factory=structlog.stdlib.LoggerFactory(),
         cache_logger_on_first_use=True,

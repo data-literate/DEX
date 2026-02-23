@@ -51,9 +51,7 @@ class OpenWeatherPipeline:
         self.client = OpenWeatherAPIClient(api_key)
         self.extracted_data = []
 
-    def extract_cities(
-        self, cities: list[str], units: str = "metric"
-    ) -> list[dict[str, Any]]:
+    def extract_cities(self, cities: list[str], units: str = "metric") -> list[dict[str, Any]]:
         """
         Extract weather data for multiple cities.
 

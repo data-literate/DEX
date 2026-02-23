@@ -7,7 +7,7 @@
 ## Getting Started
 
 **New to DEX? Start here:**
-1. **[Main README](../Readme.md)** - Project overview
+1. **[Main README](../README.md)** - Project overview
 2. **[Development Setup](./DEVELOPMENT.md)** - Local environment setup
 3. **[CI/CD Pipeline](./CI_CD.md)** - Build, release, and publish workflow
 4. **[Contributing](./CONTRIBUTING.md)** - How to contribute
@@ -47,7 +47,7 @@ Project-specific documentation:
 ### Planning
 
 - **[Project Roadmap](./roadmap/project-roadmap.json)** - Strategic milestones
-- **[GitHub Issues](https://github.com/data-literate/DEX/issues)** - Task tracking
+- **[GitHub Issues](https://github.com/TheDataEngineX/DEX/issues)** - Task tracking
 
 ---
 
@@ -97,4 +97,4 @@ docs/
 
 ---
 
-**Version**: v0.3.4 | **Updated**: Feb 20, 2026
+**Version**: v0.3.5 | **Updated**: Feb 21, 2026

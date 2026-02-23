@@ -1,4 +1,11 @@
-"""Middleware for Prometheus metrics collection."""
+"""Middleware for Prometheus metrics collection.
+
+Provides ``PrometheusMetricsMiddleware`` that automatically records
+request counts, durations, in-flight gauges, and exception counters
+for every HTTP request (except ``/metrics`` itself).
+"""
+
+from __future__ import annotations
 
 import time
 from collections.abc import Callable
@@ -38,9 +45,7 @@ class PrometheusMetricsMiddleware(BaseHTTPMiddleware):
             status = response.status_code
 
             # Record request metrics
-            http_requests_total.labels(
-                method=method, endpoint=path, status=status
-            ).inc()
+            http_requests_total.labels(method=method, endpoint=path, status=status).inc()
 
             return cast(Response, response)
 
@@ -53,9 +58,7 @@ class PrometheusMetricsMiddleware(BaseHTTPMiddleware):
         finally:
             # Record duration
             duration = time.time() - start_time
-            http_request_duration_seconds.labels(method=method, endpoint=path).observe(
-                duration
-            )
+            http_request_duration_seconds.labels(method=method, endpoint=path).observe(duration)
 
             # Decrement in-flight counter
             http_requests_in_flight.dec()

@@ -28,7 +28,20 @@ class ModelStage(StrEnum):
 
 @dataclass
 class ModelArtifact:
-    """Registry entry for a model version."""
+    """Registry entry for a model version.
+
+    Attributes:
+        name: Model name (e.g. ``"job_classifier"``).
+        version: Semantic version string.
+        stage: Current lifecycle stage.
+        artifact_path: File path to the serialised model.
+        metrics: Training/evaluation metrics.
+        parameters: Hyper-parameters used for training.
+        description: Free-text description.
+        created_at: When the artifact was registered.
+        promoted_at: When the artifact was last promoted.
+        tags: Arbitrary labels for filtering.
+    """
 
     name: str
     version: str
@@ -77,7 +90,9 @@ class ModelRegistry:
         versions[artifact.version] = artifact
         logger.info(
             "Registered model %s v%s (stage=%s)",
-            artifact.name, artifact.version, artifact.stage.value,
+            artifact.name,
+            artifact.version,
+            artifact.stage.value,
         )
         self._save()
         return artifact

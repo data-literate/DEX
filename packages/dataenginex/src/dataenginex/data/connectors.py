@@ -26,6 +26,7 @@ from loguru import logger
 # Connector metadata
 # ---------------------------------------------------------------------------
 
+
 class ConnectorStatus(StrEnum):
     """Lifecycle states for a data connector."""
 
@@ -38,7 +39,16 @@ class ConnectorStatus(StrEnum):
 
 @dataclass
 class FetchResult:
-    """Outcome of a single ``fetch`` invocation."""
+    """Outcome of a single ``fetch`` invocation.
+
+    Attributes:
+        records: Retrieved data records.
+        record_count: Number of records returned.
+        source: Name of the data source.
+        fetched_at: Timestamp of the fetch.
+        duration_ms: Fetch duration in milliseconds.
+        errors: Error messages (empty on success).
+    """
 
     records: list[dict[str, Any]]
     record_count: int
@@ -55,6 +65,7 @@ class FetchResult:
 # ---------------------------------------------------------------------------
 # Abstract base
 # ---------------------------------------------------------------------------
+
 
 class DataConnector(ABC):
     """Base class for all data connectors in DEX.
@@ -116,6 +127,7 @@ class DataConnector(ABC):
 # REST connector
 # ---------------------------------------------------------------------------
 
+
 class RestConnector(DataConnector):
     """Fetches records from an HTTP/REST API endpoint.
 
@@ -175,7 +187,9 @@ class RestConnector(DataConnector):
     ) -> FetchResult:
         if self._client is None:
             return FetchResult(
-                records=[], record_count=0, source=self.name,
+                records=[],
+                record_count=0,
+                source=self.name,
                 errors=["Connector not connected"],
             )
 
@@ -211,7 +225,9 @@ class RestConnector(DataConnector):
             duration = (time.perf_counter() - start) * 1000
             self._mark_error(str(exc))
             return FetchResult(
-                records=[], record_count=0, source=self.name,
+                records=[],
+                record_count=0,
+                source=self.name,
                 duration_ms=round(duration, 2),
                 errors=[str(exc)],
             )
@@ -227,6 +243,7 @@ class RestConnector(DataConnector):
 # ---------------------------------------------------------------------------
 # File connector (JSON / JSONL / CSV)
 # ---------------------------------------------------------------------------
+
 
 class FileConnector(DataConnector):
     """Reads records from local JSON, JSONL, or CSV files.
@@ -288,10 +305,7 @@ class FileConnector(DataConnector):
                 records = records[:limit]
 
             if filters:
-                records = [
-                    r for r in records
-                    if all(r.get(k) == v for k, v in filters.items())
-                ]
+                records = [r for r in records if all(r.get(k) == v for k, v in filters.items())]
 
             duration = (time.perf_counter() - start) * 1000
             self.status = ConnectorStatus.CONNECTED
@@ -305,7 +319,9 @@ class FileConnector(DataConnector):
             duration = (time.perf_counter() - start) * 1000
             self._mark_error(str(exc))
             return FetchResult(
-                records=[], record_count=0, source=self.name,
+                records=[],
+                record_count=0,
+                source=self.name,
                 duration_ms=round(duration, 2),
                 errors=[str(exc)],
             )

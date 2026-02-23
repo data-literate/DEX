@@ -17,6 +17,7 @@ from dataenginex.core.validators import (
 # SchemaValidator
 # ---------------------------------------------------------------------------
 
+
 def _valid_job_data() -> dict[str, Any]:
     now = datetime.now(tz=UTC).isoformat()
     return {
@@ -70,6 +71,7 @@ class TestSchemaValidator:
 # ---------------------------------------------------------------------------
 # DataQualityChecks
 # ---------------------------------------------------------------------------
+
 
 class TestDataQualityChecks:
     def test_completeness_all_present(self) -> None:
@@ -132,7 +134,9 @@ class TestDataQualityChecks:
         modified = now - timedelta(days=5)
         expiry = posted - timedelta(days=1)
         ok, issues = DataQualityChecks.check_consistency_dates(
-            posted, modified, expiry,
+            posted,
+            modified,
+            expiry,
         )
         assert ok is False
         assert any("before" in i.lower() for i in issues)
@@ -169,7 +173,10 @@ class TestDataQualityChecks:
 
     def test_validity_location_bad_coords(self) -> None:
         ok, issues = DataQualityChecks.check_validity_location(
-            "US", "Seattle", latitude=100.0, longitude=200.0,
+            "US",
+            "Seattle",
+            latitude=100.0,
+            longitude=200.0,
         )
         assert ok is False
         assert len(issues) == 2
@@ -178,6 +185,7 @@ class TestDataQualityChecks:
 # ---------------------------------------------------------------------------
 # DataHash
 # ---------------------------------------------------------------------------
+
 
 class TestDataHash:
     def test_job_hash_deterministic(self) -> None:
@@ -204,6 +212,7 @@ class TestDataHash:
 # ---------------------------------------------------------------------------
 # QualityScorer
 # ---------------------------------------------------------------------------
+
 
 class TestQualityScorer:
     def test_empty_record_scores_zero(self) -> None:
@@ -252,6 +261,7 @@ class TestQualityScorer:
 # ---------------------------------------------------------------------------
 # ValidationReport
 # ---------------------------------------------------------------------------
+
 
 class TestValidationReport:
     def test_add_error(self) -> None:

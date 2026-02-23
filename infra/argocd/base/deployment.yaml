@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: dex
-        image: data-literate/dex:v1.0.0  # Replaced by Kustomize image transformer
+        image: thedataenginex/dex:v1.0.0  # Replaced by Kustomize image transformer
         ports:
         - containerPort: 8000
           name: http                     # Named port referenced by Service & Ingress

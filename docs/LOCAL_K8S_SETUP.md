@@ -195,15 +195,6 @@ argocd app refresh dex-dev
 argocd app wait dex-dev --sync
 ```
 
-### Test PR Preview (Requires GitHub Token)
-1. Create PR with `preview` label
-2. Check ArgoCD ApplicationSet for PR preview:
-   ```bash
-   kubectl get applicationset -n argocd
-   argocd appset get dex-pr-preview
-   ```
-3. Verify PR namespace created: `kubectl get ns | grep dex-pr`
-
 ## Troubleshooting
 
 ### ArgoCD pods not starting
@@ -234,10 +225,10 @@ kubectl get events -n dex-dev --sort-by='.lastTimestamp'
 ```bash
 # If using ghcr.io, images must be public or you need imagePullSecrets
 # For local testing, build image locally:
-docker build -t data-literate/dex:latest .
+docker build -t thedataenginex/dex:latest .
 
 # Tag for local registry
-docker tag data-literate/dex:latest localhost:5000/dex:latest
+docker tag thedataenginex/dex:latest localhost:5000/dex:latest
 
 # Or use Docker Desktop's built-in registry
 ```
@@ -290,10 +281,9 @@ kubectl delete namespace argocd
 
 After local validation:
 1. ✅ ArgoCD working locally
-2. ⏭️ Set up ArgoCD in cloud K8s cluster (AWS EKS, GCP GKE, Azure AKS)
-3. ⏭️ Configure GitHub token for PR preview generator
-4. ⏭️ Set up promotion workflow with PR-based promotion
-5. ⏭️ Configure webhooks for instant sync (instead of 3-min polling)
+2. ⏭️ Set up ArgoCD in your target Kubernetes cluster (cloud-managed or self-hosted)
+3. ⏭️ Set up promotion workflow with PR-based promotion
+4. ⏭️ Configure webhooks for instant sync (instead of 3-min polling)
 
 ## Tips
 

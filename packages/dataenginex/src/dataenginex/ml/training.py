@@ -22,7 +22,17 @@ from loguru import logger
 
 @dataclass
 class TrainingResult:
-    """Outcome of a model training run."""
+    """Outcome of a model training run.
+
+    Attributes:
+        model_name: Name of the trained model.
+        version: Semantic version of this training run.
+        metrics: Training metrics (e.g. ``{"train_score": 0.95}``).
+        parameters: Hyper-parameters used for training.
+        duration_seconds: Wall-clock training time.
+        artifact_path: Path where the model artifact is saved.
+        trained_at: Timestamp of training completion.
+    """
 
     model_name: str
     version: str
@@ -53,7 +63,10 @@ class BaseTrainer(ABC):
 
     @abstractmethod
     def train(
-        self, X_train: Any, y_train: Any, **params: Any  # noqa: N803
+        self,
+        X_train: Any,
+        y_train: Any,
+        **params: Any,  # noqa: N803
     ) -> TrainingResult:
         """Train the model and return metrics."""
         ...
@@ -106,7 +119,10 @@ class SklearnTrainer(BaseTrainer):
         self._is_fitted = False
 
     def train(
-        self, X_train: Any, y_train: Any, **params: Any  # noqa: N803
+        self,
+        X_train: Any,
+        y_train: Any,
+        **params: Any,  # noqa: N803
     ) -> TrainingResult:
         if self.estimator is None:
             raise RuntimeError("No estimator provided to SklearnTrainer")
@@ -126,7 +142,10 @@ class SklearnTrainer(BaseTrainer):
 
         logger.info(
             "Trained %s v%s in %.2fs (train_score=%.4f)",
-            self.model_name, self.version, duration, train_score,
+            self.model_name,
+            self.version,
+            duration,
+            train_score,
         )
 
         return TrainingResult(
@@ -154,21 +173,39 @@ class SklearnTrainer(BaseTrainer):
                 recall_score,
             )
 
-            metrics["precision"] = round(float(
-                precision_score(
-                    y_test, predictions, average="weighted", zero_division=0,
+            metrics["precision"] = round(
+                float(
+                    precision_score(
+                        y_test,
+                        predictions,
+                        average="weighted",
+                        zero_division=0,
+                    ),
                 ),
-            ), 4)
-            metrics["recall"] = round(float(
-                recall_score(
-                    y_test, predictions, average="weighted", zero_division=0,
+                4,
+            )
+            metrics["recall"] = round(
+                float(
+                    recall_score(
+                        y_test,
+                        predictions,
+                        average="weighted",
+                        zero_division=0,
+                    ),
                 ),
-            ), 4)
-            metrics["f1"] = round(float(
-                f1_score(
-                    y_test, predictions, average="weighted", zero_division=0,
+                4,
+            )
+            metrics["f1"] = round(
+                float(
+                    f1_score(
+                        y_test,
+                        predictions,
+                        average="weighted",
+                        zero_division=0,
+                    ),
                 ),
-            ), 4)
+                4,
+            )
         except Exception:
             pass
 
@@ -189,11 +226,15 @@ class SklearnTrainer(BaseTrainer):
 
         # Save metadata alongside
         meta = out.with_suffix(".json")
-        meta.write_text(json.dumps({
-            "model_name": self.model_name,
-            "version": self.version,
-            "saved_at": datetime.now(tz=UTC).isoformat(),
-        }))
+        meta.write_text(
+            json.dumps(
+                {
+                    "model_name": self.model_name,
+                    "version": self.version,
+                    "saved_at": datetime.now(tz=UTC).isoformat(),
+                }
+            )
+        )
 
         logger.info("Saved model %s to %s", self.model_name, out)
         return str(out)

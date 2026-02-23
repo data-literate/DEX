@@ -65,6 +65,30 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: cloud_neutrality
+    attributes:
+      label: Cloud Neutrality
+      description: How will this stay vendor-neutral?
+      options:
+        - No cloud dependency (local/open-source default)
+        - Optional provider adapter (AWS/GCP/Azure)
+        - Provider-specific (must justify)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: cost_profile
+    attributes:
+      label: Cost Profile
+      description: Expected baseline operating cost for default usage
+      options:
+        - Free / local-first
+        - Free tier compatible
+        - Paid service required (must justify)
+    validations:
+      required: true
+
   - type: textarea
     id: acceptance
     attributes:

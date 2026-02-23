@@ -25,7 +25,8 @@ jobs:
       packages: write
 
     outputs:
-      image_tag: ${{ steps.meta.outputs.tags }}
+      image_tag: ${{ steps.vars.outputs.image_tag }}
+      image_digest: ${{ steps.build.outputs.digest }}
       short_sha: ${{ steps.vars.outputs.short_sha }}
 
     steps:
@@ -40,12 +41,12 @@ jobs:
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  text: '🚀 CD Pipeline Started - Docker Build',
+                  text: '� Continuous Delivery - Docker Build Started',
                   blocks: [{
                     type: 'section',
                     text: {
                       type: 'mrkdwn',
-                      text: `*🚀 CD Pipeline Started*\n*Branch:* ${process.env.BRANCH}`
+                      text: `*🐳 CD Pipeline Started*\n*Building Docker Image & Deploying*\n*Branch:* ${process.env.BRANCH}`
                     }
                   }]
                 })
@@ -74,8 +75,14 @@ jobs:
         id: vars
         run: |
           SHORT_SHA=$(git rev-parse --short=8 HEAD)
+          # Convert GitHub org/owner to lowercase for Docker reference compliance
+          OWNER_LOWER=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          # Construct full image tag using lowercase owner
+          echo "image_tag=${REGISTRY}/${OWNER_LOWER}/dex:${SHORT_SHA}" >> $GITHUB_OUTPUT
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
-          echo "image_tag=sha-$SHORT_SHA" >> $GITHUB_OUTPUT
+        env:
+          REGISTRY: ${{ env.REGISTRY }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
 
       - name: Docker metadata
         id: meta
@@ -83,15 +90,18 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=sha-${{ steps.vars.outputs.short_sha }}
+            type=raw,value=${{ steps.vars.outputs.short_sha }}
             type=raw,value=latest,enable=${{ github.event.workflow_run.head_branch == 'main' }}
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.short_sha }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -109,10 +119,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Pull and list image from GHCR
+        run: |
+          echo "Pulling image: ${{ needs.build-and-push.outputs.image_tag }}"
+          docker pull ${{ needs.build-and-push.outputs.image_tag }}
+          docker images | grep dex
+
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.34.1
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ needs.build-and-push.outputs.short_sha }}
+          image-ref: ${{ needs.build-and-push.outputs.image_tag }}
           format: 'sarif'
           output: 'trivy-results.sarif'
 
@@ -139,27 +155,27 @@ jobs:
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  text: '✅ CD Pipeline Completed Successfully',
+                  text: '✅ Deployment Succeeded',
                   blocks: [
                     {
                       type: 'section',
                       text: {
                         type: 'mrkdwn',
-                        text: `*✅ CD Pipeline Completed*`
+                        text: `*✅ Continuous Delivery Completed*\n*Docker Image Built & Deployed to Kubernetes*`
                       }
                     },
                     {
                       type: 'section',
                       fields: [
                         { type: 'mrkdwn', text: `*Image:*\n${process.env.TAG}` },
-                        { type: 'mrkdwn', text: `*SHA:*\n\`${process.env.SHA}\`` },
+                        { type: 'mrkdwn', text: `*Commit:*\n\`${process.env.SHA?.substring(0, 8)}\`` },
                         { type: 'mrkdwn', text: `*Branch:*\n${process.env.BRANCH}` },
                         { type: 'mrkdwn', text: `*Run:*\n<${process.env.URL}|View Details>` }
                       ]
                     },
                     {
                       type: 'context',
-                      elements: [{ type: 'mrkdwn', text: `🐳 Image pushed to GHCR • Security scan passed` }]
+                      elements: [{ type: 'mrkdwn', text: `🐳 Image pushed to GHCR • Security scan passed • Deployed via GitOps` }]
                     }
                   ]
                 })

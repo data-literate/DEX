@@ -52,7 +52,16 @@ class ColumnProfile:
 
 @dataclass
 class ProfileReport:
-    """Aggregated profiling report for a dataset."""
+    """Aggregated profiling report for a dataset.
+
+    Attributes:
+        dataset_name: Name of the profiled dataset.
+        record_count: Total number of records profiled.
+        column_count: Number of columns/fields discovered.
+        columns: Per-column profile statistics.
+        profiled_at: Timestamp when profiling was performed.
+        duration_ms: Time taken for profiling in milliseconds.
+    """
 
     dataset_name: str
     record_count: int
@@ -153,9 +162,7 @@ class DataProfiler:
 
         # Determine dominant type
         dtype = DataProfiler._infer_dtype(non_null)
-        counter: Counter[Any] = Counter(
-            str(v) for v in non_null
-        )
+        counter: Counter[Any] = Counter(str(v) for v in non_null)
         top_values = counter.most_common(5)
         unique_count = len(counter)
 

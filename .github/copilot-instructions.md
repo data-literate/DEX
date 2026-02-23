@@ -17,10 +17,10 @@ Domain-specific guidance lives in [instructions/](instructions/) — loaded auto
 **Build:** `poetry-core` backend + `uv` package manager | Dep groups: `dev`, `data` (PySpark/Airflow), `notebook`
 
 **Commands:**
-- Quality: `poe lint` | `poe format` | `poe typecheck` | `poe check-all`
-- Test: `poe test` | `poe test-unit` | `poe test-integration` | `poe test-cov`
-- Run: `poe dev` | `poe docker-up` | `poe docker-down`
-- Deps: `poe install` | `poe security` | `poe uv-sync` | `poe uv-lock`
+- Quality: `uv run poe lint` | `uv run poe lint-fix` | `uv run poe typecheck` | `uv run poe check-all`
+- Test: `uv run poe test` | `uv run poe test-unit` | `uv run poe test-integration` | `uv run poe test-cov`
+- Run: `uv run poe dev` | `uv run poe docker-up` | `uv run poe docker-down`
+- Deps: `uv run poe install` | `uv run poe security` | `uv run poe uv-sync` | `uv run poe uv-lock`
 
 ---
 
