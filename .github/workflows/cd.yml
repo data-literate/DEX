@@ -75,14 +75,13 @@ jobs:
         id: vars
         run: |
           SHORT_SHA=$(git rev-parse --short=8 HEAD)
-          # Lowercase GitHub owner for Docker compliance
-          OWNER_LOWER=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          OWNER_LOWER=$(echo "${REPO_OWNER}" | tr '[:upper:]' '[:lower:]')
           echo "owner_lower=${OWNER_LOWER}" >> $GITHUB_OUTPUT
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
           echo "image_tag=${REGISTRY}/${OWNER_LOWER}/dex:${SHORT_SHA}" >> $GITHUB_OUTPUT
         env:
           REGISTRY: ${{ env.REGISTRY }}
-          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          REPO_OWNER: ${{ github.event.workflow_run.repository.owner.login }}
 
       - name: Docker metadata
         id: meta
