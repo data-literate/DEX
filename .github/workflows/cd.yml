@@ -35,7 +35,11 @@ jobs:
         if: always()
         with:
           script: |
-            if (!process.env.SLACK_WEBHOOK) return;
+            const core = require('@actions/core');
+            if (!process.env.SLACK_WEBHOOK) {
+              core.setFailed('SLACK_WEBHOOK is not set');
+              return;
+            }
             try {
               await fetch(process.env.SLACK_WEBHOOK, {
                 method: 'POST',
@@ -51,7 +55,10 @@ jobs:
                   }]
                 })
               });
-            } catch (e) { console.log('Slack notification failed'); }
+            } catch (e) { 
+              console.error('Slack notification failed:', e.message); 
+              core.setFailed('Slack notification failed: ' + e.message);
+            }
         env:
           SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
           BRANCH: ${{ github.event.workflow_run.head_branch }}
@@ -64,29 +71,16 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Compute lowercase image name
-        id: image
-        uses: actions/github-script@v7
-        with:
-          result-encoding: string
-          script: |
-            return `ghcr.io/${context.repo.owner}/${context.repo.repo}`.toLowerCase()
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract commit SHA
+      - name: Extract commit SHA and image tag
         id: vars
         run: |
           SHORT_SHA=$(git rev-parse --short=8 HEAD)
           OWNER_LOWER=$(echo "${REPO_OWNER}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_REPO="${REGISTRY}/${OWNER_LOWER}/dex"
           echo "owner_lower=${OWNER_LOWER}" >> $GITHUB_OUTPUT
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
-          echo "image_tag=${REGISTRY}/${OWNER_LOWER}/dex:${SHORT_SHA}" >> $GITHUB_OUTPUT
+          echo "image_repo=${IMAGE_REPO}" >> $GITHUB_OUTPUT
+          echo "image_tag=${IMAGE_REPO}:${SHORT_SHA}" >> $GITHUB_OUTPUT
         env:
           REGISTRY: ${{ env.REGISTRY }}
           REPO_OWNER: ${{ github.event.workflow_run.repository.owner.login }}
@@ -95,10 +89,17 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ steps.vars.outputs.owner_lower }}/dex
+          images: ${{ steps.vars.outputs.image_repo }}
           tags: |
             type=raw,value=${{ steps.vars.outputs.short_sha }}
             type=raw,value=latest,enable=${{ github.event.workflow_run.head_branch == 'main' }}
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
         id: build
@@ -107,12 +108,12 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ steps.image.outputs.result }}:latest
-            ${{ steps.image.outputs.result }}:${{ github.sha }}
+            ${{ steps.vars.outputs.image_repo }}:latest
+            ${{ steps.vars.outputs.image_repo }}:${{ steps.vars.outputs.short_sha }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
 
   security-scan:
     name: Security Scan
@@ -125,7 +126,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-        
+
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -163,7 +164,11 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            if (!process.env.SLACK_WEBHOOK) return;
+            const core = require('@actions/core');
+            if (!process.env.SLACK_WEBHOOK) {
+              core.setFailed('SLACK_WEBHOOK is not set');
+              return;
+            }
             try {
               await fetch(process.env.SLACK_WEBHOOK, {
                 method: 'POST',
@@ -194,7 +199,10 @@ jobs:
                   ]
                 })
               });
-            } catch (e) { console.log('Slack notification failed:', e.message); }
+            } catch (e) { 
+              console.error('Slack notification failed:', e.message);
+              core.setFailed('Slack notification failed: ' + e.message);
+            }
         env:
           SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
           TAG: ${{ needs.build-and-push.outputs.image_tag }}
@@ -207,7 +215,11 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            if (!process.env.SLACK_WEBHOOK) return;
+            const core = require('@actions/core');
+            if (!process.env.SLACK_WEBHOOK) {
+              core.setFailed('SLACK_WEBHOOK is not set');
+              return;
+            }
             const buildResult = process.env.BUILD_RESULT;
             const scanResult = process.env.SCAN_RESULT;
             const failedJobs = [];
@@ -243,7 +255,10 @@ jobs:
                   ]
                 })
               });
-            } catch (e) { console.log('Slack notification failed:', e.message); }
+            } catch (e) { 
+              console.error('Slack notification failed:', e.message); 
+              core.setFailed('Slack notification failed: ' + e.message);
+            }
         env:
           SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
           BUILD_RESULT: ${{ needs.build-and-push.result }}
