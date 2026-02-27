@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Notify Security Scan Start
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         if: always()
         with:
           script: |
@@ -74,7 +74,7 @@ jobs:
     steps:
       - name: Notify Security Success
         if: ${{ needs.semgrep.result == 'success' && needs.codeql.result == 'success' }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             if (!process.env.SLACK_WEBHOOK) return;
@@ -112,7 +112,7 @@ jobs:
 
       - name: Notify Security Issues
         if: ${{ needs.semgrep.result == 'failure' || needs.codeql.result == 'failure' }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             if (!process.env.SLACK_WEBHOOK) return;

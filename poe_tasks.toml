@@ -58,6 +58,10 @@ help = "Audit dependencies for known vulnerabilities"
 cmd = "pre-commit run --all-files"
 help = "Run all pre-commit hooks"
 
+[tool.poe.tasks.actionlint]
+cmd = "actionlint .github/workflows/*.yml"
+help = "Lint GitHub Actions workflows"
+
 [tool.poe.tasks.check-all]
 shell = "poe imports-check && poe lint && poe typecheck && poe test"
 help = "Run import-order check, lint, typecheck, and tests in sequence"
