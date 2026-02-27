@@ -26,6 +26,8 @@ jobs:
     permissions:
       contents: write
       packages: write
+      pull-requests: write
+      issues: write
 
     steps:
       - name: Checkout PR branch
