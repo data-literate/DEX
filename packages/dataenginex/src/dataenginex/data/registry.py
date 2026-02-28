@@ -16,6 +16,11 @@ from typing import Any
 
 from loguru import logger
 
+__all__ = [
+    "SchemaRegistry",
+    "SchemaVersion",
+]
+
 
 @dataclass
 class SchemaVersion:

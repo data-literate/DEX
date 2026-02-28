@@ -10,6 +10,12 @@ from enum import StrEnum
 
 import httpx
 
+__all__ = [
+    "ComponentHealth",
+    "HealthChecker",
+    "HealthStatus",
+]
+
 
 class HealthStatus(StrEnum):
     """Supported health statuses."""

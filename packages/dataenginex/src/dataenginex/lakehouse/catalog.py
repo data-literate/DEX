@@ -16,6 +16,11 @@ from typing import Any
 
 from loguru import logger
 
+__all__ = [
+    "CatalogEntry",
+    "DataCatalog",
+]
+
 
 @dataclass
 class CatalogEntry:

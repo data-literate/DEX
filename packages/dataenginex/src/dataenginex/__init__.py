@@ -31,4 +31,41 @@ try:
 except PackageNotFoundError:
     __version__ = "0.4.11"
 
-__all__ = ["__version__"]
+# Re-export key public symbols for convenience top-level imports
+from dataenginex.api import HealthChecker, HealthStatus
+from dataenginex.core import DataLayer, MedallionArchitecture, QualityGate
+from dataenginex.data import DataConnector, DataProfiler, SchemaRegistry
+from dataenginex.lakehouse import DataCatalog, ParquetStorage, StorageBackend
+from dataenginex.middleware import configure_logging, configure_tracing, get_logger
+from dataenginex.ml import DriftDetector, ModelRegistry, SklearnTrainer
+from dataenginex.warehouse import PersistentLineage, TransformPipeline
+
+__all__ = [
+    "__version__",
+    # api
+    "HealthChecker",
+    "HealthStatus",
+    # core
+    "DataLayer",
+    "MedallionArchitecture",
+    "QualityGate",
+    # data
+    "DataConnector",
+    "DataProfiler",
+    "SchemaRegistry",
+    # lakehouse
+    "DataCatalog",
+    "ParquetStorage",
+    "StorageBackend",
+    # middleware
+    "configure_logging",
+    "configure_tracing",
+    "get_logger",
+    # ml
+    "DriftDetector",
+    "ModelRegistry",
+    "SklearnTrainer",
+    # warehouse
+    "PersistentLineage",
+    "TransformPipeline",
+]
