@@ -22,7 +22,7 @@ See [README.md](https://github.com/TheDataEngineX/DEX/blob/main/README.md) for t
 
 ### Infrastructure Baseline (implemented)
 - ✅ **CI/CD**: GitHub Actions — lint (ruff), type-check (mypy), test (pytest), build, push
-- ✅ **GitOps**: ArgoCD with multi-environment deployment (dev/stage/prod)
+- ✅ **GitOps**: ArgoCD with branch-based deployment (dev/prod)
 - ✅ **Code Quality**: Ruff (0 errors), mypy strict (0 errors), 94% test coverage
 - ✅ **Pre-commit**: ruff + mypy + standard hooks
 - ✅ **Containerization**: Multi-stage Docker with non-root user, healthcheck
@@ -50,7 +50,7 @@ See [README.md](https://github.com/TheDataEngineX/DEX/blob/main/README.md) for t
          ▼
 ┌─────────────────────────────────────────────────────────────┐
 │              Kubernetes + ArgoCD (GitOps)                   │
-│   Environments: dev (2 pods), stage (2 pods), prod (3 pods)│
+│   Environments: dev (2 pods, dex-dev), prod (3 pods, dex)    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -192,7 +192,7 @@ CI builds image → CD updates manifests → ArgoCD syncs → Monitor
 
 ### 5. Promotion Flow
 ```
-dev (auto) → stage (QA approval) → prod (manual approval)
+dev (auto) → prod (PR promotion via main branch)
 ```
 
 ## Risk Management

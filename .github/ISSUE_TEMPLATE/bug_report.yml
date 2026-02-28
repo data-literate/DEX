@@ -65,8 +65,7 @@ body:
       options:
         - Local Development
         - Dev (dex-dev)
-        - Stage (dex-stage)
-        - Prod (dex-prod)
+        - Prod (dex)
     validations:
       required: true
 

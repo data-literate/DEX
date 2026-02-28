@@ -2,16 +2,18 @@
 
 **Procedures for deploying and rolling back DEX across environments.**
 
-> **Quick Links:** [Dev Deployment](#deploy-to-dev) · [Stage/Prod Deployment](#deploy-to-stageprod) · [Rollback](#rollback) · [Emergency Procedures](#emergency-rollback-kubernetes)
+> **Quick Links:** [Dev Deployment](#deploy-to-dev) · [Prod Deployment](#deploy-to-prod) · [Rollback](#rollback) · [Emergency Procedures](#emergency-rollback-kubernetes)
 
 ---
 
-This runbook describes how to release and rollback DEX using the `dev` → `main` promotion flow.
+This runbook describes how to release and rollback DEX using the `dev` → `main` branch-based deployment flow.
 
 ## Environments
 
-- **dev**: Deploys from `dev` branch via GitOps (auto-sync)
-- **stage/prod**: Deploys from `main` branch via GitOps (auto-sync)
+| Environment | Branch | Namespace | ArgoCD App |
+|-------------|--------|-----------|------------|
+| **dev** | `dev` | `dex-dev` | `dex-dev` |
+| **prod** | `main` | `dex` | `dex` |
 
 ```mermaid
 graph LR
@@ -21,15 +23,11 @@ graph LR
     ArgoDev --> DevK8s[dex-dev namespace]
 
     Main[main branch] --> MainCD[CD Pipeline]
-    MainCD --> StageManifest[stage/kustomization.yaml]
     MainCD --> ProdManifest[prod/kustomization.yaml]
-    StageManifest --> ArgoStage[ArgoCD]
     ProdManifest --> ArgoProd[ArgoCD]
-    ArgoStage --> StageK8s[dex-stage namespace]
-    ArgoProd --> ProdK8s[dex-prod namespace]
+    ArgoProd --> ProdK8s[dex namespace]
 
     style DevK8s fill:#d4edda
-    style StageK8s fill:#fff3cd
     style ProdK8s fill:#f8d7da
 ```
 
@@ -74,7 +72,7 @@ kubectl get pods -n dex-dev
 argocd app get dex-dev
 ```
 
-## Deploy to Stage/Prod
+## Deploy to Prod
 
 **Trigger**: Merge release PR from `dev` → `main`.
 
@@ -85,34 +83,27 @@ sequenceDiagram
     participant CI as CI Pipeline
     participant CD as CD Pipeline
     participant Argo as ArgoCD
-    participant Stage as dex-stage
-    participant Prod as dex-prod
+    participant Prod as dex
 
     Dev->>GH: Merge PR to main
     GH->>CI: Run tests & lint
     CI-->>GH: ✓ CI passes
     GH->>CD: Trigger CD workflow
     CD->>CD: Build image (sha-XXXXXXXX)
-    CD->>GH: Update stage+prod/kustomization.yaml
+    CD->>GH: Update prod/kustomization.yaml
     GH->>Argo: Git change detected
-    par Stage and Prod Deployment
-        Argo->>Stage: Sync dex-stage
-        Argo->>Prod: Sync dex-prod
-    end
-    Stage-->>Dev: ✓ Stage deployed
+    Argo->>Prod: Sync dex namespace
     Prod-->>Dev: ✓ Prod deployed
 ```
 
 **Expected Outcome**:
-- CD updates `infra/argocd/overlays/stage/kustomization.yaml` and `infra/argocd/overlays/prod/kustomization.yaml` in `main`.
-- ArgoCD syncs `dex-stage` and `dex-prod` to the new SHA.
+- CD updates `infra/argocd/overlays/prod/kustomization.yaml` in `main`.
+- ArgoCD syncs `dex` namespace to the new SHA.
 
 **Verify**:
 ```bash
-kubectl get pods -n dex-stage
-kubectl get pods -n dex-prod
-argocd app get dex-stage
-argocd app get dex-prod
+kubectl get pods -n dex
+argocd app get dex
 ```
 
 ## Rollback
@@ -122,7 +113,7 @@ graph TD
     Start[Deployment Issue Detected] --> Decision{Which Environment?}
 
     Decision -->|Dev| DevLog["git log dev/kustomization.yaml"]
-    Decision -->|Stage/Prod| MainLog["git log stage/kustomization.yaml"]
+    Decision -->|Prod| MainLog["git log prod/kustomization.yaml"]
 
     DevLog --> DevRevert["git revert <commit-sha>"]
     DevRevert --> DevPush["git push origin dev"]
@@ -131,8 +122,8 @@ graph TD
 
     MainLog --> MainRevert["git revert <commit-sha>"]
     MainRevert --> MainPush["git push origin main"]
-    MainPush --> MainArgo[ArgoCD syncs stage+prod]
-    MainArgo --> MainVerify["kubectl get pods -n dex-stage/prod"]
+    MainPush --> MainArgo[ArgoCD syncs dex]
+    MainArgo --> MainVerify["kubectl get pods -n dex"]
 
     DevVerify --> End[✓ Rollback Complete]
     MainVerify --> End
@@ -151,23 +142,22 @@ git push origin dev
 
 ArgoCD will sync `dex-dev` back to the previous image.
 
-### Rollback Stage/Prod
+### Rollback Prod
 
 ```bash
-git log --oneline infra/argocd/overlays/stage/kustomization.yaml
+git log --oneline infra/argocd/overlays/prod/kustomization.yaml
 git revert <commit-sha>
 git push origin main
 ```
 
-ArgoCD will sync `dex-stage` and `dex-prod` back to the previous image.
+ArgoCD will sync `dex` back to the previous image.
 
 ## Emergency Rollback (Kubernetes)
 
 If ArgoCD is unavailable, roll back directly:
 
 ```bash
-kubectl rollout undo deployment/dex -n dex-stage
-kubectl rollout undo deployment/dex -n dex-prod
+kubectl rollout undo deployment/dex -n dex
 ```
 
 Record the rollback by reverting the manifest in git once ArgoCD is available.

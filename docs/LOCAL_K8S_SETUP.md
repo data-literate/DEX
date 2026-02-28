@@ -113,10 +113,8 @@ kubectl get applications -n argocd
 
 # Expected output:
 # NAME        SYNC STATUS   HEALTH STATUS
-# dex         OutOfSync     Missing
 # dex-dev     OutOfSync     Missing
-# dex-stage   OutOfSync     Missing
-# dex-prod    OutOfSync     Missing
+# dex         OutOfSync     Missing
 ```
 
 ## Step 7: Sync Applications
@@ -288,7 +286,7 @@ After local validation:
 ## Tips
 
 - **Fast Refresh**: `argocd app refresh <app>` forces immediate git poll
-- **Auto-Sync**: Already enabled for dev/stage, disabled for prod (manual approval)
+- **Auto-Sync**: Already enabled for both dev and prod
 - **Prune**: Auto-prune enabled (ArgoCD deletes resources removed from git)
 - **Self-Heal**: Enabled (ArgoCD reverts manual kubectl changes)
 - **Diff**: `argocd app diff dex-dev` shows pending changes

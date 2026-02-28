@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------
 # DataEngineX — Base Kustomization
 # Aggregates all base K8s manifests and sets the default image tag.
-# Environment overlays (dev/stage/prod/preview) patch on top of this.
+# Environment overlays (dev/prod) patch on top of this.
 # ---------------------------------------------------------------
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization

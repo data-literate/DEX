@@ -24,4 +24,5 @@ applyTo: ".github/workflows/**/*.yml,.github/workflows/**/*.yaml"
 - `uv` for deps (not pip) | Python 3.11 | `ubuntu-latest`
 - Declare `permissions:` per workflow — pin action versions to tags
 - CD triggers on `workflow_run` after CI success
+- Branch-based deployment: `dev` → dex-dev, `main` → dex (no stage or preview environments)
 - Matrix releases: separate workflows for independent package versioning

@@ -1,12 +1,12 @@
 # ---------------------------------------------------------------
 # PROD overlay — Production configuration.
 # 3 replicas, warn-level logging, higher resource limits.
-# Only SHA tags validated in stage are promoted here.
+# Deployed automatically when merging to main branch.
 # ---------------------------------------------------------------
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: dex-prod
+namespace: dex
 
 resources:
   - ../../base
@@ -18,7 +18,7 @@ replicas:
 images:
   - name: thedataenginex/dex
     newName: ghcr.io/thedataenginex/dex
-    newTag: sha-03216e24    # Same SHA promoted from stage
+    newTag: sha-03216e24    # Pinned to specific commit SHA
 
 patches:
   - path: deployment.yaml
