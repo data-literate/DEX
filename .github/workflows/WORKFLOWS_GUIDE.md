@@ -32,8 +32,7 @@ graph TB
     subgraph "Outputs"
         GHCR[ghcr.io<br/>Container Registry]
         DevK8s[dex-dev]
-        StageK8s[dex-stage]
-        ProdK8s[dex-prod]
+        ProdK8s[dex]
         PyPIReg[PyPI Registry]
     end
 
@@ -50,7 +49,6 @@ graph TB
 
     CD --> GHCR
     CD -->|dev branch| DevK8s
-    CD -->|main branch| StageK8s
     CD -->|main branch| ProdK8s
 
     PyPI --> PyPIReg
@@ -63,7 +61,6 @@ graph TB
     style PyPI fill:#f8f5ff
     style GHCR fill:#d4edda
     style DevK8s fill:#d4edda
-    style StageK8s fill:#d4edda
     style ProdK8s fill:#d4edda
     style PyPIReg fill:#d4edda
 ```
@@ -83,11 +80,15 @@ graph TB
 ### `cd.yml` - Continuous Deployment
 **Triggers**: `workflow_run` after upstream workflow completion on `main`/`dev` (`Continuous Integration`, `Security Scans`, `Package Validation`)
 
+**Branch → Environment Mapping**:
+- `dev` → `dex-dev`
+- `main` → `dex`
+
 **Jobs**:
 1. **gate-dependencies**: Blocks CD unless all required upstream workflows for the same commit SHA are successful
 2. **build-and-push**: Builds Docker image with SHA tag → ghcr.io
 3. **security-scan**: Runs Trivy vulnerability scanner on produced image
-4. **update-gitops-manifests**: Direct push with bot token; falls back to PR/issue when branch protection rejects push
+4. **update-gitops-manifests**: Updates the environment overlay matching the branch; direct push with bot token, falls back to PR/issue when branch protection rejects push
 5. **verify-deployment**: ArgoCD + optional smoke checks when manifests were updated directly
 6. **notify-deployment**: Posts success/failure/pending-manual-approval status notifications
 
@@ -174,20 +175,23 @@ sequenceDiagram
     K8s-->>Dev: ✓ Deployed
 ```
 
-### Dev/Main Image Build (Automatic)
+### Dev Image Build (Automatic)
 ```
-PR merged to dev/main → CI passes → CD builds and pushes image → security scan runs
+PR merged to dev → CI passes → CD builds and pushes image → security scan runs → dev overlay updated → ArgoCD syncs dex-dev
 ```
 
-### Stage/Prod Deployment
+### Prod Deployment
 ```
-Push/merge to main → CI passes → CD updates stage/prod overlays in GitOps → ArgoCD syncs stage and prod.
+PR merged to main (from dev) → CI passes → CD builds and pushes image → security scan runs → prod overlay updated → ArgoCD syncs dex
 ```
 
 ### Manual Promotion (Alternative)
 ```bash
-# Use promotion script
-./scripts/promote.sh --from-env stage --to-env prod --image-tag sha-abc12345
+# Promote dev → prod (creates PR: dev → main)
+./scripts/promote.sh
+
+# Promote specific image tag to prod
+./scripts/promote.sh --image-tag sha-abc12345
 ```
 
 ---

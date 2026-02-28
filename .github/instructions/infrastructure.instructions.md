@@ -11,8 +11,8 @@ applyTo: "infra/**/*,Dockerfile,docker-compose.yml"
 
 ## Kubernetes
 - Kustomize base: `infra/argocd/base/` (deployment, HPA, ingress, NetworkPolicy, PDB)
-- Overlays: `infra/argocd/overlays/` (dev, stage, prod, preview)
-- ArgoCD GitOps — deploys on merge | Envs: dev/stage (2 pods), prod (3 pods)
+- Overlays: `infra/argocd/overlays/` (dev, prod)
+- ArgoCD GitOps — deploys on merge | Envs: dev (2 pods, dex-dev), prod (3 pods, dex)
 - Set resource limits/requests, liveness/readiness/startup probes
 
 ## Monitoring

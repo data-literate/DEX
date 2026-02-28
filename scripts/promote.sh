@@ -1,33 +1,37 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# ---------------------------------------------------------------
+# promote.sh — Branch-based promotion: dev → prod (main)
+#
+# Creates a PR to merge the dev branch into main, which triggers
+# CD to build + deploy to the prod environment (dex namespace)
+# via ArgoCD.
+#
+# Optionally promotes a specific image tag by updating the prod
+# overlay kustomization.yaml directly.
+# ---------------------------------------------------------------
+
 usage() {
   cat <<'USAGE'
 Usage:
-  ./scripts/promote.sh --from-env <dev|stage> --to-env <stage|prod> [--image-tag <tag>] [--auto-merge]
+  ./scripts/promote.sh [--image-tag <tag>] [--auto-merge]
+
+Promotes dev → prod by creating a merge PR from dev into main.
+If --image-tag is provided, updates prod overlay with that specific tag instead.
 
 Examples:
-  ./scripts/promote.sh --from-env dev --to-env stage
-  ./scripts/promote.sh --from-env stage --to-env prod --image-tag sha-abc12345
-  ./scripts/promote.sh --from-env dev --to-env stage --auto-merge
+  ./scripts/promote.sh                          # PR: dev → main
+  ./scripts/promote.sh --auto-merge             # PR: dev → main (auto-merge)
+  ./scripts/promote.sh --image-tag sha-abc12345 # Update prod overlay directly
 USAGE
 }
 
-from_env=""
-to_env=""
 image_tag=""
 auto_merge="false"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --from-env|-f)
-      from_env="$2"
-      shift 2
-      ;;
-    --to-env|-t)
-      to_env="$2"
-      shift 2
-      ;;
     --image-tag|-i)
       image_tag="$2"
       shift 2
@@ -48,49 +52,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ -z "$from_env" || -z "$to_env" ]]; then
-  usage
-  exit 1
-fi
-
-if [[ "$from_env" == "stage" && "$to_env" != "prod" ]]; then
-  echo "Can only promote from stage to prod"
-  exit 1
-fi
-
-if [[ "$from_env" == "dev" && "$to_env" != "stage" ]]; then
-  echo "Can only promote from dev to stage"
-  exit 1
-fi
-
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-from_kustomization="${repo_root}/infra/argocd/overlays/${from_env}/kustomization.yaml"
-to_kustomization="${repo_root}/infra/argocd/overlays/${to_env}/kustomization.yaml"
-
-echo "Promoting from ${from_env} to ${to_env}"
-
-if [[ -z "$image_tag" ]]; then
-  echo "Reading image tag from ${from_env} environment"
-  if [[ ! -f "$from_kustomization" ]]; then
-    echo "Missing kustomization: ${from_kustomization}"
-    exit 1
-  fi
-  image_tag=$(grep -E 'newTag:' "$from_kustomization" | head -n 1 | sed 's/.*newTag:[[:space:]]*//')
-  if [[ -z "$image_tag" ]]; then
-    echo "Could not find image tag in ${from_kustomization}"
-    exit 1
-  fi
-  echo "Found image tag: ${image_tag}"
-fi
-
-if [[ ! "$image_tag" =~ ^(sha-[a-f0-9]{8}|v[0-9]+\.[0-9]+\.[0-9]+|latest)$ ]]; then
-  echo "Warning: image tag '${image_tag}' does not match expected format"
-  read -r -p "Continue anyway? (y/N) " continue_choice
-  if [[ "$continue_choice" != "y" ]]; then
-    exit 1
-  fi
-fi
-
 if [[ -n "$(git status --porcelain)" ]]; then
   echo "Warning: you have uncommitted changes"
   git status --porcelain
@@ -100,92 +61,165 @@ if [[ -n "$(git status --porcelain)" ]]; then
   fi
 fi
 
-current_branch=$(git rev-parse --abbrev-ref HEAD)
-if [[ "$current_branch" != "main" ]]; then
-  echo "Switching to main branch"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# ---------------------------------------------------------------
+# Mode 1: Direct image tag promotion (override prod overlay)
+# ---------------------------------------------------------------
+if [[ -n "$image_tag" ]]; then
+  if [[ ! "$image_tag" =~ ^(sha-[a-f0-9]{8}|v[0-9]+\.[0-9]+\.[0-9]+|latest)$ ]]; then
+    echo "Warning: image tag '${image_tag}' does not match expected format"
+    read -r -p "Continue anyway? (y/N) " continue_choice
+    if [[ "$continue_choice" != "y" ]]; then
+      exit 1
+    fi
+  fi
+
+  prod_kustomization="${repo_root}/infra/argocd/overlays/prod/kustomization.yaml"
+  echo "Promoting image ${image_tag} to prod overlay"
+
   git checkout main
   git pull origin main
-fi
 
-branch_name="promote-${to_env}-${image_tag}"
-echo "Creating branch: ${branch_name}"
-git checkout -b "$branch_name"
+  branch_name="promote-prod-${image_tag}"
+  echo "Creating branch: ${branch_name}"
+  git checkout -b "$branch_name"
 
-echo "Updating ${to_env} kustomization.yaml"
-sed -i "s|newTag:.*|newTag: ${image_tag}|g" "$to_kustomization"
+  sed -i "s|newTag:.*|newTag: ${image_tag}|g" "$prod_kustomization"
 
-echo "Changes:"
-git diff "$to_kustomization"
+  echo "Changes:"
+  git diff "$prod_kustomization"
 
-echo "Committing changes"
-git add "$to_kustomization"
-git commit \
-  -m "chore: promote ${image_tag} to ${to_env}" \
-  -m "Promoted from: ${from_env}" \
-  -m "Image tag: ${image_tag}" \
-  -m "Environment: ${to_env}" \
-  -m "Created via promote.sh script." \
-  -m "ArgoCD will sync ${to_env} environment after PR is merged."
+  git add "$prod_kustomization"
+  git commit \
+    -m "chore: promote ${image_tag} to prod" \
+    -m "Image tag: ${image_tag}" \
+    -m "Created via promote.sh script." \
+    -m "ArgoCD will sync prod environment (dex namespace) after PR is merged."
 
-echo "Pushing branch"
-git push origin "$branch_name"
+  git push origin "$branch_name"
 
-if command -v gh >/dev/null 2>&1; then
-  pr_title="Promote ${image_tag} to ${to_env}"
-  pr_body=$(cat <<EOF
-## Image Promotion
+  if command -v gh >/dev/null 2>&1; then
+    pr_title="Promote ${image_tag} to prod"
+    pr_body=$(cat <<EOF
+## Image Promotion to Production
 
-**From**: ${from_env}
-**To**: ${to_env}
-**Image Tag**: \\`${image_tag}\\`
+**Image Tag**: \`${image_tag}\`
 
 ### Checklist
 - [ ] Verify image tag is correct
-- [ ] Check ${from_env} environment is stable
-- [ ] Review deployment changes
-$(if [[ "$to_env" == "prod" ]]; then echo "- [ ] Notify team of production deployment
+- [ ] Check dev environment is stable with this image
+- [ ] Notify team of production deployment
 - [ ] Verify rollback plan
-- [ ] Schedule deployment window (if required)"; fi)
 
 ### Post-Merge
-After merging this PR:
-1. ArgoCD will detect the change
-$(if [[ "$to_env" == "prod" ]]; then echo "2. Manual sync required: run \\`argocd app sync dex\\` in ArgoCD UI"; else echo "2. ArgoCD will auto-sync ${to_env} environment (~3 minutes)"; fi)
-3. Monitor deployment: \\`kubectl get pods -n dex-${to_env}\\`
-4. Verify health: \\`kubectl rollout status deployment/dex -n dex-${to_env}\\`
+1. CD pipeline will build and deploy to prod
+2. ArgoCD will sync dex (~3 minutes)
+3. Monitor: \`kubectl get pods -n dex\`
+4. Verify: \`kubectl rollout status deployment/dex -n dex\`
 
 ### Rollback
-If issues occur:
-
-```bash
-# Revert this commit
+\`\`\`bash
 git revert HEAD
 git push origin main
-
-# Or use ArgoCD rollback
-argocd app rollback dex-${to_env}
-```
+# Or: argocd app rollback dex
+\`\`\`
 
 ---
 Automated promotion via promote.sh
 EOF
 )
 
-  gh pr create --title "$pr_title" --body "$pr_body" --base main --head "$branch_name" --label "promotion" --label "$to_env"
+    gh pr create --title "$pr_title" --body "$pr_body" --base main --head "$branch_name" --label "promotion" --label "prod"
+
+    if [[ "$auto_merge" == "true" ]]; then
+      gh pr merge "$branch_name" --auto --squash
+      echo "PR will auto-merge after checks pass"
+    else
+      gh pr view --web
+    fi
+  else
+    echo "GitHub CLI (gh) not found. Create a PR manually:"
+    echo "  Branch: ${branch_name}"
+    echo "  Title: Promote ${image_tag} to prod"
+  fi
+
+  git checkout main
+  echo "Promotion complete"
+  exit 0
+fi
+
+# ---------------------------------------------------------------
+# Mode 2: Branch promotion (dev → main)
+# ---------------------------------------------------------------
+echo "Promoting dev → main (prod)"
+echo "This creates a PR to merge the dev branch into main."
+
+git fetch origin dev main
+
+# Check dev is ahead of main
+dev_ahead=$(git rev-list --count origin/main..origin/dev 2>/dev/null || echo "0")
+if [[ "$dev_ahead" == "0" ]]; then
+  echo "dev is not ahead of main — nothing to promote."
+  exit 0
+fi
+echo "dev is ${dev_ahead} commit(s) ahead of main"
+
+if command -v gh >/dev/null 2>&1; then
+  # Check if a promotion PR already exists
+  existing_pr=$(gh pr list --base main --head dev --json number --jq '.[0].number' 2>/dev/null || echo "")
+  if [[ -n "$existing_pr" ]]; then
+    echo "Promotion PR #${existing_pr} already exists: dev → main"
+    gh pr view "$existing_pr" --web
+    exit 0
+  fi
+
+  dev_sha=$(git rev-parse --short=8 origin/dev)
+  pr_title="chore: promote dev to prod (${dev_sha})"
+  pr_body=$(cat <<EOF
+## Branch Promotion: dev → prod
+
+**Source**: \`dev\` (${dev_sha})
+**Target**: \`main\` (prod)
+**Commits**: ${dev_ahead} commit(s) ahead
+
+### Checklist
+- [ ] Dev environment is stable
+- [ ] All CI checks pass
+- [ ] Notify team of production deployment
+- [ ] Verify rollback plan
+
+### Post-Merge
+1. CD pipeline builds image and updates prod overlay
+2. ArgoCD syncs dex (~3 minutes)
+3. Monitor: \`kubectl get pods -n dex\`
+4. Verify: \`kubectl rollout status deployment/dex -n dex\`
+
+### Rollback
+\`\`\`bash
+git revert HEAD
+git push origin main
+# Or: argocd app rollback dex
+\`\`\`
+
+---
+Automated promotion via promote.sh
+EOF
+)
+
+  gh pr create --title "$pr_title" --body "$pr_body" --base main --head dev --label "promotion" --label "prod"
 
   if [[ "$auto_merge" == "true" ]]; then
-    gh pr merge "$branch_name" --auto --squash
+    gh pr merge dev --auto --squash
     echo "PR will auto-merge after checks pass"
   else
     gh pr view --web
   fi
 else
   echo "GitHub CLI (gh) not found. Create a PR manually:"
-  echo "  Branch: ${branch_name}"
-  echo "  Title: Promote ${image_tag} to ${to_env}"
+  echo "  Base: main"
+  echo "  Head: dev"
+  echo "  Title: Promote dev to prod"
 fi
-
-echo "Switching back to main"
-git checkout main
 
 echo "Promotion complete"

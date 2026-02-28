@@ -2,6 +2,7 @@
 # DataEngineX SLO Alert Rules
 # Fires alerts when latency (P95), error rate (5xx), or in-flight
 # saturation exceed per-environment thresholds.
+# Environments: dev (dex-dev), prod (dex)
 # Each rule links to the Deploy Runbook for remediation steps.
 # ---------------------------------------------------------------
 groups:
@@ -18,15 +19,6 @@ groups:
         annotations:
           summary: "High latency in prod ({{ $labels.method }} {{ $labels.endpoint }})"
           description: 'P95 latency is {{ printf "%.2f" $value }}s. See the deployment runbook: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md'
-      - alert: DataEngineXLatencyHigh
-        expr: histogram_quantile(0.95, sum by (le, environment) (rate(http_request_duration_seconds_bucket{environment="stage"}[5m]))) > 1.0
-        for: 4m
-        labels:
-          environment: stage
-          severity: page
-        annotations:
-          summary: "High latency in stage"
-          description: 'P95 latency exceeded threshold ({{ printf "%.2f" $value }}s). Consult the runbook: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md'
       - alert: DataEngineXLatencyHigh
         expr: histogram_quantile(0.95, sum by (le, environment) (rate(http_request_duration_seconds_bucket{environment="dev"}[5m]))) > 1.5
         for: 5m
@@ -46,15 +38,6 @@ groups:
           summary: "Elevated error rate in prod"
           description: '{{ printf "%.2f" (100 * $value) }}% of requests return 5xx statuses. Follow the incident runbook: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md'
       - alert: DataEngineXErrorRateHigh
-        expr: sum(rate(http_requests_total{status=~"5..",environment="stage"}[5m])) / sum(rate(http_requests_total{environment="stage"}[5m])) > 0.03
-        for: 4m
-        labels:
-          environment: stage
-          severity: page
-        annotations:
-          summary: "Elevated error rate in stage"
-          description: '{{ printf "%.2f" (100 * $value) }}% errors detected. Consult: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md'
-      - alert: DataEngineXErrorRateHigh
         expr: sum(rate(http_requests_total{status=~"5..",environment="dev"}[5m])) / sum(rate(http_requests_total{environment="dev"}[5m])) > 0.05
         for: 5m
         labels:
@@ -72,15 +55,6 @@ groups:
         annotations:
           summary: "High saturation in prod"
           description: "{{ $value }} in-flight requests; follow the runbook: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md"
-      - alert: DataEngineXSaturationHigh
-        expr: http_requests_in_flight{environment="stage"} > 15
-        for: 3m
-        labels:
-          environment: stage
-          severity: warning
-        annotations:
-          summary: "High saturation in stage"
-          description: "{{ $value }} in-flight requests. Refer to: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md"
       - alert: DataEngineXSaturationHigh
         expr: http_requests_in_flight{environment="dev"} > 10
         for: 5m

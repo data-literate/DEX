@@ -1,75 +1,33 @@
 # ---------------------------------------------------------------
-# ArgoCD Application — Single-environment (default namespace)
-# Watches the base overlay on main branch.
-# For multi-env deployment see the ApplicationSet below.
+# ArgoCD ApplicationSet — Branch-based deployment
+# Two long-lived branches map to exactly one environment each:
+#   dev branch  → dex-dev  (development)
+#   main branch → dex      (production)
+# Co-located in same DEX repo (infra/argocd/overlays/)
 # ---------------------------------------------------------------
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: dex
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io  # Clean up K8s resources on app deletion
-spec:
-  project: dex-project
-
-  # Git source — points at the base Kustomization
-  source:
-    repoURL: https://github.com/TheDataEngineX/DEX
-    targetRevision: main
-    path: infra/argocd/base
-
-  # Target cluster & namespace
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: default
-
-  # Sync policy — fully automated with self-healing
-  syncPolicy:
-    automated:
-      prune: true           # Remove resources no longer in Git
-      selfHeal: true        # Re-apply if someone manually edits
-
-    syncOptions:
-      - CreateNamespace=true  # Auto-create namespace if missing
-
-    # Retry on transient failures
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
-
----
-# Multi-environment ApplicationSet (dev, stage, prod)
-# Gold standard: Same image tag (SHA) promoted across all environments
-# Co-located in same DEX repo (infra/argocd/overlays/) - can split to dex-gitops-config later
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: dex-multienv
+  name: dex-environments
   namespace: argocd
 spec:
   generators:
-  - list:
-      elements:
-      - name: dex-dev
-        namespace: dex-dev
-        environment: dev
-        branch: dev
-      - name: dex-stage
-        namespace: dex-stage
-        environment: stage
-        branch: main
-      - name: dex-prod
-        namespace: dex-prod
-        environment: prod
-        branch: main
+    - list:
+        elements:
+          - name: dex-dev
+            namespace: dex-dev
+            environment: dev
+            branch: dev
+          - name: dex
+            namespace: dex
+            environment: prod
+            branch: main
   template:
     metadata:
       name: "{{name}}"
       namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
     spec:
       project: dex-project
       source:
@@ -84,69 +42,13 @@ spec:
           prune: true
           selfHeal: true
         syncOptions:
-        - CreateNamespace=true
+          - CreateNamespace=true
         retry:
-          limit: 3
+          limit: 5
           backoff:
             duration: 5s
             factor: 2
             maxDuration: 3m
-
----
-# PR Preview ApplicationSet (ephemeral environments per pull request)
-# Auto-generates preview-pr-X for each open PR (from same DEX repo, infra/argocd folder)
-apiVersion: argoproj.io/v1alpha1
-kind: ApplicationSet
-metadata:
-  name: dex-pr-preview
-  namespace: argocd
-spec:
-  generators:
-    - pullRequest:
-        github:
-          owner: TheDataEngineX
-          repo: DEX
-          labels:
-            - preview  # Only PRs with 'preview' label get an env
-        requeueAfterSeconds: 180  # Check for new PRs every 3 minutes
-
-  template:
-    metadata:
-      name: 'dex-pr-{{number}}'
-      namespace: argocd
-      finalizers:
-        - resources-finalizer.argocd.argoproj.io
-
-    spec:
-      project: dex-project
-
-      source:
-        repoURL: https://github.com/TheDataEngineX/DEX
-        targetRevision: '{{head_sha}}'  # Deploy exact PR commit
-        path: infra/argocd/overlays/preview
-
-        kustomize:
-          images:
-            - thedataenginex/dex:sha-{{head_short_sha}}  # Use PR's image
-
-      destination:
-        server: https://kubernetes.default.svc
-        namespace: 'dex-pr-{{number}}'  # Isolated namespace per PR
-
-      syncPolicy:
-        automated:
-          prune: true
-          selfHeal: true
-
-        syncOptions:
-          - CreateNamespace=true
-
-        retry:
-          limit: 3
-          backoff:
-            duration: 5s
-            factor: 2
-            maxDuration: 1m
 
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -158,17 +60,14 @@ spec:
   description: DEX - DataEngineX Project
 
   sourceRepos:
-    - 'https://github.com/TheDataEngineX/DEX'  # Same repo for code + config (co-located; split later if needed)
+    - 'https://github.com/TheDataEngineX/DEX'
 
   destinations:
-    - namespace: 'dex-*'
+    - namespace: 'dex'
       server: https://kubernetes.default.svc
-    - namespace: 'default'
-      server: https://kubernetes.default.svc
-    - namespace: 'dex-pr-*'  # Allow PR preview namespaces
+    - namespace: 'dex-dev'
       server: https://kubernetes.default.svc
 
-  # Allow creating namespaces
   clusterResourceWhitelist:
     - group: ''
       kind: Namespace

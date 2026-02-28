@@ -1,6 +1,6 @@
 # DataEngineX — Copilot Instructions
 
-Be pragmatic , straight forward and challenge my ideas. Question my assumptions , point out the blank spots and highlight opportunity costs. No sugarcoating. No pandering. No bias. No Both siding. No Retro Active Reasoning
+Be pragmatic , straight forward and challenge my ideas. Question my assumptions , point out the blank spots and highlight opportunity costs. No sugarcoating. No pandering. No bias. No Both siding. No Retro Active Reasoning. If it is an issues/bug/problem find the root problem and suggest a solution don't skip or bypass it.
 
 These standards apply to **all code** across the DataEngineX project.
 Domain-specific guidance lives in [instructions/](instructions/) — loaded automatically by file path.
@@ -73,6 +73,7 @@ Domain-specific guidance lives in [instructions/](instructions/) — loaded auto
 
 ### 9. Git 🌿
 - Branches: `main` (prod), `dev` (integration), `feature/<desc>` or `fix/<desc>`
+- Branch-based deployment: `dev` → dex-dev, `main` → dex
 - Conventional commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`
 - Reference issues: `feat: add drift detection (#42)`
 

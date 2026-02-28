@@ -349,7 +349,6 @@ jobs:
             files=("infra/argocd/overlays/dev/kustomization.yaml")
           elif [[ "$BRANCH" == "main" ]]; then
             files=(
-              "infra/argocd/overlays/stage/kustomization.yaml"
               "infra/argocd/overlays/prod/kustomization.yaml"
             )
           else
@@ -446,7 +445,7 @@ jobs:
           if [[ "$BRANCH" == "dev" ]]; then
             echo "apps=dex-dev" >> "$GITHUB_OUTPUT"
           elif [[ "$BRANCH" == "main" ]]; then
-            echo "apps=dex-stage dex-prod" >> "$GITHUB_OUTPUT"
+            echo "apps=dex" >> "$GITHUB_OUTPUT"
           else
             echo "Unsupported branch for verification: $BRANCH"
             exit 1
@@ -496,7 +495,6 @@ jobs:
         env:
           BRANCH: ${{ needs.gate-dependencies.outputs.branch }}
           DEV_HEALTHCHECK_URL: ${{ vars.DEV_HEALTHCHECK_URL }}
-          STAGE_HEALTHCHECK_URL: ${{ vars.STAGE_HEALTHCHECK_URL }}
           PROD_HEALTHCHECK_URL: ${{ vars.PROD_HEALTHCHECK_URL }}
         run: |
           set -euo pipefail
@@ -505,7 +503,6 @@ jobs:
           if [[ "$BRANCH" == "dev" ]]; then
             [[ -n "${DEV_HEALTHCHECK_URL}" ]] && urls+=("${DEV_HEALTHCHECK_URL}")
           elif [[ "$BRANCH" == "main" ]]; then
-            [[ -n "${STAGE_HEALTHCHECK_URL}" ]] && urls+=("${STAGE_HEALTHCHECK_URL}")
             [[ -n "${PROD_HEALTHCHECK_URL}" ]] && urls+=("${PROD_HEALTHCHECK_URL}")
           fi
 
