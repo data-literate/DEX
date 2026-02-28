@@ -1,5 +1,5 @@
 # Security Scans
-# Runs Semgrep (OWASP rules) and CodeQL (static analysis) on push/PR.
+# Runs Trivy (misconfig + secret scan) and CodeQL (static analysis) on push/PR.
 # Results appear in GitHub Security tab.
 
 name: Security Scans
@@ -18,7 +18,7 @@ env:
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
 jobs:
-  semgrep:
+  trivy-security:
     runs-on: ubuntu-latest
     steps:
       - name: Notify Security Scan Start
@@ -37,7 +37,7 @@ jobs:
                     type: 'section',
                     text: {
                       type: 'mrkdwn',
-                      text: `*🔒 Security Scans Started*\n*Branch:* ${process.env.REF}\n*Tools:* Semgrep, CodeQL`
+                      text: `*🔒 Security Scans Started*\n*Branch:* ${process.env.REF}\n*Tools:* Trivy (repo), CodeQL`
                     }
                   }]
                 })
@@ -48,10 +48,21 @@ jobs:
           REF: ${{ github.ref_name }}
 
       - uses: actions/checkout@v6
-      - name: Run Semgrep
-        uses: semgrep/semgrep-action@v1
+      - name: Run Trivy repo security scan
+        uses: aquasecurity/trivy-action@0.34.1
         with:
-          config: auto
+          scan-type: fs
+          scan-ref: .
+          scanners: misconfig,secret
+          format: sarif
+          output: trivy-repo-results.sarif
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+
+      - name: Upload Trivy repo results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-repo-results.sarif
 
   codeql:
     runs-on: ubuntu-latest
@@ -67,12 +78,12 @@ jobs:
   notify-security:
     name: Notify Security Status
     runs-on: ubuntu-latest
-    needs: [semgrep, codeql]
+    needs: [trivy-security, codeql]
     if: always()
 
     steps:
       - name: Notify Security Success
-        if: ${{ needs.semgrep.result == 'success' && needs.codeql.result == 'success' }}
+        if: ${{ needs.trivy-security.result == 'success' && needs.codeql.result == 'success' }}
         uses: actions/github-script@v8
         with:
           script: |
@@ -95,7 +106,7 @@ jobs:
                       type: 'section',
                       fields: [
                         { type: 'mrkdwn', text: `*Branch:*\n${process.env.REF}` },
-                        { type: 'mrkdwn', text: `*Semgrep:*\n✅ Passed` },
+                        { type: 'mrkdwn', text: `*Trivy (repo):*\n✅ Passed` },
                         { type: 'mrkdwn', text: `*CodeQL:*\n✅ Passed` },
                         { type: 'mrkdwn', text: `*Run:*\n<${process.env.URL}|View Details>` }
                       ]
@@ -110,7 +121,7 @@ jobs:
           URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
       - name: Notify Security Issues
-        if: ${{ needs.semgrep.result == 'failure' || needs.codeql.result == 'failure' }}
+        if: ${{ needs.trivy-security.result == 'failure' || needs.codeql.result == 'failure' }}
         uses: actions/github-script@v8
         with:
           script: |
@@ -142,7 +153,7 @@ jobs:
                     },
                     {
                       type: 'context',
-                      elements: [{ type: 'mrkdwn', text: `🔍 Semgrep or CodeQL found issues — review security tab for findings` }]
+                      elements: [{ type: 'mrkdwn', text: `🔍 Trivy or CodeQL found issues — review security tab for findings` }]
                     }
                   ]
                 })
