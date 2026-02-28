@@ -4,14 +4,14 @@
 
 ## Overview
 
-The Weather Pipeline is a complete, working implementation of the DEX framework's medallion architecture. It serves as a template for all future projects (like CareerDEX).
+The Weather Pipeline is a working reference implementation of the DEX framework's medallion architecture. It serves as a template for future projects (like CareerDEX).
 
-**Status**: Complete Reference Implementation  
+**Status**: Reference implementation (actively refined)
 **Purpose**: Learn DEX patterns, validate architecture, reuse for other projects
 
 ## 📚 Documentation
 
-- **[Weather Source Package](../../src/weatherdex/)** - Core weather modules and notebooks
+- **[Weather Source Package](https://github.com/TheDataEngineX/DEX/tree/main/src/weatherdex)** - Core weather modules and notebooks
 - **[CI/CD Pipeline](../CI_CD.md)** - Packaging, release, and promotion flow
 
 ## What You'll Learn
@@ -60,4 +60,4 @@ python -c "import weatherdex; print(weatherdex.__all__)"
 
 ---
 
-**Documentation Hub**: [See docs/README.md](../README.md)
+**Documentation Hub**: [See docs/docs-hub.md](../docs-hub.md)

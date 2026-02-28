@@ -4,6 +4,21 @@
 
 **Related Issue**: Closes #XXX
 
+## Suggested PR Title
+
+<!-- Example: chore: org/domain foundation with pages + label/project automation -->
+
+## Suggested Squash Commit Message
+
+<!--
+chore: establish org/domain foundation (pages, labels, project automation)
+
+- migrate platform/docs references to thedataenginex.org
+- add GitHub Pages docs deployment workflow
+- add label sync and org project intake automation
+- align issue templates/support/security/workflow docs
+-->
+
 ## Keep / Change / Remove
 
 - **Keep**:
@@ -48,5 +63,13 @@
 - [ ] Type checking passes (`uv run poe typecheck` ✓)
 - [ ] Documentation updated (if applicable)
 - [ ] Pre-commit hooks pass
+
+## External Setup (if applicable)
+
+- [ ] GitHub Pages source set to **GitHub Actions**
+- [ ] Org/Repo variable set: `ORG_PROJECT_URL`
+- [ ] Org/Repo secret set: `ORG_PROJECT_TOKEN`
+- [ ] Cloudflare DNS updated for docs/api/apex domains
+- [ ] Post-cutover checks completed (see `docs/DEPLOY_RUNBOOK.md` → Org + Domain Rollout)
 
 ## Notes for Reviewers

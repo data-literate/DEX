@@ -25,7 +25,7 @@ Describe what we will do and why we chose this approach.
 List other options evaluated and why they were rejected:
 
 1. **Alternative 1**
-   - Pros: 
+   - Pros:
    - Cons:
 
 2. **Alternative 2**

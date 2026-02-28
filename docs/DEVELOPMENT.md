@@ -1,6 +1,6 @@
 # Development Setup Guide
 
-**Version**: v0.3.5 | **Updated**: Feb 21, 2026
+**Version**: v0.3.6 | **Updated**: Feb 27, 2026
 
 ## Prerequisites
 
@@ -19,8 +19,7 @@ cd DEX
 git checkout -b feat/issue-XXX-description dev
 
 # 2. Install & setup
-uv sync
-pre-commit install
+uv run poe setup
 
 # 3. Verify setup
 uv run poe check-all
@@ -74,14 +73,30 @@ git push origin feat/issue-XXX-description
 
 ### Version Management
 
+DEX uses **two independent version sources** and release tags:
+
+- **CareerDEX app version**: root `pyproject.toml` → release tag `careerdex-vX.Y.Z`
+- **DataEngineX package version**: `packages/dataenginex/pyproject.toml` → release tag `dataenginex-vX.Y.Z` and PyPI publish flow
+
 ```bash
-# Update version in pyproject.toml (Major.Minor.Patch)
-# Push to main to trigger release workflow
-git checkout main
-git merge --no-ff dev
+# CareerDEX release (app)
+# 1) Bump root version
+# 2) Merge to main and push
+git add pyproject.toml
+git commit -m "chore: bump careerdex to X.Y.Z"
 git push origin main
-# Workflow automatically creates tag, release, and Slack notification
+
+# DataEngineX release (package + PyPI flow)
+# 1) Bump package version
+# 2) Merge to main and push
+git add packages/dataenginex/pyproject.toml
+git commit -m "chore: bump dataenginex to X.Y.Z"
+git push origin main
 ```
+
+On `main`, release workflows create Git tags/releases automatically:
+- `careerdex-vX.Y.Z` from `release-careerdex.yml`
+- `dataenginex-vX.Y.Z` from `release-dataenginex.yml` (then triggers `pypi-publish.yml`)
 
 ## Local Data Setup
 
@@ -162,6 +177,7 @@ open http://localhost:9090
 ## Common Commands
 
 ```bash
+uv run poe setup              # One-step setup (all deps + pre-commit hooks)
 uv run poe check-all          # Run lint + typecheck + tests in sequence
 uv run poe lint               # Ruff lint check
 uv run poe lint-fix           # Auto-fix lint + format
@@ -178,7 +194,7 @@ uv run poe clean              # Remove caches and build artifacts
 
 - **Code Style**: See [CONTRIBUTING.md](./CONTRIBUTING.md)
 - **Architecture**: See [ARCHITECTURE.md](./ARCHITECTURE.md)
-- **ADRs**: See [adr/](./adr/) for architectural decisions
+- **ADRs**: See [ADR-0001](./adr/0001-medallion-architecture.md) for architectural decisions
 - **Deployment**: See [DEPLOY_RUNBOOK.md](./DEPLOY_RUNBOOK.md)
 - **Issues**: [GitHub Issues](https://github.com/TheDataEngineX/DEX/issues)
 - **Chat**: #dex-dev Slack channel

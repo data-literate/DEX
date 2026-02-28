@@ -19,9 +19,21 @@ spec:
       labels:
         app: dex
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: dex
         image: thedataenginex/dex:v1.0.0  # Replaced by Kustomize image transformer
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 10001
         ports:
         - containerPort: 8000
           name: http                     # Named port referenced by Service & Ingress

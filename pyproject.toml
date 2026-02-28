@@ -1,7 +1,7 @@
 
 [project]
 name = "careerdex-app"
-version = "0.3.5"
+version = "0.3.6"
 description = "CareerDEX application built on the DataEngineX core package"
 authors = [
     {name = "Jay", email = "jayapal.myaka99@gmail.com"}
@@ -24,6 +24,7 @@ dev = [
     "types-requests>=2.32.4.20260107",
     "poethepoet>=0.40.0",
     "uv>=0.10.0",
+    "zensical>=0.0.24",
     "mkdocs-material>=9.6.0",
     "mkdocstrings[python]>=0.28.0",
 ]
@@ -40,15 +41,11 @@ notebook = [
 ]
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
-package-mode = true
-
-[[tool.poetry.packages]]
-include = "careerdex"
-from = "src"
+[tool.hatch.build.targets.wheel]
+packages = ["src/careerdex"]
 
 [tool.uv]
 python-preference = "only-managed"

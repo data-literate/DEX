@@ -37,7 +37,7 @@ def test_metrics_middleware_success() -> None:
 
     # Get initial metric values
     initial_count = http_requests_total.labels(
-        method="GET", endpoint="/test", status=200
+        method="GET", endpoint="/test", status="200", environment="dev"
     )._value.get()
 
     # Make request
@@ -46,7 +46,7 @@ def test_metrics_middleware_success() -> None:
 
     # Check metrics updated
     final_count = http_requests_total.labels(
-        method="GET", endpoint="/test", status=200
+        method="GET", endpoint="/test", status="200", environment="dev"
     )._value.get()
     assert final_count > initial_count
 
@@ -67,7 +67,9 @@ def test_metrics_middleware_tracks_duration() -> None:
     assert response.status_code == 200
 
     # Check duration was recorded
-    histogram = http_request_duration_seconds.labels(method="GET", endpoint="/test")
+    histogram = http_request_duration_seconds.labels(
+        method="GET", endpoint="/test", environment="dev"
+    )
     assert histogram._sum.get() > 0
 
 
@@ -83,14 +85,18 @@ def test_metrics_middleware_tracks_exceptions() -> None:
     client = TestClient(app)
 
     # Get initial exception count
-    initial_exceptions = http_exceptions_total.labels(exception_type="ValueError")._value.get()
+    initial_exceptions = http_exceptions_total.labels(
+        exception_type="ValueError", environment="dev"
+    )._value.get()
 
     # Make request that raises exception
     with contextlib.suppress(ValueError):
         client.get("/error")
 
     # Check exception was tracked
-    final_exceptions = http_exceptions_total.labels(exception_type="ValueError")._value.get()
+    final_exceptions = http_exceptions_total.labels(
+        exception_type="ValueError", environment="dev"
+    )._value.get()
     assert final_exceptions > initial_exceptions
 
 
@@ -129,4 +135,4 @@ def test_in_flight_requests() -> None:
     assert response.status_code == 200
 
     # In-flight should be back to 0 after request completes
-    assert http_requests_in_flight._value.get() == 0
+    assert http_requests_in_flight.labels(environment="dev")._value.get() == 0

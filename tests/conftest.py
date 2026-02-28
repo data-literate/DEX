@@ -11,6 +11,8 @@ automatically skipped when PySpark is not installed.
 
 from __future__ import annotations
 
+import os
+import shutil
 from typing import Any
 
 import pytest
@@ -26,9 +28,29 @@ try:
 except ImportError:
     _HAS_PYSPARK = False
 
+
+def _has_java_runtime() -> bool:
+    """Return True when a Java runtime is discoverable for PySpark.
+
+    PySpark can launch via ``JAVA_HOME`` or a ``java`` executable on ``PATH``.
+    """
+    java_home = os.environ.get("JAVA_HOME")
+    if java_home:
+        java_bin = os.path.join(java_home, "bin", "java")
+        if os.path.isfile(java_bin) and os.access(java_bin, os.X_OK):
+            return True
+    return shutil.which("java") is not None
+
+
+_HAS_JAVA_RUNTIME = _has_java_runtime()
+_HAS_SPARK_TEST_RUNTIME = _HAS_PYSPARK and _HAS_JAVA_RUNTIME
+
 requires_pyspark = pytest.mark.skipif(
-    not _HAS_PYSPARK,
-    reason="PySpark not installed (install via `uv sync --group data`)",
+    not _HAS_SPARK_TEST_RUNTIME,
+    reason=(
+        "Spark test runtime unavailable: requires PySpark and Java "
+        "(install via `uv sync --group data` and set JAVA_HOME or add java to PATH)"
+    ),
 )
 
 
@@ -48,6 +70,8 @@ def spark() -> Any:
     """
     if not _HAS_PYSPARK:
         pytest.skip("PySpark not installed")
+    if not _HAS_JAVA_RUNTIME:
+        pytest.skip("Java runtime unavailable for PySpark (set JAVA_HOME or add java to PATH)")
 
     session: Any = (
         SparkSession.builder.master("local[1]")

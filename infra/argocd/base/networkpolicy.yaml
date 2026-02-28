@@ -10,13 +10,13 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: dex-api-netpol
+  name: dex-netpol
   labels:
-    app: dex-api
+    app: dex
 spec:
   podSelector:
     matchLabels:
-      app: dex-api
+      app: dex
   policyTypes:
     - Ingress
     - Egress

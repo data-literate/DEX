@@ -9,6 +9,7 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
+        args: ["--allow-multiple-documents"]
       - id: check-toml
       - id: check-added-large-files
         args: ["--maxkb=500"]
@@ -27,8 +28,12 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
+          - fastapi>=0.128.4
+          - httpx>=0.28.0
+          - google-cloud-storage>=2.18.0
           - types-pyyaml
           - types-requests
-        args: ["--config-file=pyproject.toml"]
+        args: ["--config-file=pyproject.toml", "--no-incremental", "packages/dataenginex/src/dataenginex"]
+        language_version: python3.11
         pass_filenames: false
         files: ^packages/dataenginex/src/dataenginex/

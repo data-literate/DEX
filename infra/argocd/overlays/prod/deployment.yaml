@@ -6,11 +6,27 @@ metadata:
 spec:
   template:
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: dex
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 10001
         env:
         - name: LOG_LEVEL
           value: "warn"           # Only warnings & errors in production
+        - name: DEX_AUTH_ENABLED
+          value: "true"
+        - name: DEX_RATE_LIMIT_ENABLED
+          value: "true"
         resources:
           requests:
             cpu: 200m             # Guaranteed CPU for prod traffic

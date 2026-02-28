@@ -16,11 +16,11 @@ DEX is a unified framework that bridges **Data Engineering, Data Warehousing, Ma
 - dex-api (FastAPI feature/prediction APIs)
 - dex-ops (Terraform + Kubernetes + GitOps)
 
-See [README.md](../README.md) for the full philosophy and roadmap context.
+See [README.md](https://github.com/TheDataEngineX/DEX/blob/main/README.md) for the full philosophy and roadmap context.
 
-## Current State (v0.3.0 - Production Hardening ✅)
+## Current State (v0.3.x - Foundation + Hardening)
 
-### Completed Infrastructure
+### Infrastructure Baseline (implemented)
 - ✅ **CI/CD**: GitHub Actions — lint (ruff), type-check (mypy), test (pytest), build, push
 - ✅ **GitOps**: ArgoCD with multi-environment deployment (dev/stage/prod)
 - ✅ **Code Quality**: Ruff (0 errors), mypy strict (0 errors), 94% test coverage
@@ -90,13 +90,15 @@ See [README.md](../README.md) for the full philosophy and roadmap context.
 
 ## Roadmap Overview
 
-The detailed roadmap is tracked in GitHub Issues/Milestones and the Project board.
+The detailed roadmap is tracked in GitHub Issues/Milestones with CSV export in `docs/roadmap/project-roadmap.csv` as canonical documentation source.
+
+Organization project hub: `https://github.com/orgs/TheDataEngineX/projects`
 
 ### Phases (High Level)
 
 - **Phase 1: Foundation (v0.1.0)** ✅ — CI/CD, GitOps, multi‑env deployments
 - **Phase 2: Production Hardening (v0.2.0)** ✅ — observability, health probes, API quality
-- **Phase 3: Data Platform (v0.3.0)** ✅ — medallion architecture, data quality, schemas
+- **Phase 3: Data Platform (v0.3.0)** 🔄 — medallion architecture foundation, incremental data quality/schema implementation
 - **Phase 4: ML Platform (v0.4.0)** — training, registry, serving, monitoring
 - **Phase 5: Advanced Features (v0.5.0)** — auth, caching, analytics
 - **Phase 6: Production Ready (v1.0.0)** — DR, security, performance
@@ -147,7 +149,7 @@ src/
 ### Core Stack (Confirmed)
 - **API**: FastAPI + Uvicorn
 - **Language**: Python 3.11+
-- **Package Management**: Poetry (metadata) + uv (installs)
+- **Package Management**: uv (dependencies/env) + Hatchling (build backend)
 - **Container**: Docker
 - **Orchestration**: Kubernetes + ArgoCD
 - **CI/CD**: GitHub Actions
@@ -198,10 +200,10 @@ dev (auto) → stage (QA approval) → prod (manual approval)
 ### High Priority Risks
 1. **Complexity Creep**: Too many features, slow delivery
    - **Mitigation**: Strict prioritization, MVP mindset
-   
+
 2. **Technical Debt**: Fast iteration sacrifices quality
    - **Mitigation**: 20% time for refactoring, code reviews
-   
+
 3. **Infrastructure Costs**: Cloud bills spiral
    - **Mitigation**: Resource limits, cost monitoring, right-sizing
 
@@ -211,7 +213,7 @@ dev (auto) → stage (QA approval) → prod (manual approval)
 ### Medium Priority Risks
 1. **Data Quality Issues**: Bad data in production
    - **Mitigation**: Data quality framework in Phase 3
-   
+
 2. **Model Drift**: Models degrade over time
    - **Mitigation**: Monitoring and automated retraining in Phase 4
 
@@ -263,6 +265,6 @@ dev (auto) → stage (QA approval) → prod (manual approval)
 
 ---
 
-**Last Updated**: 2026-02-15  
-**Document Owner**: Project Lead  
+**Last Updated**: 2026-02-15
+**Document Owner**: Project Lead
 **Review Cadence**: Bi-weekly

@@ -7,14 +7,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: dex-api-hpa
+  name: dex-hpa
   labels:
-    app: dex-api
+    app: dex
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: dex-api
+    name: dex
   minReplicas: 2              # Minimum pods for high availability
   maxReplicas: 10             # Upper bound to control cloud costs
   metrics:
