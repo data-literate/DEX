@@ -10,22 +10,22 @@ CareerDEX is an intelligent job matching platform built on the DEX framework. It
 
 ## 📚 Documentation
 
-- **[CareerDEX Source README](../../src/careerdex/README.md)** - Full package architecture and implementation details
+- **[CareerDEX Source Package](https://github.com/TheDataEngineX/DEX/tree/main/src/careerdex)** - Full package architecture and implementation details
 - **[CI/CD Pipeline](../CI_CD.md)** - Packaging, release, and promotion flow
 
 ## Implementation
 
 ### Current Status
 
-Core package structure implemented with phased modules under `src/careerdex/phases/`.
+Core package structure is implemented with phased modules under `src/careerdex/phases/`, with several features currently scaffolded/in progress per roadmap.
 
 ### Key Components
 
-- **Data Ingestion**: 4-source job fetcher (LinkedIn, Indeed, Glassdoor, Company Pages) - 3-hour cycles
+- **Data Ingestion**: Multi-source ingestion pipeline patterns (phased implementation)
 - **Storage**: Medallion architecture (Bronze/Silver/Gold layers)
-- **ML Models**: Resume scoring, job matching, salary prediction
-- **API**: FastAPI endpoints for job search, matching, recommendations
-- **UI**: Web interface for job seekers
+- **ML Models**: Resume scoring, matching, and salary prediction modules (in progress)
+- **API**: FastAPI endpoints for search/matching/recommendations (incremental rollout)
+- **UI**: Web interface planned in later roadmap phases
 
 ## Quick Links
 
@@ -38,8 +38,8 @@ Core package structure implemented with phased modules under `src/careerdex/phas
 ## Getting Started
 
 1. Read [DEVELOPMENT.md](../DEVELOPMENT.md) to set up local environment
-2. Review [CareerDEX Source README](../../src/careerdex/README.md) for architecture
-3. Review package release setup in [packages/README.md](../../packages/README.md)
+2. Review [CareerDEX Source Package](https://github.com/TheDataEngineX/DEX/tree/main/src/careerdex) for architecture
+3. Review package release setup in [packages/README.md](https://github.com/TheDataEngineX/DEX/blob/main/packages/README.md)
 
 ## Directory Structure
 
@@ -58,4 +58,4 @@ src/careerdex/
 
 ---
 
-**Documentation Hub**: [See docs/README.md](../README.md)
+**Documentation Hub**: [See docs/docs-hub.md](../docs-hub.md)

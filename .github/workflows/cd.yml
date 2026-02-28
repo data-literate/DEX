@@ -331,6 +331,39 @@ jobs:
               --timeout 600
           done
 
+      - name: Run optional post-deploy smoke checks
+        if: ${{ steps.plan.outputs.verification_enabled == 'true' }}
+        shell: bash
+        env:
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          DEV_HEALTHCHECK_URL: ${{ vars.DEV_HEALTHCHECK_URL }}
+          STAGE_HEALTHCHECK_URL: ${{ vars.STAGE_HEALTHCHECK_URL }}
+          PROD_HEALTHCHECK_URL: ${{ vars.PROD_HEALTHCHECK_URL }}
+        run: |
+          set -euo pipefail
+
+          urls=()
+          if [[ "$BRANCH" == "dev" ]]; then
+            [[ -n "${DEV_HEALTHCHECK_URL}" ]] && urls+=("${DEV_HEALTHCHECK_URL}")
+          elif [[ "$BRANCH" == "main" ]]; then
+            [[ -n "${STAGE_HEALTHCHECK_URL}" ]] && urls+=("${STAGE_HEALTHCHECK_URL}")
+            [[ -n "${PROD_HEALTHCHECK_URL}" ]] && urls+=("${PROD_HEALTHCHECK_URL}")
+          fi
+
+          if [[ ${#urls[@]} -eq 0 ]]; then
+            echo "No healthcheck URLs configured; skipping smoke checks."
+            exit 0
+          fi
+
+          for url in "${urls[@]}"; do
+            echo "Running smoke check against ${url}"
+            code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 15 --retry 3 --retry-delay 2 "$url")
+            if [[ "$code" != "200" ]]; then
+              echo "Smoke check failed for ${url} with status ${code}"
+              exit 1
+            fi
+          done
+
   rollback-gitops:
     name: Rollback GitOps Manifest Update
     runs-on: ubuntu-latest

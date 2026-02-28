@@ -99,7 +99,7 @@ jobs:
           gh release create "${{ steps.version.outputs.tag }}" \
             --target main \
             --title "CareerDEX ${{ steps.version.outputs.tag }}" \
-            --notes "CareerDEX application release. See docs/careerdex/README.md for details." \
+            --notes "CareerDEX application release. See docs/careerdex/index.md for details." \
             --generate-notes \
             --draft=false
 

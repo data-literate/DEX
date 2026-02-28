@@ -34,7 +34,6 @@ def db_connection() -> Iterator[pyodbc.Connection]:
 
 
 if __name__ == "__main__":
-
     with db_connection() as connection:
         cursor = connection.cursor()
         cursor.execute("SELECT 1")

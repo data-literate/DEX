@@ -26,7 +26,7 @@ graph LR
     Operate -->|Issues| Plan
     Operate -->|Incidents| Rollback[Rollback]
     Rollback --> Operate
-    
+
     style Plan fill:#e1f5ff
     style Design fill:#e1f5ff
     style Implement fill:#fff3cd
@@ -50,6 +50,8 @@ graph LR
 **Exit**: Clear acceptance criteria and implementation plan.
 
 **Artifacts**: GitHub Issue, Project card, checklist of deliverables.
+
+Use the organization project space: `https://github.com/orgs/TheDataEngineX/projects`
 
 ---
 
@@ -156,7 +158,7 @@ flowchart TD
     MergeMain --> ProdDeploy[Auto-deploy to stage+prod]
     ProdDeploy --> Monitor[Monitor Production]
     Monitor --> End([✓ Complete])
-    
+
     style Start fill:#e1f5ff
     style Issue fill:#e1f5ff
     style Code fill:#fff3cd
@@ -176,20 +178,20 @@ flowchart TD
 4. After validation in dev, open a release PR from `dev` → `main`.
 5. Merge after all required checks pass.
 
-See [Contributing Guide](../CONTRIBUTING.md) for branch naming, local checks, and PR conventions.
+See [Contributing Guide](CONTRIBUTING.md) for branch naming, local checks, and PR conventions.
 
 ---
 
 ## Related Documentation
 
 **Development:**
-- **[Contributing Guide](../CONTRIBUTING.md)** - Contribution workflow
+- **[Contributing Guide](CONTRIBUTING.md)** - Contribution workflow
 - **[CI/CD Pipeline](CI_CD.md)** - Automated build and deploy
 
 **Operations:**
 - **[Deployment Runbook](DEPLOY_RUNBOOK.md)** - Release procedures
-- **[Project Management](PROJECT_MANAGEMENT.md)** - Issue tracking
+- **[Project Roadmap](roadmap/project-roadmap.csv)** - Issue tracking and milestone source
 
 ---
 
-**[← Back to Documentation Hub](README.md)**
+**[← Back to Documentation Hub](docs-hub.md)**

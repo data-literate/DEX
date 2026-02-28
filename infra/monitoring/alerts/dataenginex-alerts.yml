@@ -10,32 +10,32 @@ groups:
       # --- Latency alerts (P95 threshold) ---
       # Prod: > 750 ms for 3 min → page
       - alert: DataEngineXLatencyHigh
-        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{environment="prod"}[5m])) > 0.75
+        expr: histogram_quantile(0.95, sum by (le, environment) (rate(http_request_duration_seconds_bucket{environment="prod"}[5m]))) > 0.75
         for: 3m
         labels:
           environment: prod
           severity: page
         annotations:
           summary: "High latency in prod ({{ $labels.method }} {{ $labels.endpoint }})"
-          description: "P95 latency is {{ printf "%.2f" $value }}s. See the deployment runbook: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md"
+          description: 'P95 latency is {{ printf "%.2f" $value }}s. See the deployment runbook: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md'
       - alert: DataEngineXLatencyHigh
-        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{environment="stage"}[5m])) > 1.0
+        expr: histogram_quantile(0.95, sum by (le, environment) (rate(http_request_duration_seconds_bucket{environment="stage"}[5m]))) > 1.0
         for: 4m
         labels:
           environment: stage
           severity: page
         annotations:
           summary: "High latency in stage"
-          description: "P95 latency exceeded threshold ({{ printf "%.2f" $value }}s). Consult the runbook: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md"
+          description: 'P95 latency exceeded threshold ({{ printf "%.2f" $value }}s). Consult the runbook: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md'
       - alert: DataEngineXLatencyHigh
-        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{environment="dev"}[5m])) > 1.5
+        expr: histogram_quantile(0.95, sum by (le, environment) (rate(http_request_duration_seconds_bucket{environment="dev"}[5m]))) > 1.5
         for: 5m
         labels:
           environment: dev
           severity: warning
         annotations:
           summary: "High latency in dev"
-          description: "P95 latency ({{ printf "%.2f" $value }}s) exceeded the dev threshold. Runbook: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md"
+          description: 'P95 latency ({{ printf "%.2f" $value }}s) exceeded the dev threshold. Runbook: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md'
       - alert: DataEngineXErrorRateHigh
         expr: sum(rate(http_requests_total{status=~"5..",environment="prod"}[5m])) / sum(rate(http_requests_total{environment="prod"}[5m])) > 0.01
         for: 3m
@@ -44,7 +44,7 @@ groups:
           severity: page
         annotations:
           summary: "Elevated error rate in prod"
-          description: "{{ printf "%.2f" (100 * $value) }}% of requests return 5xx statuses. Follow the incident runbook: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md"
+          description: '{{ printf "%.2f" (100 * $value) }}% of requests return 5xx statuses. Follow the incident runbook: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md'
       - alert: DataEngineXErrorRateHigh
         expr: sum(rate(http_requests_total{status=~"5..",environment="stage"}[5m])) / sum(rate(http_requests_total{environment="stage"}[5m])) > 0.03
         for: 4m
@@ -53,7 +53,7 @@ groups:
           severity: page
         annotations:
           summary: "Elevated error rate in stage"
-          description: "{{ printf "%.2f" (100 * $value) }}% errors detected. Consult: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md"
+          description: '{{ printf "%.2f" (100 * $value) }}% errors detected. Consult: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md'
       - alert: DataEngineXErrorRateHigh
         expr: sum(rate(http_requests_total{status=~"5..",environment="dev"}[5m])) / sum(rate(http_requests_total{environment="dev"}[5m])) > 0.05
         for: 5m
@@ -62,7 +62,7 @@ groups:
           severity: warning
         annotations:
           summary: "Elevated error rate in dev"
-          description: "{{ printf "%.2f" (100 * $value) }}% 5xx errors observed; use the runbook: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md"
+          description: '{{ printf "%.2f" (100 * $value) }}% 5xx errors observed; use the runbook: https://github.com/TheDataEngineX/DEX/blob/main/docs/DEPLOY_RUNBOOK.md'
       - alert: DataEngineXSaturationHigh
         expr: http_requests_in_flight{environment="prod"} > 25
         for: 2m

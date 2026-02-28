@@ -13,22 +13,22 @@ graph TB
         PushDev[Push to dev]
         PushMain[Push to main]
     end
-    
+
     subgraph "CI Workflows"
         CI[ci.yml<br/>Lint & Test]
         Security[security.yml<br/>CodeQL & Semgrep]
     end
-    
+
     subgraph "CD Workflows"
         CD[cd.yml<br/>Build & Deploy]
     end
-    
+
     subgraph "Release Workflows"
         RelDEX[release-dataenginex.yml<br/>DataEngineX Release]
         RelCDEX[release-careerdex.yml<br/>CareerDEX Release]
         PyPI[pypi-publish.yml<br/>PyPI Publishing]
     end
-    
+
     subgraph "Outputs"
         GHCR[ghcr.io<br/>Container Registry]
         DevK8s[dex-dev]
@@ -36,27 +36,27 @@ graph TB
         ProdK8s[dex-prod]
         PyPIReg[PyPI Registry]
     end
-    
+
     PR --> CI
     PR --> Security
     PushDev --> CI
     PushMain --> CI
-    
+
     CI -->|Success| CD
     PushDev --> CD
     PushMain --> CD
-    
+
     PushMain --> RelDEX
     PushMain --> RelCDEX
     RelDEX --> PyPI
-    
+
     CD --> GHCR
     CD -->|dev branch| DevK8s
     CD -->|main branch| StageK8s
     CD -->|main branch| ProdK8s
-    
+
     PyPI --> PyPIReg
-    
+
     style CI fill:#e1f5ff
     style Security fill:#e1f5ff
     style CD fill:#fff3cd
@@ -90,7 +90,7 @@ graph TB
 2. **security-scan**: Runs Trivy vulnerability scanner
 3. **notify-deployment**: Posts deployment status notifications
 
-**Image Tags**: `sha-XXXXXXXX` (immutable), `latest` (main only)
+**Image Tags**: `sha-XXXXXXXX` (immutable), `v<project_version>` (main only), `latest` (main only), `dev` (dev only)
 
 ---
 
@@ -105,13 +105,48 @@ graph TB
 
 ---
 
+### `docs-pages.yml` - Documentation Deployment
+**Triggers**: Push to `main` on docs/MkDocs changes, manual dispatch
+
+**Jobs**:
+- **build**: Builds MkDocs site and uploads Pages artifact
+- **deploy**: Publishes site to GitHub Pages
+
+**Custom Domain**: `docs.thedataenginex.org`
+
+---
+
+### `label-sync.yml` - Label Taxonomy Sync
+**Triggers**: Push to `main` when `.github/labels.yml` changes, manual dispatch
+
+**Jobs**:
+- **sync-labels**: Synchronizes repository labels from `.github/labels.yml`
+
+**Purpose**: Keeps issue/PR labels consistent with maintainer taxonomy.
+
+---
+
+### `project-automation.yml` - Project Intake Automation
+**Triggers**: Issue/PR opened/reopened events, manual dispatch
+
+**Jobs**:
+- **add-to-org-project**: Adds new issues/PRs to org project board
+
+**Configuration Required**:
+- Variable: `ORG_PROJECT_URL`
+- Secret: `ORG_PROJECT_TOKEN`
+
+---
+
 ## Image Registry
 
 **Registry**: `ghcr.io/thedataenginex/dex`
 
 **Image Tags**:
 - `sha-XXXXXXXX` - Immutable SHA tag (8 characters)
+- `v<project_version>` - Semantic version tag for main branch builds
 - `latest` - Latest main branch build
+- `dev` - Moving tag for dev branch builds
 
 ---
 
@@ -126,13 +161,13 @@ sequenceDiagram
     participant GHCR as ghcr.io
     participant Argo as ArgoCD
     participant K8s as Kubernetes
-    
+
     Dev->>GH: Push to dev/main
     GH->>CI: Run lint & test
     CI-->>GH: ✓ Passed
     GH->>CD: Trigger CD
     CD->>GHCR: Build & push image (sha-XXXXXXXX)
-    CD->>GH: Create PR updating kustomization.yaml
+    CD->>GH: Commit/push overlay kustomization.yaml updates
     GH->>Argo: Git change detected
     Argo->>K8s: Sync environment
     K8s-->>Dev: ✓ Deployed
@@ -145,7 +180,7 @@ PR merged to dev/main → CI passes → CD builds and pushes image → security 
 
 ### Stage/Prod Deployment
 ```
-Use GitOps promotion flow documented in infra/runbooks; manifest updates are not currently automated in cd.yml.
+Push/merge to main → CI passes → CD updates stage/prod overlays in GitOps → ArgoCD syncs stage and prod.
 ```
 
 ### Manual Promotion (Alternative)
@@ -189,25 +224,25 @@ kubectl get pods -n dex-dev
 ```mermaid
 graph TD
     Issue[CI/CD Issue] --> Type{Issue Type?}
-    
+
     Type -->|CI Failure| CheckCI[Check CI logs]
     CheckCI --> LocalTest[\"Run lint locally\"]
     LocalTest --> FixCode[Fix code issues]
     FixCode --> Push[Push changes]
-    
+
     Type -->|CD Not Triggering| CheckWorkflow[\"Check: gh run list\"]
     CheckWorkflow --> VerifyCI[Verify CI passed first]
     VerifyCI --> CheckTrigger[Check workflow_run trigger]
-    
+
     Type -->|Image Not Deploying| CheckKust[Check kustomization.yaml updated]
     CheckKust --> CheckArgo[\"argocd app get dex-env\"]
     CheckArgo --> CheckImage[\"docker pull ghcr.io/.../sha-XXX\"]
     CheckImage --> ForceSync[\"argocd app sync --force\"]
-    
+
     Push --> End[✓ Resolved]
     CheckTrigger --> End
     ForceSync --> End
-    
+
     style Issue fill:#f8d7da
     style End fill:#d4edda
 ```
@@ -236,4 +271,4 @@ uv run poe test
 - **[CI/CD Pipeline Guide](../../docs/CI_CD.md)** - Complete pipeline documentation
 - **[SDLC](../../docs/SDLC.md)** - Development lifecycle
 - **[Deploy Runbook](../../docs/DEPLOY_RUNBOOK.md)** - Release procedures
-- **[Infrastructure](../../infra/README.md)** - GitOps and ArgoCD setup
+- **[Local K8s Setup](../../docs/LOCAL_K8S_SETUP.md)** - GitOps and ArgoCD setup

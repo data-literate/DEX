@@ -16,4 +16,3 @@ Quick essentials:
 3. Open a PR using `.github/PULL_REQUEST_TEMPLATE.md`
 
 See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for complete guidelines on commits, code style, and PR process.
-

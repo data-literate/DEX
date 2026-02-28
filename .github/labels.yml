@@ -1,0 +1,107 @@
+- name: type:bug
+  color: "D73A4A"
+  description: Defect or unintended behavior
+
+- name: type:feature
+  color: "0E8A16"
+  description: New capability or enhancement request
+
+- name: type:docs
+  color: "1D76DB"
+  description: Documentation improvements
+
+- name: type:chore
+  color: "BFD4F2"
+  description: Maintenance and housekeeping work
+
+- name: type:refactor
+  color: "C2E0C6"
+  description: Code restructuring without behavior changes
+
+- name: area:api
+  color: "5319E7"
+  description: API layer and contracts
+
+- name: area:data
+  color: "FBCA04"
+  description: Data pipelines, storage, and quality
+
+- name: area:ml
+  color: "C5DEF5"
+  description: ML modeling, training, and inference
+
+- name: area:infra
+  color: "0052CC"
+  description: Infrastructure, Kubernetes, and platform
+
+- name: area:docs
+  color: "0E8A16"
+  description: Documentation structure and content
+
+- name: area:ci
+  color: "0366D6"
+  description: CI/CD workflows and automation
+
+- name: priority:p0
+  color: "B60205"
+  description: Critical priority
+
+- name: priority:p1
+  color: "D93F0B"
+  description: High priority
+
+- name: priority:p2
+  color: "FBCA04"
+  description: Medium priority
+
+- name: priority:p3
+  color: "0E8A16"
+  description: Low priority
+
+- name: needs-triage
+  color: "EDEDED"
+  description: Awaiting maintainer triage
+
+- name: needs-info
+  color: "F9D0C4"
+  description: More information required
+
+- name: blocked
+  color: "000000"
+  description: Blocked by external dependency
+
+- name: duplicate
+  color: "CFD3D7"
+  description: Duplicate of an existing issue
+
+- name: wontfix
+  color: "FFFFFF"
+  description: Intentionally not planned for implementation
+
+- name: good first issue
+  color: "7057FF"
+  description: Good starter task for first-time contributors
+
+- name: help wanted
+  color: "008672"
+  description: Community help welcomed
+
+- name: incident
+  color: "B60205"
+  description: Incident issue generated from deployment failures
+
+- name: deployment
+  color: "1D76DB"
+  description: Deployment and environment operations
+
+- name: cd
+  color: "5319E7"
+  description: Continuous deployment automation
+
+- name: bug
+  color: "D73A4A"
+  description: Backward-compatible alias for existing bug reports
+
+- name: enhancement
+  color: "A2EEEF"
+  description: Backward-compatible alias for feature requests

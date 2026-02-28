@@ -322,4 +322,3 @@ See [NOTIFICATIONS_SETUP.md](NOTIFICATIONS_SETUP.md) troubleshooting section.
 - [Airflow Documentation](https://airflow.apache.org/docs/)
 - [Slack API Reference](https://api.slack.com/messaging)
 - [GitHub API Reference](https://docs.github.com/rest)
-

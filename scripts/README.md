@@ -25,7 +25,7 @@ Promotes container images between environments by updating kustomization.yaml an
 - Updates target environment kustomization.yaml
 - Commits with detailed message
 - Creates GitHub PR with checklist (requires `gh` CLI)
-- Supports auto-merge with `-AutoMerge` flag
+- Supports auto-merge with `--auto-merge` flag
 
 **Prerequisites (Ubuntu):**
 - bash
@@ -52,7 +52,7 @@ Displays current deployed image tags across all environments.
 ============================================================
   dev         sha-abc12345
   stage       sha-xyz67890
-  prod        v1.2.3
+  prod        sha-xyz67890
 ============================================================
 
 📊 Environment Status:
@@ -84,11 +84,11 @@ kubectl get pods -n dex-stage
 
 # 7. Wait for PR review + merge
 # 8. Manually sync prod in ArgoCD
-argocd app sync dex
+argocd app sync dex-prod
 
 # 9. Verify prod deployment
-kubectl rollout status deployment/dex -n dex
-kubectl get pods -n dex
+kubectl rollout status deployment/dex -n dex-prod
+kubectl get pods -n dex-prod
 ```
 
 ### Emergency Hotfix: Direct to Prod
@@ -105,7 +105,7 @@ hotfixTag="sha-emergency"
 
 # 3. Fast-track PR approval
 # 4. Manual ArgoCD sync
-argocd app sync dex --force
+argocd app sync dex-prod --force
 ```
 
 ### Rollback
@@ -117,8 +117,8 @@ git revert <commit-sha>
 git push origin main
 
 # Option 2: ArgoCD rollback
-argocd app history dex
-argocd app rollback dex <revision>
+argocd app history dex-prod
+argocd app rollback dex-prod <revision>
 
 # Option 3: Manual promotion to previous tag
 ./scripts/promote.sh --from-env stage --to-env prod --image-tag sha-previous123
@@ -127,14 +127,19 @@ argocd app rollback dex <revision>
 ## Integration with CI/CD
 
 ### Automated Dev Deployment
-GitHub Actions automatically updates dev overlay on `main` branch push:
+GitHub Actions automatically updates GitOps overlays based on branch:
+- `dev` branch CI success → updates `infra/argocd/overlays/dev/kustomization.yaml`
+- `main` branch CI success → updates `infra/argocd/overlays/stage/kustomization.yaml` and `infra/argocd/overlays/prod/kustomization.yaml`
+
+Example from CD workflow:
 ```yaml
 # .github/workflows/cd.yml
-- name: Update dev kustomization.yaml
+- name: Update overlay image tags
   run: |
-    sed -i "s|newTag:.*|newTag: sha-$SHORT_SHA|g" infra/argocd/overlays/dev/kustomization.yaml
-    git commit -m "chore: update dev image to sha-$SHORT_SHA [skip ci]"
-    git push origin main
+    # dev branch updates dev overlay
+    # main branch updates stage/prod overlays
+    git commit -m "chore: update ${BRANCH} image to sha-$SHORT_SHA [skip ci]"
+    git push origin "HEAD:${BRANCH}"
 ```
 
 ### Manual Stage/Prod Promotion
@@ -154,12 +159,12 @@ name: Auto-Promote to Stage
 
 on:
   workflow_dispatch:  # Manual trigger only
-  
+
 jobs:
   promote:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Promote to stage
         run: ./scripts/promote.sh --from-env dev --to-env stage --auto-merge
 ```
@@ -225,6 +230,6 @@ git push origin promote-stage-sha-abc12345
 
 ## References
 
-- [Infrastructure Promotion Workflow](../infra/README.md)
+- [Infrastructure Promotion Workflow](../docs/DEPLOY_RUNBOOK.md)
 - [ArgoCD Sync Documentation](https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/)
 - [Kustomize Documentation](https://kustomize.io/)

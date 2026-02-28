@@ -32,6 +32,6 @@
 "[CDX] Testing, Documentation & Deployment (Phase 6)","https://github.com/TheDataEngineX/DEX/issues/70","Todo","v0.6.2","careerdex, phase-6, component:testing, deployment"
 "[DEX] DataSecOps (SBOM + Trivy)","https://github.com/TheDataEngineX/DEX/issues/97","Todo","v0.6.3","P1-high, dataenginex, component:infrastructure"
 "[DEX] Streamlit dashboard + Plugin system","https://github.com/TheDataEngineX/DEX/issues/98","Todo","v0.6.4","P2-medium, dataenginex, component:infrastructure, component:api"
-"Configure thedataenginex.com DNS and subdomains","","Todo","Backlog","P2-medium, component:infrastructure"
+"Configure thedataenginex.org DNS and subdomains","","Todo","Backlog","P2-medium, component:infrastructure"
 "Community content (LinkedIn, Dev.to, Medium, YouTube)","","Todo","Backlog","P3-low, community"
 "Patreon / GitHub Sponsors","","Todo","Backlog","P3-low, community"

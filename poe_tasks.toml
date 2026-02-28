@@ -3,8 +3,12 @@ executor.type = "uv"
 
 # Installation & Setup
 [tool.poe.tasks.install]
-shell = "uv sync && pre-commit install"
+shell = "uv sync && uvx pre-commit install"
 help = "Install dependencies and pre-commit hooks"
+
+[tool.poe.tasks.setup]
+shell = "uv sync --all-groups && uvx pre-commit install"
+help = "One-step setup: install all dependency groups and pre-commit hooks"
 
 # Development
 [tool.poe.tasks.dev]
@@ -12,20 +16,36 @@ cmd = "uvicorn careerdex.api.main:app --reload --port 8000"
 help = "Run development server on localhost:8000"
 
 # Testing
-[tool.poe.tasks.test]
+[tool.poe.tasks.test-core]
 cmd = "pytest tests/ -v --tb=short"
+help = "Internal: run all tests without dependency sync"
+
+[tool.poe.tasks.test-unit-core]
+cmd = "pytest tests/unit/ -v --tb=short"
+help = "Internal: run unit tests without dependency sync"
+
+[tool.poe.tasks.test-integration-core]
+cmd = "pytest tests/integration/ -v --tb=short"
+help = "Internal: run integration tests without dependency sync"
+
+[tool.poe.tasks.test-cov-core]
+cmd = "pytest tests/ -v --cov=dataenginex --cov=careerdex --cov=weatherdex --cov-report=html --cov-report=xml:coverage.xml --cov-report=term-missing"
+help = "Internal: run coverage tests without dependency sync"
+
+[tool.poe.tasks.test]
+shell = "poe uv-sync && poe test-core"
 help = "Run all tests"
 
 [tool.poe.tasks.test-unit]
-cmd = "pytest tests/unit/ -v --tb=short"
+shell = "poe uv-sync && poe test-unit-core"
 help = "Run unit tests only"
 
 [tool.poe.tasks.test-integration]
-cmd = "pytest tests/integration/ -v --tb=short"
+shell = "poe uv-sync && poe test-integration-core"
 help = "Run integration tests only"
 
 [tool.poe.tasks.test-cov]
-cmd = "pytest tests/ -v --cov=dataenginex --cov=careerdex --cov=weatherdex --cov-report=html --cov-report=xml:coverage.xml --cov-report=term-missing"
+shell = "poe uv-sync && poe test-cov-core"
 help = "Run tests with coverage report (HTML + XML + terminal)"
 
 # Code Quality
@@ -51,20 +71,24 @@ help = "Run mypy type checking with project config"
 env = { UV_PYTHON = "3.11", UV_PROJECT_ENVIRONMENT = ".venv" }
 
 [tool.poe.tasks.security]
-shell = "pip-audit --progress-spinner off 2>&1 || echo 'pip-audit not installed — run: uv pip install pip-audit'"
-help = "Audit dependencies for known vulnerabilities"
+cmd = "uvx pip-audit --progress-spinner off"
+help = "Audit dependencies for known vulnerabilities (tool-style via uvx)"
 
 [tool.poe.tasks.pre-commit]
-cmd = "pre-commit run --all-files"
+cmd = "uvx pre-commit run --all-files"
 help = "Run all pre-commit hooks"
 
 [tool.poe.tasks.actionlint]
-cmd = "actionlint .github/workflows/*.yml"
-help = "Lint GitHub Actions workflows"
+shell = "if command -v actionlint >/dev/null 2>&1; then actionlint .github/workflows/*.yml; elif command -v docker >/dev/null 2>&1; then docker run --rm -v \"$PWD\":/repo -w /repo rhysd/actionlint:latest actionlint .github/workflows/*.yml; else echo 'actionlint not found. Install actionlint locally or install Docker for container fallback.'; exit 127; fi"
+help = "Lint GitHub Actions workflows (local actionlint or Docker fallback)"
+
+[tool.poe.tasks.check-all-core]
+shell = "poe pre-commit && poe test-core && poe actionlint && poe docs"
+help = "Internal: run full project checks without dependency sync"
 
 [tool.poe.tasks.check-all]
-shell = "poe imports-check && poe lint && poe typecheck && poe test"
-help = "Run import-order check, lint, typecheck, and tests in sequence"
+shell = "poe uv-sync && poe check-all-core"
+help = "Run full project checks: pre-commit hooks, tests, workflow lint, and docs build"
 
 [tool.poe.tasks.clean]
 shell = "find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; find . -type f -name '*.pyc' -delete 2>/dev/null; rm -rf .pytest_cache .mypy_cache .ruff_cache dist build *.egg-info 2>/dev/null; echo 'Cache and artifacts cleaned'"
@@ -98,8 +122,8 @@ help = "Delete Kubernetes resources"
 
 # Documentation
 [tool.poe.tasks.docs]
-shell = "cd docs && sphinx-build -b html . _build/html && echo 'Documentation built. Open docs/_build/html/index.html'"
-help = "Generate and serve documentation"
+shell = "zensical build --clean && echo 'Documentation built. Open site/index.html'"
+help = "Build documentation site with Zensical"
 
 # Version
 [tool.poe.tasks.version]
@@ -132,3 +156,12 @@ help = "Resolve dependencies from pyproject.toml and write uv.lock"
 cmd = "uv sync"
 help = "Install dependencies from uv.lock"
 env = { UV_PROJECT_ENVIRONMENT = ".venv" }
+
+[tool.poe.tasks.uv-sync-all]
+cmd = "uv sync --all-groups"
+help = "Install dependencies from uv.lock for all groups"
+env = { UV_PROJECT_ENVIRONMENT = ".venv" }
+
+[tool.poe.tasks.check-all-managed]
+shell = "status=0; poe uv-sync-all || status=$?; if [ $status -eq 0 ]; then poe check-all-core || status=$?; fi; poe clean; exit $status"
+help = "Run dependency sync, full checks, then cleanup (cleanup always runs)"

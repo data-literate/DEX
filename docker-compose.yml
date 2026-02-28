@@ -30,7 +30,7 @@ services:
 
   # --- Prometheus — Metrics collection ---
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.55.1
     container_name: dex-prometheus
     ports:
       - "9090:9090"             # Prometheus web UI
@@ -41,7 +41,7 @@ services:
 
   # --- Alertmanager — Alert routing ---
   alertmanager:
-    image: prom/alertmanager:latest
+    image: prom/alertmanager:v0.28.0
     container_name: dex-alertmanager
     ports:
       - "9093:9093"             # Alertmanager web UI
@@ -51,7 +51,7 @@ services:
 
   # --- Grafana — Dashboards & visualisation ---
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.3.1
     container_name: dex-grafana
     ports:
       - "3000:3000"             # Grafana web UI

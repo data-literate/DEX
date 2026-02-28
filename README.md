@@ -4,9 +4,9 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen)](https://github.com/TheDataEngineX/DEX)
-[![Version](https://img.shields.io/badge/version-0.3.5-blue)](https://github.com/TheDataEngineX/DEX/releases)
+[![Version](https://img.shields.io/badge/version-0.3.6-blue)](https://github.com/TheDataEngineX/DEX/releases)
 
-A production-ready data engineering framework with medallion architecture, Airflow orchestration, and enterprise observability. DEX is both a core framework and a mono-repo for sub-projects built on top of it.
+A production-focused data engineering framework with medallion architecture, Airflow orchestration patterns, and enterprise observability foundations. DEX is both a core framework and a mono-repo for sub-projects built on top of it.
 
 ---
 
@@ -14,7 +14,7 @@ A production-ready data engineering framework with medallion architecture, Airfl
 
 ```bash
 git clone https://github.com/TheDataEngineX/DEX && cd DEX
-uv lock && uv sync          # Install dependencies
+uv run poe setup            # One-step setup (all deps + pre-commit hooks)
 uv run poe dev               # Run dev server → http://localhost:8000
 uv run poe test              # Run tests
 ```
@@ -70,7 +70,6 @@ DEX/
 │       └── grafana/           #     Dashboards
 │
 ├── docs/                      # Documentation
-├── packages/                  # Package workspace (dataenginex)
 ├── scripts/                   # Utility scripts
 ├── learning/                  # Learning experiments
 │
@@ -104,7 +103,7 @@ Raw Sources (LinkedIn, Indeed, Glassdoor, APIs)
 | Layer            | Technology                                      |
 |------------------|-------------------------------------------------|
 | Language         | Python 3.11+                                    |
-| Package Manager  | uv (installs) + Poetry (build backend)          |
+| Package Manager  | uv (dependencies/env) + Hatchling (build backend) |
 | Web Framework    | FastAPI + Uvicorn                               |
 | Orchestration    | Apache Airflow                                  |
 | ML               | PySpark                                         |
@@ -133,7 +132,7 @@ uv run poe docker-up         # Start local stack
 
 | Guide                                             | Description              |
 |---------------------------------------------------|--------------------------|
-| [Documentation Hub](docs/README.md)               | Complete index           |
+| [Documentation Hub](docs/docs-hub.md)             | Complete index           |
 | [Architecture](docs/ARCHITECTURE.md)              | System design            |
 | [Development](docs/DEVELOPMENT.md)                | Local setup              |
 | [Contributing](docs/CONTRIBUTING.md)              | Code style, PR process   |
@@ -148,8 +147,9 @@ uv run poe docker-up         # Start local stack
 | [Local K8s Setup](docs/LOCAL_K8S_SETUP.md)        | Test ArgoCD locally      |
 | [SDLC](docs/SDLC.md)                             | Lifecycle stages         |
 | [ADRs](docs/adr/)                                 | Architecture decisions   |
-| [CareerDEX](docs/careerdex/README.md)             | Job matching project     |
-| [Weather](docs/weather/README.md)                 | Weather pipeline         |
+| [Roadmap (Canonical CSV)](docs/roadmap/project-roadmap.csv) | Planned and in-progress work |
+| [CareerDEX](docs/careerdex/index.md)              | Job matching project     |
+| [Weather](docs/weather/index.md)                  | Weather pipeline         |
 
 ---
 
@@ -197,4 +197,4 @@ Follow PyPI best practices, keep it concise.
 
 ---
 
-**Version**: v0.3.5 | **License**: MIT
+**Version**: v0.3.6 | **License**: MIT

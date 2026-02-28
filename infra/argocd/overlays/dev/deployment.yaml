@@ -11,6 +11,10 @@ spec:
         env:
         - name: LOG_LEVEL
           value: "debug"          # Verbose for development
+        - name: DEX_AUTH_ENABLED
+          value: "true"
+        - name: DEX_RATE_LIMIT_ENABLED
+          value: "true"
         resources:
           requests:
             cpu: 50m              # Smaller footprint in dev

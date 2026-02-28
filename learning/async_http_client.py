@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse
 async def fetch(url: str) -> httpx.Response:
     async with httpx.AsyncClient() as client:
         return await client.get(url)
-    
+
 async def fetch_stock_data(symbol: str) -> httpx.Response:
         #url = f"https://stooq.com/q/l/?s={symbol.lower()}&f=sd2t2ohlcv&h&e=csv"
         url = f"https://stooq.com/q/d/l/?s={symbol.lower()}.us&i=d"
@@ -26,7 +26,7 @@ async def main():
 
     # Get Top 5 oldest stocks data from stooq.com
     stock_symbols = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA"]
-    
+
     tasks = [fetch_stock_data(symbol) for symbol in stock_symbols]
     responses = await asyncio.gather(*tasks)
     for response in responses:
