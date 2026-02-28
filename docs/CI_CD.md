@@ -81,7 +81,7 @@ The **root `pyproject.toml`** orchestrates all tests:
 
 ### Separate Validation
 
-- **Package validation** (`package-validation.yml`): Watches `packages/dataenginex/**` only → builds wheel + twine check
+- **Package validation** (`package-validation.yml`): Runs on every push to `main`/`dev` and package-related PR changes → builds wheel + twine check (CD dependency gate)
 - **Release automation** (matrix):
   - `release-dataenginex.yml`: Watches `packages/dataenginex/pyproject.toml` for version changes → creates `dataenginex-vX.Y.Z` tag + release
   - `release-careerdex.yml`: Watches root `pyproject.toml` for version changes → creates `careerdex-vX.Y.Z` tag + release
@@ -142,7 +142,7 @@ uv run poe test-cov
 
 **Workflow**: [`.github/workflows/cd.yml`](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/cd.yml)
 
-**Trigger**: After successful CI run on `main` or `dev` branches
+**Trigger**: `workflow_run` on `main`/`dev` after required upstream workflows complete successfully for the same commit SHA (`Continuous Integration`, `Security Scans`, `Package Validation`)
 
 **Jobs**:
 
@@ -200,6 +200,8 @@ images:
 **Commit Message**: `chore: update main image to sha-XXXXXXXX [skip ci]`
 
 **Result**: ArgoCD syncs `dex-stage` and `dex-prod` namespaces
+
+If protected branch rules reject direct push, CD falls back to creating a promotion PR (or issue when PR creation is not permitted), and reports deployment as pending manual approval rather than false success.
 
 ### 4. Security Scan
 
@@ -709,7 +711,7 @@ test: add integration tests for API
 | **CI** (Integration) | PR label `full-test` or manual dispatch | Full test (data + notebook groups) | [.github/workflows/ci.yml](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/ci.yml) |
 | **Security** | `push main/dev`, PRs to main/dev | CodeQL + Semgrep scans | [.github/workflows/security.yml](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/security.yml) |
 | **Package** | Changes to `packages/dataenginex/**` | Build wheel + twine check (dataenginex only) | [.github/workflows/package-validation.yml](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/package-validation.yml) |
-| **CD** | After CI success on main/dev | Build Docker image, push to ghcr.io | [.github/workflows/cd.yml](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/cd.yml) |
+| **CD** | `workflow_run` after CI + Security + Package Validation succeed on main/dev | Build Docker image, update GitOps manifests, verify deployment | [.github/workflows/cd.yml](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/cd.yml) |
 | **Release DataEngineX** | Version change in `packages/dataenginex/pyproject.toml` on main | Extract version, create `dataenginex-vX.Y.Z` tag + release | [.github/workflows/release-dataenginex.yml](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/release-dataenginex.yml) |
 | **Release CareerDEX** | Version change in root `pyproject.toml` on main | Extract version, create `careerdex-vX.Y.Z` tag + release | [.github/workflows/release-careerdex.yml](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/release-careerdex.yml) |
 | **PyPI Publish** | GitHub release (DataEngineX) published | Detect changes + publish dataenginex to TestPyPI/PyPI | [.github/workflows/pypi-publish.yml](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/pypi-publish.yml) |

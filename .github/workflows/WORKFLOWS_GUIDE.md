@@ -43,8 +43,6 @@ graph TB
     PushMain --> CI
 
     CI -->|Success| CD
-    PushDev --> CD
-    PushMain --> CD
 
     PushMain --> RelDEX
     PushMain --> RelCDEX
@@ -83,19 +81,22 @@ graph TB
 ---
 
 ### `cd.yml` - Continuous Deployment
-**Triggers**: After successful CI on `main` or `dev` branches
+**Triggers**: `workflow_run` after upstream workflow completion on `main`/`dev` (`Continuous Integration`, `Security Scans`, `Package Validation`)
 
 **Jobs**:
-1. **build-and-push**: Builds Docker image with SHA tag → ghcr.io
-2. **security-scan**: Runs Trivy vulnerability scanner
-3. **notify-deployment**: Posts deployment status notifications
+1. **gate-dependencies**: Blocks CD unless all required upstream workflows for the same commit SHA are successful
+2. **build-and-push**: Builds Docker image with SHA tag → ghcr.io
+3. **security-scan**: Runs Trivy vulnerability scanner on produced image
+4. **update-gitops-manifests**: Direct push with bot token; falls back to PR/issue when branch protection rejects push
+5. **verify-deployment**: ArgoCD + optional smoke checks when manifests were updated directly
+6. **notify-deployment**: Posts success/failure/pending-manual-approval status notifications
 
 **Image Tags**: `sha-XXXXXXXX` (immutable), `v<project_version>` (main only), `latest` (main only), `dev` (dev only)
 
 ---
 
 ### `security.yml` - Security Scans
-**Triggers**: Push to `main`, Pull Requests to `main`
+**Triggers**: Push to `main`/`dev`, Pull Requests to `main`/`dev`
 
 **Jobs**:
 - **CodeQL**: Static analysis for vulnerabilities
@@ -214,8 +215,11 @@ kubectl get pods -n dex-dev
 
 **Repository Secrets**:
 - `GITHUB_TOKEN` - Auto-provided by GitHub Actions
+- `GITOPS_BOT_TOKEN` - Recommended for protected-branch bypass push in CD (fallback PR/issue still works without it)
+- `ORG_PROJECT_TOKEN` - Required for project automation auto-add
 
-**No additional secrets needed** for basic CI/CD operation.
+**Repository Variables**:
+- `ORG_PROJECT_URL` - Required for project automation auto-add
 
 ---
 
@@ -255,8 +259,8 @@ uv run poe test
 ```
 
 ### CD Not Triggering
-- Verify CI passed successfully
-- Check workflow_run trigger in cd.yml
+- Verify all required upstream workflows passed on the same commit SHA (`Continuous Integration`, `Security Scans`, `Package Validation`)
+- Check workflow_run trigger configuration in `cd.yml`
 - View workflow runs: `gh run list`
 
 ### Image Not Deploying

@@ -1,14 +1,20 @@
 name: Continuous Deployment
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - Continuous Integration
+      - Security Scans
+      - Package Validation
+    types:
+      - completed
     branches:
       - main
       - dev
   workflow_dispatch:
 
 concurrency:
-  group: cd-${{ github.ref_name }}
+  group: cd-${{ github.event.workflow_run.head_branch || github.ref_name }}-${{ github.event.workflow_run.head_sha || github.sha }}
   cancel-in-progress: true
 
 env:
@@ -16,23 +22,53 @@ env:
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
 jobs:
-  check-upstream-workflows:
-    name: Verify Upstream Workflows
+  gate-dependencies:
+    name: Verify Upstream Workflow Dependencies
     runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
 
+    outputs:
+      branch: ${{ steps.dependency_gate.outputs.branch }}
+      target_sha: ${{ steps.dependency_gate.outputs.target_sha }}
+
     steps:
       - name: Wait for required workflows on this commit
+        id: dependency_gate
         uses: actions/github-script@v8
         with:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const sha = context.sha;
-            const required = ['Continuous Integration', 'Security Scans'];
-            const optional = ['Package Validation'];
+            const required = ['Continuous Integration', 'Security Scans', 'Package Validation'];
+            const eventName = context.eventName;
+
+            if (eventName === 'workflow_dispatch') {
+              const branch = context.ref.replace('refs/heads/', '');
+              core.setOutput('branch', branch);
+              core.setOutput('target_sha', context.sha);
+              core.info(`Manual dispatch detected; using branch=${branch}, sha=${context.sha.substring(0, 8)}`);
+              return;
+            }
+
+            const triggeringRun = context.payload.workflow_run;
+            const branch = triggeringRun?.head_branch;
+            const sha = triggeringRun?.head_sha;
+            const sourceEvent = triggeringRun?.event;
+
+            if (!branch || !sha) {
+              core.setFailed('Missing workflow_run head branch/SHA context for dependency gating.');
+              return;
+            }
+
+            if (sourceEvent !== 'push') {
+              core.setFailed(`CD only supports push events, got: ${sourceEvent || 'unknown'}`);
+              return;
+            }
+
+            core.setOutput('branch', branch);
+            core.setOutput('target_sha', sha);
 
             const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
             const timeoutMs = 20 * 60 * 1000;
@@ -57,7 +93,6 @@ jobs:
               const missing = [];
               const pending = [];
               const failed = [];
-              const optionalFailed = [];
 
               for (const name of required) {
                 const run = byName.get(name);
@@ -76,33 +111,13 @@ jobs:
                 }
               }
 
-              for (const name of optional) {
-                const run = byName.get(name);
-                if (!run) {
-                  continue;
-                }
-                if (run.status !== 'completed') {
-                  pending.push(`${name} (${run.status})`);
-                  continue;
-                }
-                if (run.conclusion !== 'success') {
-                  optionalFailed.push(`${name} (${run.conclusion})`);
-                }
-              }
-
               core.info(`Required workflows for ${sha.substring(0, 8)}:`);
               core.info(`- missing: ${missing.length ? missing.join(', ') : 'none'}`);
               core.info(`- pending: ${pending.length ? pending.join(', ') : 'none'}`);
               core.info(`- failed: ${failed.length ? failed.join(', ') : 'none'}`);
-              core.info(`- optional failed: ${optionalFailed.length ? optionalFailed.join(', ') : 'none'}`);
 
               if (failed.length) {
                 core.setFailed(`Blocking CD because upstream workflow(s) failed: ${failed.join(', ')}`);
-                return;
-              }
-
-              if (optionalFailed.length) {
-                core.setFailed(`Blocking CD because optional workflow(s) that ran failed: ${optionalFailed.join(', ')}`);
                 return;
               }
 
@@ -122,8 +137,8 @@ jobs:
   build-and-push:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
-    needs: check-upstream-workflows
-    if: ${{ needs.check-upstream-workflows.result == 'success' }}
+    needs: gate-dependencies
+    if: ${{ needs.gate-dependencies.result == 'success' }}
 
     permissions:
       contents: read
@@ -167,12 +182,13 @@ jobs:
             }
         env:
           SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ needs.gate-dependencies.outputs.branch }}
 
       - name: Checkout code at CI commit
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ needs.gate-dependencies.outputs.target_sha }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -231,9 +247,9 @@ jobs:
           images: ${{ steps.vars.outputs.image_repo }}
           tags: |
             type=raw,value=${{ steps.vars.outputs.sha_tag }}
-            type=raw,value=v${{ steps.versions.outputs.project_version }},enable=${{ github.ref_name == 'main' }}
-            type=raw,value=latest,enable=${{ github.ref_name == 'main' }}
-            type=raw,value=dev,enable=${{ github.ref_name == 'dev' }}
+            type=raw,value=v${{ steps.versions.outputs.project_version }},enable=${{ needs.gate-dependencies.outputs.branch == 'main' }}
+            type=raw,value=latest,enable=${{ needs.gate-dependencies.outputs.branch == 'main' }}
+            type=raw,value=dev,enable=${{ needs.gate-dependencies.outputs.branch == 'dev' }}
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -300,7 +316,7 @@ jobs:
   update-gitops-manifests:
     name: Update GitOps Manifests
     runs-on: ubuntu-latest
-    needs: [build-and-push, security-scan]
+    needs: [gate-dependencies, build-and-push, security-scan]
     if: ${{ needs.build-and-push.result == 'success' && needs.security-scan.result == 'success' }}
 
     permissions:
@@ -310,20 +326,21 @@ jobs:
 
     outputs:
       updated: ${{ steps.commit.outputs.updated }}
+      update_mode: ${{ steps.commit.outputs.update_mode }}
 
     steps:
       - name: Checkout branch
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: ${{ github.ref_name }}
+          ref: ${{ needs.gate-dependencies.outputs.branch }}
           token: ${{ secrets.GITOPS_BOT_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Update overlay image tags
         id: update
         shell: bash
         env:
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ needs.gate-dependencies.outputs.branch }}
           NEW_TAG: sha-${{ needs.build-and-push.outputs.short_sha }}
         run: |
           set -euo pipefail
@@ -349,7 +366,7 @@ jobs:
         id: commit
         shell: bash
         env:
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ needs.gate-dependencies.outputs.branch }}
           NEW_TAG: sha-${{ needs.build-and-push.outputs.short_sha }}
           GH_TOKEN: ${{ secrets.GITOPS_BOT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
@@ -357,6 +374,7 @@ jobs:
           if [[ -z "$(git status --porcelain infra/argocd/overlays)" ]]; then
             echo "No manifest changes detected."
             echo "updated=false" >> "$GITHUB_OUTPUT"
+            echo "update_mode=no_changes" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -366,9 +384,10 @@ jobs:
           git add infra/argocd/overlays
           git commit -m "chore: update ${BRANCH} image to ${NEW_TAG} [skip ci]"
 
-          if [[ "$BRANCH" != "main" ]] && git push origin "HEAD:${BRANCH}"; then
+          if git push origin "HEAD:${BRANCH}"; then
             echo "Pushed manifest update directly to ${BRANCH}."
             echo "updated=true" >> "$GITHUB_OUTPUT"
+            echo "update_mode=direct_push" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -387,6 +406,7 @@ jobs:
             --body "$PR_BODY"; then
             echo "Opened PR branch ${PR_BRANCH}; deployment verification is skipped until PR is merged."
             echo "updated=false" >> "$GITHUB_OUTPUT"
+            echo "update_mode=pr_opened" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -400,13 +420,14 @@ jobs:
             --label deployment
 
           echo "updated=false" >> "$GITHUB_OUTPUT"
+          echo "update_mode=issue_opened" >> "$GITHUB_OUTPUT"
           echo "Created issue for manual PR creation from ${PR_BRANCH}."
           exit 0
 
   verify-deployment:
     name: Verify ArgoCD Deployment Health
     runs-on: ubuntu-latest
-    needs: [update-gitops-manifests]
+    needs: [gate-dependencies, update-gitops-manifests]
     if: ${{ needs.update-gitops-manifests.result == 'success' && needs.update-gitops-manifests.outputs.updated == 'true' }}
 
     outputs:
@@ -417,7 +438,7 @@ jobs:
         id: plan
         shell: bash
         env:
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ needs.gate-dependencies.outputs.branch }}
           ARGOCD_SERVER: ${{ vars.ARGOCD_SERVER }}
           ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
         run: |
@@ -473,7 +494,7 @@ jobs:
         if: ${{ steps.plan.outputs.verification_enabled == 'true' }}
         shell: bash
         env:
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ needs.gate-dependencies.outputs.branch }}
           DEV_HEALTHCHECK_URL: ${{ vars.DEV_HEALTHCHECK_URL }}
           STAGE_HEALTHCHECK_URL: ${{ vars.STAGE_HEALTHCHECK_URL }}
           PROD_HEALTHCHECK_URL: ${{ vars.PROD_HEALTHCHECK_URL }}
@@ -505,7 +526,7 @@ jobs:
   rollback-gitops:
     name: Rollback GitOps Manifest Update
     runs-on: ubuntu-latest
-    needs: [build-and-push, update-gitops-manifests, verify-deployment]
+    needs: [gate-dependencies, build-and-push, update-gitops-manifests, verify-deployment]
     if: ${{ always() && needs.update-gitops-manifests.outputs.updated == 'true' && needs.verify-deployment.result == 'failure' }}
 
     permissions:
@@ -516,13 +537,13 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: ${{ github.ref_name }}
+          ref: ${{ needs.gate-dependencies.outputs.branch }}
           token: ${{ secrets.GITOPS_BOT_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Revert manifest commit
         shell: bash
         env:
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ needs.gate-dependencies.outputs.branch }}
           NEW_TAG: sha-${{ needs.build-and-push.outputs.short_sha }}
         run: |
           set -euo pipefail
@@ -547,7 +568,7 @@ jobs:
   create-rollback-issue:
     name: Create Rollback Incident Issue
     runs-on: ubuntu-latest
-    needs: [build-and-push, verify-deployment, rollback-gitops]
+    needs: [gate-dependencies, build-and-push, verify-deployment, rollback-gitops]
     if: ${{ always() && needs.verify-deployment.result == 'failure' }}
 
     permissions:
@@ -591,7 +612,7 @@ jobs:
             });
         env:
           ROLLBACK_RESULT: ${{ needs.rollback-gitops.result }}
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ needs.gate-dependencies.outputs.branch }}
           IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           ACTOR: ${{ github.actor }}
@@ -600,12 +621,12 @@ jobs:
   notify-deployment:
     name: Notify Deployment Status
     runs-on: ubuntu-latest
-    needs: [build-and-push, security-scan, update-gitops-manifests, verify-deployment, rollback-gitops, create-rollback-issue]
+    needs: [gate-dependencies, build-and-push, security-scan, update-gitops-manifests, verify-deployment, rollback-gitops, create-rollback-issue]
     if: always()
 
     steps:
       - name: Notify CD Success
-        if: ${{ needs.build-and-push.result == 'success' && needs.security-scan.result == 'success' && needs.update-gitops-manifests.result == 'success' && (needs.verify-deployment.result == 'success' || needs.verify-deployment.result == 'skipped') }}
+        if: ${{ needs.build-and-push.result == 'success' && needs.security-scan.result == 'success' && needs.update-gitops-manifests.result == 'success' && needs.update-gitops-manifests.outputs.update_mode != 'pr_opened' && needs.update-gitops-manifests.outputs.update_mode != 'issue_opened' && (needs.verify-deployment.result == 'success' || needs.verify-deployment.result == 'skipped') }}
         uses: actions/github-script@v8
         with:
           script: |
@@ -647,10 +668,55 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
           TAG: ${{ needs.build-and-push.outputs.image_tag }}
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ needs.gate-dependencies.outputs.branch }}
           PROJECT_VERSION: ${{ needs.build-and-push.outputs.project_version }}
           PACKAGE_VERSION: ${{ needs.build-and-push.outputs.package_version }}
           VERIFICATION_RESULT: ${{ needs.verify-deployment.result }}
+          URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: Notify CD Pending Manual Promotion
+        if: ${{ needs.build-and-push.result == 'success' && needs.security-scan.result == 'success' && needs.update-gitops-manifests.result == 'success' && (needs.update-gitops-manifests.outputs.update_mode == 'pr_opened' || needs.update-gitops-manifests.outputs.update_mode == 'issue_opened') }}
+        uses: actions/github-script@v8
+        with:
+          script: |
+            if (!process.env.SLACK_WEBHOOK) {
+              core.info('SLACK_WEBHOOK is not set; skipping Slack notification.');
+              return;
+            }
+            try {
+              await fetch(process.env.SLACK_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  text: '⏳ CD awaiting protected-branch approval',
+                  blocks: [
+                    {
+                      type: 'section',
+                      text: {
+                        type: 'mrkdwn',
+                        text: `*⏳ CD requires manual approval path*\n*Manifest update was not pushed directly due to branch protection*`
+                      }
+                    },
+                    {
+                      type: 'section',
+                      fields: [
+                        { type: 'mrkdwn', text: `*Image:*\n${process.env.TAG}` },
+                        { type: 'mrkdwn', text: `*Branch:*\n${process.env.BRANCH}` },
+                        { type: 'mrkdwn', text: `*Update mode:*\n${process.env.UPDATE_MODE}` },
+                        { type: 'mrkdwn', text: `*Run:*\n<${process.env.URL}|View Details>` }
+                      ]
+                    }
+                  ]
+                })
+              });
+            } catch (e) {
+              core.warning('Slack notification failed: ' + e.message);
+            }
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          TAG: ${{ needs.build-and-push.outputs.image_tag }}
+          BRANCH: ${{ needs.gate-dependencies.outputs.branch }}
+          UPDATE_MODE: ${{ needs.update-gitops-manifests.outputs.update_mode }}
           URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
       - name: Notify CD Failure
@@ -713,6 +779,6 @@ jobs:
           VERIFY_RESULT: ${{ needs.verify-deployment.result }}
           ROLLBACK_RESULT: ${{ needs.rollback-gitops.result }}
           ISSUE_RESULT: ${{ needs.create-rollback-issue.result }}
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ needs.gate-dependencies.outputs.branch }}
           ACTOR: ${{ github.actor }}
           URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
