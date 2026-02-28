@@ -4,8 +4,6 @@ on:
   workflow_run:
     workflows:
       - Continuous Integration
-      - Security Scans
-      - Package Validation
     types:
       - completed
     branches:
