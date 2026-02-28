@@ -14,6 +14,12 @@ from typing import Any
 
 from loguru import logger
 
+__all__ = [
+    "ModelServer",
+    "PredictionRequest",
+    "PredictionResponse",
+]
+
 
 @dataclass
 class PredictionRequest:

@@ -16,6 +16,12 @@ from typing import Any
 
 from loguru import logger
 
+__all__ = [
+    "ModelArtifact",
+    "ModelRegistry",
+    "ModelStage",
+]
+
 
 class ModelStage(StrEnum):
     """Model lifecycle stages."""

@@ -27,6 +27,13 @@ from loguru import logger
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
 
+__all__ = [
+    "AuthMiddleware",
+    "AuthUser",
+    "create_token",
+    "decode_token",
+]
+
 # ---------------------------------------------------------------------------
 # Token helpers (pure-Python HS256 — no external ``pyjwt`` needed)
 # ---------------------------------------------------------------------------
