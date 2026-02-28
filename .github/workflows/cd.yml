@@ -1,16 +1,14 @@
 name: Continuous Deployment
 
 on:
-  workflow_run:
-    workflows: ["Continuous Integration"]
-    types:
-      - completed
+  push:
     branches:
       - main
       - dev
+  workflow_dispatch:
 
 concurrency:
-  group: cd-${{ github.event.workflow_run.head_branch }}
+  group: cd-${{ github.ref_name }}
   cancel-in-progress: true
 
 env:
@@ -18,10 +16,114 @@ env:
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
 jobs:
+  check-upstream-workflows:
+    name: Verify Upstream Workflows
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+
+    steps:
+      - name: Wait for required workflows on this commit
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const sha = context.sha;
+            const required = ['Continuous Integration', 'Security Scans'];
+            const optional = ['Package Validation'];
+
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+            const timeoutMs = 20 * 60 * 1000;
+            const intervalMs = 20 * 1000;
+            const start = Date.now();
+
+            while (true) {
+              const { data } = await github.rest.actions.listWorkflowRunsForRepo({
+                owner,
+                repo,
+                head_sha: sha,
+                per_page: 100,
+              });
+
+              const byName = new Map();
+              for (const run of data.workflow_runs) {
+                if (!byName.has(run.name)) {
+                  byName.set(run.name, run);
+                }
+              }
+
+              const missing = [];
+              const pending = [];
+              const failed = [];
+              const optionalFailed = [];
+
+              for (const name of required) {
+                const run = byName.get(name);
+                if (!run) {
+                  missing.push(name);
+                  continue;
+                }
+
+                if (run.status !== 'completed') {
+                  pending.push(`${name} (${run.status})`);
+                  continue;
+                }
+
+                if (run.conclusion !== 'success') {
+                  failed.push(`${name} (${run.conclusion})`);
+                }
+              }
+
+              for (const name of optional) {
+                const run = byName.get(name);
+                if (!run) {
+                  continue;
+                }
+                if (run.status !== 'completed') {
+                  pending.push(`${name} (${run.status})`);
+                  continue;
+                }
+                if (run.conclusion !== 'success') {
+                  optionalFailed.push(`${name} (${run.conclusion})`);
+                }
+              }
+
+              core.info(`Required workflows for ${sha.substring(0, 8)}:`);
+              core.info(`- missing: ${missing.length ? missing.join(', ') : 'none'}`);
+              core.info(`- pending: ${pending.length ? pending.join(', ') : 'none'}`);
+              core.info(`- failed: ${failed.length ? failed.join(', ') : 'none'}`);
+              core.info(`- optional failed: ${optionalFailed.length ? optionalFailed.join(', ') : 'none'}`);
+
+              if (failed.length) {
+                core.setFailed(`Blocking CD because upstream workflow(s) failed: ${failed.join(', ')}`);
+                return;
+              }
+
+              if (optionalFailed.length) {
+                core.setFailed(`Blocking CD because optional workflow(s) that ran failed: ${optionalFailed.join(', ')}`);
+                return;
+              }
+
+              if (!missing.length && !pending.length) {
+                core.info('All required upstream workflows succeeded.');
+                return;
+              }
+
+              if (Date.now() - start > timeoutMs) {
+                core.setFailed(`Timed out waiting for upstream workflows. Missing: ${missing.join(', ') || 'none'}; Pending: ${pending.join(', ') || 'none'}`);
+                return;
+              }
+
+              await sleep(intervalMs);
+            }
+
   build-and-push:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs: check-upstream-workflows
+    if: ${{ needs.check-upstream-workflows.result == 'success' }}
 
     permissions:
       contents: read
@@ -65,14 +167,12 @@ jobs:
             }
         env:
           SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
-          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          BRANCH: ${{ github.ref_name }}
 
-      # nosemgrep: workflow-run-target-code-checkout — safe: triggers only on completed CI for main/dev
       - name: Checkout code at CI commit
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -122,7 +222,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
         env:
           REGISTRY: ${{ env.REGISTRY }}
-          REPO_OWNER: ${{ github.event.workflow_run.repository.owner.login }}
+          REPO_OWNER: ${{ github.repository_owner }}
 
       - name: Docker metadata
         id: meta
@@ -131,9 +231,9 @@ jobs:
           images: ${{ steps.vars.outputs.image_repo }}
           tags: |
             type=raw,value=${{ steps.vars.outputs.sha_tag }}
-            type=raw,value=v${{ steps.versions.outputs.project_version }},enable=${{ github.event.workflow_run.head_branch == 'main' }}
-            type=raw,value=latest,enable=${{ github.event.workflow_run.head_branch == 'main' }}
-            type=raw,value=dev,enable=${{ github.event.workflow_run.head_branch == 'dev' }}
+            type=raw,value=v${{ steps.versions.outputs.project_version }},enable=${{ github.ref_name == 'main' }}
+            type=raw,value=latest,enable=${{ github.ref_name == 'main' }}
+            type=raw,value=dev,enable=${{ github.ref_name == 'dev' }}
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -160,17 +260,15 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-latest
     needs: build-and-push
+    if: ${{ needs.build-and-push.result == 'success' }}
 
     permissions:
       packages: read
       security-events: write
 
     steps:
-      # nosemgrep: workflow-run-target-code-checkout — safe: triggers only on completed CI for main/dev
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -208,24 +306,24 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write
 
     outputs:
       updated: ${{ steps.commit.outputs.updated }}
 
     steps:
-      # nosemgrep: workflow-run-target-code-checkout — safe: triggers only on completed CI for main/dev
       - name: Checkout branch
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: ${{ github.event.workflow_run.head_branch }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.ref_name }}
+          token: ${{ secrets.GITOPS_BOT_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Update overlay image tags
         id: update
         shell: bash
         env:
-          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          BRANCH: ${{ github.ref_name }}
           NEW_TAG: sha-${{ needs.build-and-push.outputs.short_sha }}
         run: |
           set -euo pipefail
@@ -251,9 +349,9 @@ jobs:
         id: commit
         shell: bash
         env:
-          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          BRANCH: ${{ github.ref_name }}
           NEW_TAG: sha-${{ needs.build-and-push.outputs.short_sha }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITOPS_BOT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           if [[ -z "$(git status --porcelain infra/argocd/overlays)" ]]; then
@@ -268,7 +366,7 @@ jobs:
           git add infra/argocd/overlays
           git commit -m "chore: update ${BRANCH} image to ${NEW_TAG} [skip ci]"
 
-          if git push origin "HEAD:${BRANCH}"; then
+          if [[ "$BRANCH" != "main" ]] && git push origin "HEAD:${BRANCH}"; then
             echo "Pushed manifest update directly to ${BRANCH}."
             echo "updated=true" >> "$GITHUB_OUTPUT"
             exit 0
@@ -279,14 +377,31 @@ jobs:
           git checkout -b "$PR_BRANCH"
           git push origin "HEAD:${PR_BRANCH}"
 
-          gh pr create \
+          PR_BODY=$(printf "Automated GitOps manifest update from CD pipeline.\n\n- Branch: %s\n- Image tag: %s\n- Source run: %s/%s/actions/runs/%s" \
+            "$BRANCH" "$NEW_TAG" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
+
+          if gh pr create \
             --base "$BRANCH" \
             --head "$PR_BRANCH" \
             --title "chore: update ${BRANCH} image to ${NEW_TAG}" \
-            --body "Automated GitOps manifest update from CD pipeline.\n\n- Branch: ${BRANCH}\n- Image tag: ${NEW_TAG}\n- Source run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            --body "$PR_BODY"; then
+            echo "Opened PR branch ${PR_BRANCH}; deployment verification is skipped until PR is merged."
+            echo "updated=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "GitHub Actions is not permitted to create pull requests in this repository. Opening issue instead."
+          ISSUE_BODY=$(printf "Automated GitOps update could not be pushed directly to protected branch \`%s\` and this workflow token cannot create PRs.\n\nCreated branch: \`%s\`\n\nCreate PR manually:\n- Base: \`%s\`\n- Head: \`%s\`\n\nWorkflow run: %s/%s/actions/runs/%s" \
+            "$BRANCH" "$PR_BRANCH" "$BRANCH" "$PR_BRANCH" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
+
+          gh issue create \
+            --title "[CD action required] Promote ${NEW_TAG} to ${BRANCH}" \
+            --body "$ISSUE_BODY" \
+            --label deployment
 
           echo "updated=false" >> "$GITHUB_OUTPUT"
-          echo "Opened PR branch ${PR_BRANCH}; deployment verification is skipped until PR is merged."
+          echo "Created issue for manual PR creation from ${PR_BRANCH}."
+          exit 0
 
   verify-deployment:
     name: Verify ArgoCD Deployment Health
@@ -302,7 +417,7 @@ jobs:
         id: plan
         shell: bash
         env:
-          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          BRANCH: ${{ github.ref_name }}
           ARGOCD_SERVER: ${{ vars.ARGOCD_SERVER }}
           ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
         run: |
@@ -358,7 +473,7 @@ jobs:
         if: ${{ steps.plan.outputs.verification_enabled == 'true' }}
         shell: bash
         env:
-          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          BRANCH: ${{ github.ref_name }}
           DEV_HEALTHCHECK_URL: ${{ vars.DEV_HEALTHCHECK_URL }}
           STAGE_HEALTHCHECK_URL: ${{ vars.STAGE_HEALTHCHECK_URL }}
           PROD_HEALTHCHECK_URL: ${{ vars.PROD_HEALTHCHECK_URL }}
@@ -397,18 +512,17 @@ jobs:
       contents: write
 
     steps:
-      # nosemgrep: workflow-run-target-code-checkout — safe: triggers only on completed CI for main/dev
       - name: Checkout deployment branch
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: ${{ github.event.workflow_run.head_branch }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.ref_name }}
+          token: ${{ secrets.GITOPS_BOT_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Revert manifest commit
         shell: bash
         env:
-          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          BRANCH: ${{ github.ref_name }}
           NEW_TAG: sha-${{ needs.build-and-push.outputs.short_sha }}
         run: |
           set -euo pipefail
@@ -477,7 +591,7 @@ jobs:
             });
         env:
           ROLLBACK_RESULT: ${{ needs.rollback-gitops.result }}
-          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          BRANCH: ${{ github.ref_name }}
           IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           ACTOR: ${{ github.actor }}
@@ -533,7 +647,7 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
           TAG: ${{ needs.build-and-push.outputs.image_tag }}
-          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          BRANCH: ${{ github.ref_name }}
           PROJECT_VERSION: ${{ needs.build-and-push.outputs.project_version }}
           PACKAGE_VERSION: ${{ needs.build-and-push.outputs.package_version }}
           VERIFICATION_RESULT: ${{ needs.verify-deployment.result }}
@@ -599,6 +713,6 @@ jobs:
           VERIFY_RESULT: ${{ needs.verify-deployment.result }}
           ROLLBACK_RESULT: ${{ needs.rollback-gitops.result }}
           ISSUE_RESULT: ${{ needs.create-rollback-issue.result }}
-          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          BRANCH: ${{ github.ref_name }}
           ACTOR: ${{ github.actor }}
           URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
