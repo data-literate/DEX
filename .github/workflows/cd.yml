@@ -67,6 +67,7 @@ jobs:
           SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
           BRANCH: ${{ github.event.workflow_run.head_branch }}
 
+      # nosemgrep: workflow-run-target-code-checkout — safe: triggers only on completed CI for main/dev
       - name: Checkout code at CI commit
         uses: actions/checkout@v6
         with:
@@ -165,6 +166,7 @@ jobs:
       security-events: write
 
     steps:
+      # nosemgrep: workflow-run-target-code-checkout — safe: triggers only on completed CI for main/dev
       - name: Checkout code
         uses: actions/checkout@v6
         with:
@@ -210,6 +212,7 @@ jobs:
       updated: ${{ steps.commit.outputs.updated }}
 
     steps:
+      # nosemgrep: workflow-run-target-code-checkout — safe: triggers only on completed CI for main/dev
       - name: Checkout branch
         uses: actions/checkout@v6
         with:
@@ -374,6 +377,7 @@ jobs:
       contents: write
 
     steps:
+      # nosemgrep: workflow-run-target-code-checkout — safe: triggers only on completed CI for main/dev
       - name: Checkout deployment branch
         uses: actions/checkout@v6
         with:
