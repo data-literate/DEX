@@ -2,7 +2,7 @@
 
 **Complete guide to monitoring, debugging, and understanding DataEngineX in production.**
 
-> **Quick Links:** [Metrics](#prometheus-metrics) · [Tracing](#opentelemetry-tracing) · [Logging](#structured-logging) · [Local Testing](#local-testing) · [Troubleshooting](#troubleshooting)
+> **Quick Links:** [Metrics](#prometheus-metrics) · [Tracing](#opentelemetry-tracing) · [Grafana](#grafana-dashboards) · [Local Testing](#local-testing) · [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -12,9 +12,9 @@
 - [Architecture](#architecture)
 - [Prometheus Metrics](#prometheus-metrics)
 - [OpenTelemetry Tracing](#opentelemetry-tracing)
-- [Structured Logging](#structured-logging)
+- [Grafana Dashboards](#grafana-dashboards)
 - [Local Testing](#local-testing)
-- [Kubernetes Integration](#kubernetes-integration)
+- [Health Checks](#health-checks)
 - [Troubleshooting](#troubleshooting)
 - [Related Documentation](#related-documentation)
 
@@ -31,33 +31,33 @@ flowchart TB
     subgraph client["Client"]
         Browser["Browser/API Client"]
     end
-    
+
     subgraph app["DataEngineX Application"]
         direction TB
         FastAPI["FastAPI App"]
         LogMW["RequestLoggingMiddleware"]
         MetricsMW["PrometheusMetricsMiddleware"]
         Tracing["OpenTelemetry Instrumentation"]
-        
+
         FastAPI --> LogMW
         LogMW --> MetricsMW
         MetricsMW --> Tracing
     end
-    
+
     subgraph observability["Observability Stack"]
         direction LR
         Prometheus["Prometheus<br/>(Metrics)"]
         Jaeger["Jaeger<br/>(Traces)"]
         Logs["Structured Logs<br/>(JSON/Console)"]
     end
-    
+
     Browser -->|HTTP Request| FastAPI
     FastAPI -->|Response + X-Request-ID| Browser
-    
+
     MetricsMW -.->|/metrics endpoint| Prometheus
     Tracing -.->|OTLP gRPC :4317| Jaeger
     LogMW -.->|stdout/stderr| Logs
-    
+
     style FastAPI fill:#e1f5ff
     style LogMW fill:#fff3cd
     style MetricsMW fill:#d4edda
@@ -77,29 +77,29 @@ sequenceDiagram
     participant MetricsMW as PrometheusMetricsMiddleware
     participant Tracing as OpenTelemetry
     participant App as Application Logic
-    
+
     Client->>+FastAPI: HTTP GET /
     FastAPI->>+LogMW: Process Request
     Note over LogMW: Generate UUID<br/>Bind context
     LogMW->>LogMW: Log "request_started"
-    
+
     LogMW->>+MetricsMW: Continue
     Note over MetricsMW: Increment in_flight gauge
-    
+
     MetricsMW->>+Tracing: Continue
     Note over Tracing: Create span<br/>"GET /"
-    
+
     Tracing->>+App: Execute endpoint
     App-->>-Tracing: Return response
     Note over Tracing: End span<br/>Export to Jaeger
-    
+
     Tracing-->>-MetricsMW: Response
     Note over MetricsMW: Record duration histogram<br/>Increment requests counter<br/>Decrement in_flight gauge
-    
+
     MetricsMW-->>-LogMW: Response
     LogMW->>LogMW: Log "request_completed"
     Note over LogMW: Add X-Request-ID header
-    
+
     LogMW-->>-FastAPI: Response
     FastAPI-->>-Client: HTTP 200 OK<br/>X-Request-ID: uuid
 ```
@@ -186,7 +186,7 @@ flowchart TB
         Process["Process Request"]
         End["Response Sent"]
     end
-    
+
     subgraph metrics["Metrics Updates"]
         InFlight["http_requests_in_flight<br/>+1"]
         Duration["http_request_duration_seconds<br/>observe(duration)"]
@@ -194,13 +194,13 @@ flowchart TB
         Exception["http_exceptions_total<br/>+1 (if error)"]
         InFlightDec["http_requests_in_flight<br/>-1"]
     end
-    
+
     subgraph prometheus["Prometheus"]
         Scrape["Scrape /metrics<br/>every 15s"]
         Store["Time Series DB"]
         Query["PromQL Queries"]
     end
-    
+
     Start --> InFlight
     InFlight --> Process
     Process -->|Success| Duration
@@ -209,11 +209,11 @@ flowchart TB
     Exception --> Counter
     Counter --> InFlightDec
     InFlightDec --> End
-    
+
     Counter -.->|Expose| Scrape
     Scrape --> Store
     Store --> Query
-    
+
     style request fill:#e1f5ff
     style metrics fill:#d4edda
     style prometheus fill:#d1ecf1
@@ -246,23 +246,23 @@ flowchart LR
         Span["Span Creation"]
         Export["OTLP Exporter"]
     end
-    
+
     subgraph collectors["Collectors"]
         OTLP["OTLP Endpoint<br/>:4317"]
         Console["Console Export<br/>(Debug)"]
     end
-    
+
     subgraph backend["Backend"]
         Jaeger["Jaeger UI<br/>:16686"]
     end
-    
+
     Request --> Instrumentation
     Instrumentation --> Span
     Span -->|Attributes:<br/>method, path,<br/>status, duration| Export
     Export -->|if OTLP_ENDPOINT set| OTLP
     Export -->|if ENABLE_CONSOLE_TRACES| Console
     OTLP --> Jaeger
-    
+
     style app fill:#e1f5ff
     style collectors fill:#fff3cd
     style backend fill:#d1ecf1
@@ -326,7 +326,7 @@ Total: 150ms
 
 ## Grafana Dashboards
 
-Prebuilt dashboards are available in [infra/grafana](../infra/grafana/README.md):
+Prebuilt dashboards are available in [infra/grafana](https://github.com/TheDataEngineX/DEX/blob/main/infra/monitoring/grafana/README.md):
 
 - **DEX Metrics**: request rate, latency, error rate, in-flight.
 - **DEX Logs**: log volume, error spikes, recent logs, and request IDs (Loki).
@@ -359,7 +359,7 @@ Dashboards assume default labels (e.g., `app=dataenginex`). If your labels diffe
    ```bash
    curl http://localhost:8000/metrics
    ```
-   
+
    **Expected output:**
    ```
    # HELP http_requests_total Total HTTP requests
@@ -374,7 +374,7 @@ Dashboards assume default labels (e.g., `app=dataenginex`). If your labels diffe
    curl http://localhost:8000/
    curl http://localhost:8000/health
   curl http://localhost:8000/ready
-   
+
    # Check updated metrics
    curl http://localhost:8000/metrics
    ```
@@ -405,7 +405,7 @@ Then open:
      -p 14250:14250 \
      jaegertracing/all-in-one:1.60
    ```
-   
+
 2. **Run application with tracing**:
    ```bash
    export OTLP_ENDPOINT="http://localhost:4317"
@@ -493,14 +493,14 @@ services:
     environment:
       - LOG_LEVEL=INFO
       - OTLP_ENDPOINT=http://jaeger:4317
-  
+
   prometheus:
     image: prom/prometheus
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-  
+      - ./infra/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+
   jaeger:
     image: jaegertracing/all-in-one:1.60
     environment:
@@ -511,7 +511,7 @@ services:
       - "4317:4317"    # OTLP gRPC
       - "4318:4318"    # OTLP HTTP
       - "14250:14250"  # gRPC
-  
+
   grafana:
     image: grafana/grafana
     ports:
@@ -746,12 +746,12 @@ uv run poe test
 **Deployment & Operations:**
 - **[CI/CD Pipeline](CI_CD.md)** - Automated deployments
 - **[Deployment Runbook](DEPLOY_RUNBOOK.md)** - Deploy procedures
-- **[Infrastructure](../infra/README.md)** - Kubernetes setup
+- **[Local K8s Setup](LOCAL_K8S_SETUP.md)** - Kubernetes setup
 
 **Development:**
 - **[SDLC](SDLC.md)** - Development workflow
-- **[Contributing](../CONTRIBUTING.md)** - Contribution guide
+- **[Contributing](CONTRIBUTING.md)** - Contribution guide
 
 ---
 
-**[← Back to Documentation Hub](README.md)**
+**[← Back to Documentation Hub](docs-hub.md)**

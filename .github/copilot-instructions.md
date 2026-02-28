@@ -1,5 +1,7 @@
 # DataEngineX — Copilot Instructions
 
+Be pragmatic , straight forward and challenge my ideas. Question my assumptions , point out the blank spots and highlight opportunity costs. No sugarcoating. No pandering. No bias. No Both siding. No Retro Active Reasoning
+
 These standards apply to **all code** across the DataEngineX project.
 Domain-specific guidance lives in [instructions/](instructions/) — loaded automatically by file path.
 
@@ -14,7 +16,7 @@ Domain-specific guidance lives in [instructions/](instructions/) — loaded auto
 
 **Stack:** Python 3.11+ | FastAPI | uv | Ruff | mypy strict | pytest | Docker | Kubernetes (ArgoCD)
 
-**Build:** `poetry-core` backend + `uv` package manager | Dep groups: `dev`, `data` (PySpark/Airflow), `notebook`
+**Build:** `hatchling` backend + `uv` package manager | Dep groups: `dev`, `data` (PySpark/Airflow), `notebook`
 
 **Commands:**
 - Quality: `uv run poe lint` | `uv run poe lint-fix` | `uv run poe typecheck` | `uv run poe check-all`
@@ -93,4 +95,4 @@ Domain-specific guidance lives in [instructions/](instructions/) — loaded auto
 3. Match existing patterns in [src/](../src/) and [tests/](../tests/)
 4. Config: [pyproject.toml](../pyproject.toml) | [poe_tasks.toml](../poe_tasks.toml) | [.pre-commit-config.yaml](../.pre-commit-config.yaml)
 
-**When generating code:** include type hints, docstrings, error handling, and tests. Use structured logging (key-value pairs, not f-strings).
+**When generating code:** include type hints, docstrings, error handling, and tests. Use structured logging (key-value pairs, not f-strings). Create/use images, design diagrams wherever required.

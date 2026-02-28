@@ -4,18 +4,20 @@ This document explains how to get help for DataEngineX (DEX).
 
 ## Where to Ask
 
-- **Questions / usage help**: GitHub Discussions
+- **Questions / usage help**: GitHub Discussions (`https://github.com/TheDataEngineX/DEX/discussions`)
 - **Bug reports**: GitHub Issues (Bug template)
 - **Feature proposals**: GitHub Issues (Feature template)
 - **Security concerns**: Follow `SECURITY.md`
+- **Roadmap / planning view**: GitHub Organization Projects (`https://github.com/orgs/TheDataEngineX/projects`)
 
 ## Before Opening an Issue
 
 Please check:
 
 1. `README.md`
-2. `docs/README.md`
+2. `docs/docs-hub.md`
 3. Existing Issues and Discussions
+4. Public docs site: `https://docs.thedataenginex.org`
 
 ## What to Include in Help Requests
 

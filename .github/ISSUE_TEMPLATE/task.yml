@@ -1,6 +1,7 @@
 name: Task/Chore
 description: Non-feature work (refactoring, maintenance, documentation, etc.)
 title: "[Task]: "
+labels: ["type:chore", "needs-triage"]
 body:
   - type: markdown
     attributes:

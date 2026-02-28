@@ -26,7 +26,7 @@ jobs:
 
     steps:
       - name: Notify Release Start
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         if: always()
         with:
           script: |
@@ -60,8 +60,12 @@ jobs:
         id: version
         run: |
           VERSION=$(grep -m 1 "^version = " packages/dataenginex/pyproject.toml | sed 's/version = "//;s/".*//')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=dataenginex-v$VERSION" >> $GITHUB_OUTPUT
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid DataEngineX version in packages/dataenginex/pyproject.toml: $VERSION"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=dataenginex-v$VERSION" >> "$GITHUB_OUTPUT"
           echo "Extracted DataEngineX version: $VERSION"
 
       - name: Extract DataEngineX changelog notes
@@ -86,10 +90,10 @@ jobs:
         id: check_tag
         run: |
           if git rev-parse "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
-            echo "tag_exists=true" >> $GITHUB_OUTPUT
+            echo "tag_exists=true" >> "$GITHUB_OUTPUT"
             echo "Tag ${{ steps.version.outputs.tag }} already exists"
           else
-            echo "tag_exists=false" >> $GITHUB_OUTPUT
+            echo "tag_exists=false" >> "$GITHUB_OUTPUT"
             echo "Tag ${{ steps.version.outputs.tag }} is new"
           fi
 
@@ -114,11 +118,12 @@ jobs:
             --target main \
             --title "DataEngineX ${{ steps.version.outputs.tag }}" \
             --notes "${{ steps.changelog.outputs.notes }}" \
+            --generate-notes \
             --draft=false
 
       - name: Notify Release Success
         if: success() && steps.check_tag.outputs.tag_exists == 'false'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             if (!process.env.SLACK_WEBHOOK) return;
@@ -146,7 +151,7 @@ jobs:
 
       - name: Notify Release Failure
         if: failure()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             if (!process.env.SLACK_WEBHOOK) return;

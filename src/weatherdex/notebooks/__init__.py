@@ -35,4 +35,10 @@ Documentation:
 __version__ = "1.0"
 __author__ = "Weather ML Pipeline"
 
-__all__ = ["feature_engineering", "train_model", "analyze_predictions"]
+__all__ = [
+    "analyze_predictions",
+    "extract_weather",
+    "feature_engineering",
+    "load_weather",
+    "train_model",
+]

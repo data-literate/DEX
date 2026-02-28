@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: Notify CI Start
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         if: always()
         with:
           script: |
@@ -71,7 +71,7 @@ jobs:
       - name: Install uv
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Install dependencies (uv)
         env:
@@ -99,7 +99,7 @@ jobs:
 
       - name: Notify CI Success
         if: success()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             if (!process.env.SLACK_WEBHOOK) return;
@@ -127,7 +127,7 @@ jobs:
 
       - name: Notify CI Failure
         if: failure()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             if (!process.env.SLACK_WEBHOOK) return;
@@ -196,7 +196,7 @@ jobs:
       - name: Install uv
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Install dependencies (with data + notebook groups)
         env:
@@ -211,7 +211,7 @@ jobs:
 
       - name: Notify Integration Test Complete
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             if (!process.env.SLACK_WEBHOOK) return;

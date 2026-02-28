@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.11] - 2026-02-27
+
+### Changed
+
+- Added `environment` label support across HTTP metrics counters/histograms/gauges and middleware emission.
+- Aligned alert rule histogram quantile expressions with explicit bucket aggregation by `le` and `environment`.
+- Standardized docs and release prep metadata for CSV-canonical roadmap and setup workflow updates.
+
 ## [0.4.10] - 2026-02-21
 
 ### Added
@@ -118,7 +126,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cursor-based pagination utilities
 - Versioned API router (`/api/v1/`)
 
-[Unreleased]: https://github.com/TheDataEngineX/DEX/compare/v0.4.10...HEAD
+[Unreleased]: https://github.com/TheDataEngineX/DEX/compare/v0.4.11...HEAD
+[0.4.11]: https://github.com/TheDataEngineX/DEX/compare/v0.4.10...v0.4.11
 [0.4.10]: https://github.com/TheDataEngineX/DEX/compare/v0.4.8...v0.4.10
 [0.4.8]: https://github.com/TheDataEngineX/DEX/compare/v0.4.6...v0.4.8
 [0.4.6]: https://github.com/TheDataEngineX/DEX/compare/v0.4.5...v0.4.6

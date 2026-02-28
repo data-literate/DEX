@@ -7,10 +7,19 @@
 ## Getting Started
 
 **New to DEX? Start here:**
-1. **[Main README](../README.md)** - Project overview
+1. **[Main README](https://github.com/TheDataEngineX/DEX/blob/main/README.md)** - Project overview
 2. **[Development Setup](./DEVELOPMENT.md)** - Local environment setup
 3. **[CI/CD Pipeline](./CI_CD.md)** - Build, release, and publish workflow
 4. **[Contributing](./CONTRIBUTING.md)** - How to contribute
+
+### One-step Setup
+
+```bash
+uv run poe setup
+uv run poe check-all
+```
+
+Use this to install dependencies, set up pre-commit hooks, and verify the workspace in one quick flow.
 
 ---
 
@@ -23,13 +32,14 @@ Core documentation for all DEX developers:
 - **[Development Setup](./DEVELOPMENT.md)** - Local development, workflow, testing
 - **[Contributing Guidelines](./CONTRIBUTING.md)** - Code style, commits, PR process
 - **[Architecture](./ARCHITECTURE.md)** - System design and technology stack
-- **[Architecture Decision Records (ADRs)](./adr/)** - Rationale for major technical decisions
+- **[Architecture Decision Records (ADRs)](./adr/0001-medallion-architecture.md)** - Rationale for major technical decisions
   - [ADR-0001: Medallion Architecture](./adr/0001-medallion-architecture.md)
 - **[CI/CD Pipeline](./CI_CD.md)** - GitHub Actions automation
 - **[Deployment Runbook](./DEPLOY_RUNBOOK.md)** - Release procedures
 - **[Observability](./OBSERVABILITY.md)** - Monitoring, logging, tracing
 - **[SDLC](./SDLC.md)** - Software development lifecycle
 - **[Release Notes](./RELEASE_NOTES.md)** - Version history
+- **[Org + Domain Rollout](./DEPLOY_RUNBOOK.md)** - GitHub Organization and Cloudflare setup checklist
 - **[Kubernetes Setup](./LOCAL_K8S_SETUP.md)** - Local K8s configuration
 
 ### Projects
@@ -37,16 +47,17 @@ Core documentation for all DEX developers:
 Project-specific documentation:
 
 **CareerDEX**
-- **[CareerDEX Docs](./careerdex/README.md)** - Project overview and implementation status
-- **[Source Package](../src/careerdex/README.md)** - Package-level structure and architecture
+- **[CareerDEX Docs](./careerdex/index.md)** - Project overview and implementation status
+- **[Source Package](https://github.com/TheDataEngineX/DEX/tree/main/src/careerdex)** - Package-level structure and architecture
 
 **Weather** (Reference Implementation)
-- **[Weather Docs](./weather/README.md)** - Reference implementation guide
-- **[Source Package](../src/weatherdex/README.md)** - Source package summary
+- **[Weather Docs](./weather/index.md)** - Reference implementation guide
+- **[Source Package](./weather/index.md)** - Source package summary
 
 ### Planning
 
-- **[Project Roadmap](./roadmap/project-roadmap.json)** - Strategic milestones
+- **[Project Roadmap (Canonical CSV)](./roadmap/project-roadmap.csv)** - Strategic milestones and status source of truth
+- **[Project Roadmap (Derived JSON)](./roadmap/project-roadmap.json)** - Machine-readable export generated from CSV
 - **[GitHub Issues](https://github.com/TheDataEngineX/DEX/issues)** - Task tracking
 
 ---
@@ -62,8 +73,9 @@ Project-specific documentation:
 | Contribute code | [Contributing](./CONTRIBUTING.md) |
 | Understand CI/CD | [CI/CD Pipeline](./CI_CD.md) |
 | Track work | [SDLC](./SDLC.md) |
-| Work on CareerDEX | [CareerDEX Docs](./careerdex/README.md) |
-| Learn from reference | [Weather Docs](./weather/README.md) |
+| Configure org + domain | [Org + Domain Rollout](./DEPLOY_RUNBOOK.md) |
+| Work on CareerDEX | [CareerDEX Docs](./careerdex/index.md) |
+| Learn from reference | [Weather Docs](./weather/index.md) |
 
 ---
 
@@ -71,7 +83,7 @@ Project-specific documentation:
 
 ```
 docs/
-├── README.md (this file)
+├── docs-hub.md (this file)
 ├── DEVELOPMENT.md
 ├── CONTRIBUTING.md
 ├── ARCHITECTURE.md
@@ -86,15 +98,15 @@ docs/
 │   ├── 0001-medallion-architecture.md
 │   └── ...
 ├── careerdex/                  # CareerDEX project
-│   └── README.md
+│   └── index.md
 ├── weather/                    # Weather reference
-│   └── README.md
+│   └── index.md
 ├── roadmap/                    # Strategic planning
-│   ├── project-roadmap.json
-│   └── project-roadmap.csv
+│   ├── project-roadmap.csv      # Canonical source of truth
+│   └── project-roadmap.json     # Derived export
 └── (other docs organized by topic)
 ```
 
 ---
 
-**Version**: v0.3.5 | **Updated**: Feb 21, 2026
+**Version**: v0.3.6 | **Updated**: Feb 27, 2026

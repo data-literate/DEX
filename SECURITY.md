@@ -18,7 +18,7 @@ Please do **not** open public issues for suspected vulnerabilities.
 Use one of these channels:
 
 1. GitHub Security Advisories (preferred)
-2. Private maintainer contact via repository Discussions request for security triage
+2. Maintainer contact in `SUPPORT.md` to request a private triage channel
 
 If needed, open a minimal public issue without exploit details and ask maintainers for a private channel.
 

@@ -1,6 +1,6 @@
 [project]
 name = "dataenginex"
-version = "0.4.10"
+version = "0.4.11"
 description = "DataEngineX - Core framework for data engineering projects"
 authors = [
     {name = "Jay", email = "jayapal.myaka99@gmail.com"}
@@ -40,12 +40,8 @@ all = [
 ]
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
-package-mode = true
-
-[[tool.poetry.packages]]
-include = "dataenginex"
-from = "src"
+[tool.hatch.build.targets.wheel]
+packages = ["src/dataenginex"]

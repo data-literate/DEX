@@ -6,11 +6,11 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: dex-api-pdb
+  name: dex-pdb
   labels:
-    app: dex-api
+    app: dex
 spec:
   minAvailable: 1               # Keep ≥ 1 pod running at all times
   selector:
     matchLabels:
-      app: dex-api
+      app: dex

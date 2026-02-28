@@ -1,8 +1,8 @@
 # ADR-0001: Medallion Architecture (Bronze/Silver/Gold)
 
-**Status**: Accepted  
-**Date**: 2026-02-15  
-**Authors**: Data Engineering Team  
+**Status**: Accepted
+**Date**: 2026-02-15
+**Authors**: Data Engineering Team
 
 ## Context
 

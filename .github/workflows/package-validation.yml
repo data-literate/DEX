@@ -18,10 +18,6 @@ on:
     branches:
       - main
       - dev
-    paths:
-      - 'packages/dataenginex/**'
-      - 'packages/**'
-      - '.github/workflows/package-validation.yml'
 
 permissions:
   contents: read
@@ -36,7 +32,7 @@ jobs:
 
     steps:
       - name: Notify Package Validation Start
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         if: always()
         with:
           script: |
@@ -84,7 +80,7 @@ jobs:
 
       - name: Notify Package Validation Success
         if: success()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             if (!process.env.SLACK_WEBHOOK) return;
@@ -111,7 +107,7 @@ jobs:
 
       - name: Notify Package Validation Failure
         if: failure()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             if (!process.env.SLACK_WEBHOOK) return;

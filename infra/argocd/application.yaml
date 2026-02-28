@@ -109,38 +109,38 @@ spec:
           labels:
             - preview  # Only PRs with 'preview' label get an env
         requeueAfterSeconds: 180  # Check for new PRs every 3 minutes
-  
+
   template:
     metadata:
       name: 'dex-pr-{{number}}'
       namespace: argocd
       finalizers:
         - resources-finalizer.argocd.argoproj.io
-    
+
     spec:
       project: dex-project
-      
+
       source:
         repoURL: https://github.com/TheDataEngineX/DEX
         targetRevision: '{{head_sha}}'  # Deploy exact PR commit
         path: infra/argocd/overlays/preview
-        
+
         kustomize:
           images:
             - thedataenginex/dex:sha-{{head_short_sha}}  # Use PR's image
-      
+
       destination:
         server: https://kubernetes.default.svc
         namespace: 'dex-pr-{{number}}'  # Isolated namespace per PR
-      
+
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
-        
+
         syncOptions:
           - CreateNamespace=true
-        
+
         retry:
           limit: 3
           backoff:
@@ -156,10 +156,10 @@ metadata:
   namespace: argocd
 spec:
   description: DEX - DataEngineX Project
-  
+
   sourceRepos:
     - 'https://github.com/TheDataEngineX/DEX'  # Same repo for code + config (co-located; split later if needed)
-  
+
   destinations:
     - namespace: 'dex-*'
       server: https://kubernetes.default.svc
@@ -167,7 +167,7 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: 'dex-pr-*'  # Allow PR preview namespaces
       server: https://kubernetes.default.svc
-  
+
   # Allow creating namespaces
   clusterResourceWhitelist:
     - group: ''

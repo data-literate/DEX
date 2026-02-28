@@ -1,8 +1,6 @@
 # DataEngineX PyPI Publishing
 # Triggered by GitHub release from release-dataenginex.yml (tag: dataenginex-vX.Y.Z).
 # Detects if packages/dataenginex/ actually changed since previous dataenginex tag, then publishes.
-# Stages: detect changes → build distributions → TestPyPI → PyPI (if stable tag vX.Y.Z)
-# See docs/CI_CD.md for release flow.
 
 name: PyPI Publish
 
@@ -13,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to publish (e.g., v0.3.5)"
+        description: "Tag to publish (e.g., dataenginex-v0.4.10)"
         required: false
         type: string
 
@@ -32,6 +30,7 @@ jobs:
       previous_tag: ${{ steps.detect.outputs.previous_tag }}
       approved_tag: ${{ steps.detect.outputs.approved_tag }}
       current_tag: ${{ steps.detect.outputs.current_tag }}
+      package_version: ${{ steps.detect.outputs.package_version }}
 
     steps:
       - name: Checkout code
@@ -44,28 +43,53 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
           DISPATCH_TAG: ${{ github.event.inputs.tag }}
+          EVENT_NAME: ${{ github.event_name }}
         shell: bash
         run: |
           set -euo pipefail
 
-          CURRENT_TAG="${RELEASE_TAG:-${DISPATCH_TAG:-${GITHUB_REF_NAME:-}}}"
+          git fetch --tags --force
+
+          PACKAGE_VERSION=$(grep -m 1 '^version = ' packages/dataenginex/pyproject.toml | sed 's/version = "//;s/".*//')
+          echo "package_version=${PACKAGE_VERSION}" >> "$GITHUB_OUTPUT"
+
+          CURRENT_TAG="${RELEASE_TAG:-${DISPATCH_TAG:-}}"
           if [[ -z "${CURRENT_TAG}" ]]; then
-            CURRENT_TAG="$(git tag --sort=-v:refname | head -n 1 || true)"
+            CURRENT_TAG="$(git tag --list 'dataenginex-v*' --sort=-version:refname | head -n 1 || true)"
+          fi
+
+          if [[ -z "${CURRENT_TAG}" ]]; then
+            echo "Unable to determine current DataEngineX release tag."
+            exit 1
           fi
 
           echo "current_tag=${CURRENT_TAG}" >> "$GITHUB_OUTPUT"
-          PREVIOUS_TAG="$(git tag --sort=-v:refname | grep -Fxv "${CURRENT_TAG}" | head -n 1 || true)"
 
-          if [[ "${CURRENT_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          STABLE_REGEX='^dataenginex-v[0-9]+\.[0-9]+\.[0-9]+$'
+          ANY_SEMVER_REGEX='^dataenginex-v[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$'
+
+          if [[ "${CURRENT_TAG}" =~ $STABLE_REGEX ]]; then
             echo "approved_tag=true" >> "$GITHUB_OUTPUT"
           else
             echo "approved_tag=false" >> "$GITHUB_OUTPUT"
           fi
 
+          if [[ ! "${CURRENT_TAG}" =~ $ANY_SEMVER_REGEX ]]; then
+            echo "Tag ${CURRENT_TAG} is not a valid DataEngineX semver tag."
+            exit 1
+          fi
+
+          TAG_VERSION="${CURRENT_TAG#dataenginex-v}"
+          if [[ "$EVENT_NAME" == "release" && "$TAG_VERSION" != "$PACKAGE_VERSION" ]]; then
+            echo "Release tag (${CURRENT_TAG}) does not match packages/dataenginex/pyproject.toml version (${PACKAGE_VERSION})."
+            exit 1
+          fi
+
+          PREVIOUS_TAG="$(git tag --list 'dataenginex-v*' --sort=-version:refname | grep -Fxv "${CURRENT_TAG}" | head -n 1 || true)"
           echo "previous_tag=${PREVIOUS_TAG}" >> "$GITHUB_OUTPUT"
 
           if [[ -z "${PREVIOUS_TAG}" ]]; then
-            echo "No previous tag found. Allowing first publish for ${CURRENT_TAG}."
+            echo "No previous DataEngineX tag found. Allowing first publish for ${CURRENT_TAG}."
             echo "dataenginex_changed=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -88,7 +112,7 @@ jobs:
 
     steps:
       - name: Notify Package Build Start
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             if (!process.env.SLACK_WEBHOOK) return;
@@ -102,7 +126,7 @@ jobs:
                     type: 'section',
                     text: {
                       type: 'mrkdwn',
-                      text: `*📤 DataEngineX Publishing Started*\n*Tag:* ${process.env.TAG}\n*Building distributions for TestPyPI & PyPI*`
+                      text: `*📤 DataEngineX Publishing Started*\n*Tag:* ${process.env.TAG}\n*Building distributions for TestPyPI/PyPI*`
                     }
                   }]
                 })
@@ -137,7 +161,7 @@ jobs:
           uvx twine check packages/dataenginex/dist/*
 
       - name: Upload distributions
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: python-distributions
           path: packages/dataenginex/dist/
@@ -153,7 +177,7 @@ jobs:
 
     steps:
       - name: Download distributions
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: python-distributions
           path: dist/
@@ -174,7 +198,7 @@ jobs:
 
     steps:
       - name: Download distributions
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: python-distributions
           path: dist/
@@ -184,7 +208,7 @@ jobs:
 
       - name: Notify PyPI Publish Success
         if: success()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             if (!process.env.SLACK_WEBHOOK) return;
@@ -206,7 +230,7 @@ jobs:
             } catch (e) { console.log('Slack notification failed'); }
         env:
           SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
-          VERSION: ${{ needs.detect-dataenginex-changes.outputs.current_tag }}
+          VERSION: ${{ needs.detect-dataenginex-changes.outputs.package_version }}
           TAG: ${{ needs.detect-dataenginex-changes.outputs.current_tag }}
 
   skip-publish:
@@ -217,7 +241,7 @@ jobs:
 
     steps:
       - name: Notify Publish Skipped
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             if (!process.env.SLACK_WEBHOOK) return;
@@ -226,14 +250,14 @@ jobs:
             const approvedTag = process.env.APPROVED_TAG;
             const currentTag = process.env.CURRENT_TAG;
             const previousTag = process.env.PREVIOUS_TAG;
-            
+
             let reason = '';
             if (eventName !== 'release') {
               reason = 'Build validation only (no release event)';
             } else if (dataenginexChanged === 'false') {
               reason = `No changes in packages/dataenginex/ since ${previousTag}`;
             } else if (approvedTag === 'false') {
-              reason = `Tag ${currentTag} is not stable (requires vMAJOR.MINOR.PATCH)`;
+              reason = `Tag ${currentTag} is not a stable release (requires dataenginex-vMAJOR.MINOR.PATCH)`;
             }
 
             try {
@@ -267,5 +291,5 @@ jobs:
           elif [[ "${{ needs.detect-dataenginex-changes.outputs.dataenginex_changed }}" == "false" ]]; then
             echo "Skipping TestPyPI/PyPI publish: no changes in packages/dataenginex/ since previous tag ${{ needs.detect-dataenginex-changes.outputs.previous_tag }}."
           elif [[ "${{ needs.detect-dataenginex-changes.outputs.approved_tag }}" == "false" ]]; then
-            echo "Published to TestPyPI only: tag ${{ needs.detect-dataenginex-changes.outputs.current_tag }} is not an approved stable tag (requires vMAJOR.MINOR.PATCH)."
+            echo "Published to TestPyPI only: tag ${{ needs.detect-dataenginex-changes.outputs.current_tag }} is not an approved stable tag (requires dataenginex-vMAJOR.MINOR.PATCH)."
           fi
