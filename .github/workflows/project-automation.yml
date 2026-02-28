@@ -29,10 +29,18 @@ jobs:
     steps:
       - name: Add issue/PR to organization project
         if: ${{ env.ORG_PROJECT_URL != '' && env.ORG_PROJECT_TOKEN != '' }}
-        uses: actions/add-to-project@v1
+        id: add_to_project
+        continue-on-error: true
+        uses: actions/add-to-project@v1.0.2
         with:
           project-url: ${{ env.ORG_PROJECT_URL }}
           github-token: ${{ env.ORG_PROJECT_TOKEN }}
+
+      - name: Explain action failure
+        if: ${{ steps.add_to_project.outcome == 'failure' }}
+        run: |
+          echo "Project automation failed but is non-blocking."
+          echo "Check ORG_PROJECT_URL and ORG_PROJECT_TOKEN scopes/permissions."
 
       - name: Explain skipped automation
         if: ${{ env.ORG_PROJECT_URL == '' || env.ORG_PROJECT_TOKEN == '' }}

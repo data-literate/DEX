@@ -47,8 +47,8 @@ graph LR
     UpdateDev --> ArgoDev[ArgoCD: Sync dex-dev]
 
     MergeMain --> BuildMain[CD: Build Image]
-    BuildMain --> UpdateMain[CD: Update stage/prod manifests]
-    UpdateMain --> ArgoMain[ArgoCD: Sync stage/prod]
+    BuildMain --> UpdateMain[CD: Update prod manifest]
+    UpdateMain --> ArgoMain[ArgoCD: Sync dex]
 
     style CI fill:#e1f5ff
     style BuildDev fill:#fff3cd
@@ -81,7 +81,7 @@ The **root `pyproject.toml`** orchestrates all tests:
 
 ### Separate Validation
 
-- **Package validation** (`package-validation.yml`): Watches `packages/dataenginex/**` only → builds wheel + twine check
+- **Package validation** (`package-validation.yml`): Runs on every push to `main`/`dev` and package-related PR changes → builds wheel + twine check (CD dependency gate)
 - **Release automation** (matrix):
   - `release-dataenginex.yml`: Watches `packages/dataenginex/pyproject.toml` for version changes → creates `dataenginex-vX.Y.Z` tag + release
   - `release-careerdex.yml`: Watches root `pyproject.toml` for version changes → creates `careerdex-vX.Y.Z` tag + release
@@ -142,7 +142,7 @@ uv run poe test-cov
 
 **Workflow**: [`.github/workflows/cd.yml`](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/cd.yml)
 
-**Trigger**: After successful CI run on `main` or `dev` branches
+**Trigger**: `workflow_run` on `main`/`dev` after required upstream workflows complete successfully for the same commit SHA (`Continuous Integration`, `Security Scans`, `Package Validation`)
 
 **Jobs**:
 
@@ -183,13 +183,12 @@ images:
 
 **Result**: ArgoCD detects change and syncs `dex-dev` namespace
 
-### 3. Update Stage/Prod Manifests (main branch only)
+### 3. Update Prod Manifest (main branch only)
 
-Automatically updates stage and prod when changes merge to `main`:
+Automatically updates prod when changes merge to `main`:
 
 ```yaml
 # Updates:
-# - infra/argocd/overlays/stage/kustomization.yaml
 # - infra/argocd/overlays/prod/kustomization.yaml
 
 images:
@@ -199,7 +198,9 @@ images:
 
 **Commit Message**: `chore: update main image to sha-XXXXXXXX [skip ci]`
 
-**Result**: ArgoCD syncs `dex-stage` and `dex-prod` namespaces
+**Result**: ArgoCD syncs `dex` namespace
+
+If protected branch rules reject direct push, CD falls back to creating a promotion PR (or issue when PR creation is not permitted), and reports deployment as pending manual approval rather than false success.
 
 ### 4. Security Scan
 
@@ -325,7 +326,7 @@ sequenceDiagram
     K8s-->>Argo: ✓ Sync complete
 ```
 
-### Stage/Prod Environment Flow
+### Prod Environment Flow
 
 ```mermaid
 sequenceDiagram
@@ -337,15 +338,15 @@ sequenceDiagram
     participant Argo as ArgoCD
     participant K8s as Kubernetes
 
-    Dev->>GH: Merge to main (release PR)
+    Dev->>GH: Merge to main (promote from dev)
     GH->>CI: Trigger CI workflow
     CI->>CI: Run tests, lint, security
     CI-->>GH: ✓ CI passes
     GH->>CD: Trigger CD workflow
     CD->>GHCR: Build & push image (sha-XXXXXXXX)
-    CD->>GH: Commit/push stage/prod kustomization.yaml updates
+    CD->>GH: Commit/push prod kustomization.yaml update
     GH->>Argo: Git change detected
-    Argo->>K8s: Sync dex-stage & dex-prod
+    Argo->>K8s: Sync dex
     K8s-->>Argo: ✓ Sync complete
 ```
 
@@ -373,18 +374,18 @@ spec:
 ```
 
 ```yaml
-# Stage/Prod applications
+# Prod application
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: dex-stage
+  name: dex
 spec:
   source:
     repoURL: https://github.com/TheDataEngineX/DEX
     targetRevision: main  # ← Tracks main branch
-    path: infra/argocd/overlays/stage
+    path: infra/argocd/overlays/prod
   destination:
-    namespace: dex-stage
+    namespace: dex
   syncPolicy:
     automated:
       prune: true
@@ -402,8 +403,7 @@ spec:
 ```bash
 # Watch ArgoCD sync status
 argocd app get dex-dev
-argocd app get dex-stage
-argocd app get dex-prod
+argocd app get dex
 
 # View sync history
 argocd app history dex-dev
@@ -416,7 +416,7 @@ argocd app sync dex-dev --prune
 
 ### Why SHA Tags?
 
-- **Immutable**: Same image from dev → stage → prod
+- **Immutable**: Same image from dev → prod
 - **Traceable**: Links to exact git commit
 - **Auditable**: Clear promotion history in git
 - **Rollback-friendly**: Easy to revert to previous SHA
@@ -429,45 +429,23 @@ graph TD
     Dev --> DevTest{Dev Tests Pass?}
     DevTest -->|No| DevFix[Fix Issues]
     DevFix --> Build
-    DevTest -->|Yes| Stage[Promote to Stage]
-    Stage --> StageTest{Stage Tests Pass?}
-    StageTest -->|No| Rollback[Rollback Stage]
-    StageTest -->|Yes| Prod[Promote to Prod]
+    DevTest -->|Yes| Prod[Promote to Prod]
     Prod --> Monitor[Monitor Prod]
-
-    style Build fill:#e1f5ff
-    style Dev fill:#d4edda
-    style Stage fill:#fff3cd
-    style Prod fill:#f8d7da
 ```
 
-### Manual Promotion (Stage → Prod)
+### Manual Promotion (Dev → Prod)
 
-While dev and stage are auto-deployed, prod may require manual promotion for control:
-
-```bash
-# 1. Verify image in stage
-IMAGE_TAG="sha-a1b2c3d4"
-kubectl get deployment -n dex-stage -o jsonpath='{.spec.template.spec.containers[0].image}'
-
-# 2. Update prod kustomization
-sed -i "s|newTag:.*|newTag: $IMAGE_TAG|g" infra/argocd/overlays/prod/kustomization.yaml
-
-# 3. Create promotion PR
-git checkout -b promote-prod-$IMAGE_TAG
-git add infra/argocd/overlays/prod/kustomization.yaml
-git commit -m "chore: promote $IMAGE_TAG to prod"
-git push origin promote-prod-$IMAGE_TAG
-gh pr create --title "Promote $IMAGE_TAG to Production" --body "Promoting verified image from stage"
-
-# 4. Merge PR → ArgoCD syncs prod
-```
-
-Or use the promotion script:
+Use the promotion script to create a PR from `dev` into `main`:
 
 ```bash
-# Automated promotion
-./scripts/promote.sh --from-env stage --to-env prod --image-tag sha-a1b2c3d4
+# Branch promotion (dev → main)
+./scripts/promote.sh
+
+# Or promote a specific image tag to prod
+./scripts/promote.sh --image-tag sha-a1b2c3d4
+
+# Auto-merge after checks pass
+./scripts/promote.sh --auto-merge
 ```
 
 ## Rollback Procedures
@@ -485,7 +463,7 @@ git push origin dev
 # ArgoCD auto-syncs to previous image
 ```
 
-### Controlled Rollback (Stage/Prod)
+### Controlled Rollback (Prod)
 
 ```bash
 # 1. Identify last good image
@@ -501,7 +479,7 @@ git commit -m "fix: rollback prod to $LAST_GOOD"
 git push origin main
 
 # ArgoCD syncs within 3 minutes (or force sync)
-argocd app sync dex-prod
+argocd app sync dex
 ```
 
 ### Emergency Manual Rollback
@@ -510,8 +488,8 @@ If ArgoCD is unavailable:
 
 ```bash
 # Direct kubectl update
-kubectl set image deployment/dex dex=ghcr.io/thedataenginex/dex:sha-xyz78901 -n dex-prod
-kubectl rollout status deployment/dex -n dex-prod
+kubectl set image deployment/dex dex=ghcr.io/thedataenginex/dex:sha-xyz78901 -n dex
+kubectl rollout status deployment/dex -n dex
 
 # Update git to match (after recovery)
 ```
@@ -635,7 +613,7 @@ kubectl get pod -n dex-dev -o jsonpath='{.items[0].spec.containers[0].image}'
 7. **Merge to dev** → Auto-deploys to dev environment
 8. **Verify in dev** environment
 9. **Create release PR** from `dev` → `main`
-10. **Merge to main** → Auto-deploys to stage/prod
+10. **Merge to main** → Auto-deploys to prod
 
 ### Commit Messages
 
@@ -658,7 +636,7 @@ test: add integration tests for API
 
 ### Deployment Safety
 
-- **Deploy during business hours** (for stage/prod)
+- **Deploy during business hours** (for prod)
 - **Monitor for 15 minutes** after deployment
 - **Keep rollback plan ready**
 - **Communicate** in team channel before prod deploy
@@ -672,14 +650,14 @@ test: add integration tests for API
 - [x] GitOps deployment with ArgoCD
 - [x] Security scanning (CodeQL, Trivy, Semgrep)
 - [x] Automated dev deployments
-- [x] Automated stage/prod manifest updates
+- [x] Automated prod manifest updates
 
 ### Future Enhancements 🚀
 
 - [ ] **Canary deployments**: Gradual rollout to prod
 - [ ] **Blue-green deployments**: Zero-downtime releases
 - [ ] **E2E smoke tests**: Post-deployment validation
-- [ ] **Performance testing**: Load tests in stage
+- [ ] **Performance testing**: Load tests in dev
 - [ ] **SonarCloud integration**: Code quality gates
 - [ ] **Slack notifications**: Deployment status updates
 - [ ] **Automated rollback**: On health check failures
@@ -709,7 +687,7 @@ test: add integration tests for API
 | **CI** (Integration) | PR label `full-test` or manual dispatch | Full test (data + notebook groups) | [.github/workflows/ci.yml](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/ci.yml) |
 | **Security** | `push main/dev`, PRs to main/dev | CodeQL + Semgrep scans | [.github/workflows/security.yml](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/security.yml) |
 | **Package** | Changes to `packages/dataenginex/**` | Build wheel + twine check (dataenginex only) | [.github/workflows/package-validation.yml](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/package-validation.yml) |
-| **CD** | After CI success on main/dev | Build Docker image, push to ghcr.io | [.github/workflows/cd.yml](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/cd.yml) |
+| **CD** | `workflow_run` after CI + Security + Package Validation succeed on main/dev | Build Docker image, update GitOps manifests, verify deployment | [.github/workflows/cd.yml](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/cd.yml) |
 | **Release DataEngineX** | Version change in `packages/dataenginex/pyproject.toml` on main | Extract version, create `dataenginex-vX.Y.Z` tag + release | [.github/workflows/release-dataenginex.yml](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/release-dataenginex.yml) |
 | **Release CareerDEX** | Version change in root `pyproject.toml` on main | Extract version, create `careerdex-vX.Y.Z` tag + release | [.github/workflows/release-careerdex.yml](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/release-careerdex.yml) |
 | **PyPI Publish** | GitHub release (DataEngineX) published | Detect changes + publish dataenginex to TestPyPI/PyPI | [.github/workflows/pypi-publish.yml](https://github.com/TheDataEngineX/DEX/blob/main/.github/workflows/pypi-publish.yml) |
@@ -746,7 +724,7 @@ kubectl get pods -n dex-dev
 kubectl logs -n dex-dev -l app=dex -f
 
 # Promote to production
-./scripts/promote.sh --from-env stage --to-env prod
+./scripts/promote.sh
 
 # Rollback
 git revert HEAD
