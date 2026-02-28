@@ -207,6 +207,7 @@ jobs:
 
     permissions:
       contents: write
+      pull-requests: write
 
     outputs:
       updated: ${{ steps.commit.outputs.updated }}
@@ -252,6 +253,7 @@ jobs:
         env:
           BRANCH: ${{ github.event.workflow_run.head_branch }}
           NEW_TAG: sha-${{ needs.build-and-push.outputs.short_sha }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           if [[ -z "$(git status --porcelain infra/argocd/overlays)" ]]; then
@@ -265,8 +267,26 @@ jobs:
 
           git add infra/argocd/overlays
           git commit -m "chore: update ${BRANCH} image to ${NEW_TAG} [skip ci]"
-          git push origin "HEAD:${BRANCH}"
-          echo "updated=true" >> "$GITHUB_OUTPUT"
+
+          if git push origin "HEAD:${BRANCH}"; then
+            echo "Pushed manifest update directly to ${BRANCH}."
+            echo "updated=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Direct push to ${BRANCH} was rejected (likely branch protection). Creating pull request instead."
+          PR_BRANCH="bot/gitops-${BRANCH}-${NEW_TAG}-${GITHUB_RUN_ID}"
+          git checkout -b "$PR_BRANCH"
+          git push origin "HEAD:${PR_BRANCH}"
+
+          gh pr create \
+            --base "$BRANCH" \
+            --head "$PR_BRANCH" \
+            --title "chore: update ${BRANCH} image to ${NEW_TAG}" \
+            --body "Automated GitOps manifest update from CD pipeline.\n\n- Branch: ${BRANCH}\n- Image tag: ${NEW_TAG}\n- Source run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+          echo "updated=false" >> "$GITHUB_OUTPUT"
+          echo "Opened PR branch ${PR_BRANCH}; deployment verification is skipped until PR is merged."
 
   verify-deployment:
     name: Verify ArgoCD Deployment Health
